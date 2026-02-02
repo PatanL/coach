@@ -80,6 +80,11 @@ test("shouldTriggerBackOnTrackFromKeydown: triggers only when safe", () => {
   );
 
   assert.equal(
+    shouldTriggerBackOnTrackFromKeydown({ key: "Enter", isComposing: false, shiftKey: true }, null),
+    false
+  );
+
+  assert.equal(
     shouldTriggerBackOnTrackFromKeydown({ key: "Enter", isComposing: false, target: { tagName: "BUTTON" } }, null),
     false
   );
