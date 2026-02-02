@@ -186,6 +186,11 @@ function showOverlay(payload) {
     label.textContent = computed;
   }
   setText(blockName, payload.block_name || "");
+  // Hide the block label when empty so the header doesn't show a stray placeholder.
+  if (blockName) {
+    const hasBlock = Boolean(String(payload.block_name || "").trim());
+    blockName.classList.toggle("hidden", !hasBlock);
+  }
   setText(headline, payload.headline || "Reset.");
   setText(humanLine, payload.human_line || "");
   setText(diagnosis, payload.diagnosis || "");
