@@ -5,8 +5,8 @@
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "test": "node --test",
-    "lint": "echo \"(no lint configured)\""
+    "test": "node --test ./test/*.js",
+    "lint": "node --check main.js overlay.js overlay-utils.js preload.js"
   },
   "devDependencies": {
     "electron": "^30.0.0"

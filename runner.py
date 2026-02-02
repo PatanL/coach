@@ -829,6 +829,7 @@ def main() -> int:
                             "source_event_id": None,
                             "source": "runner",
                             **overlay,
+                            "can_undo_recover": True,
                         }
                     else:
                         overlay_payload = {
@@ -844,11 +845,45 @@ def main() -> int:
                             "next_action": "Resume the next block.",
                             "block_id": None,
                             "block_name": "",
+                            "can_undo_recover": True,
                         }
                     append_overlay_cmd(overlay_cmd_log, overlay_payload)
                     Path("coach/state/schedule.before.yaml").write_text(
                         schedule_before, encoding="utf-8"
                     )
+
+            if action.get("action") == "undo_recover":
+                before_path = Path("coach/state/schedule.before.yaml")
+                if before_path.exists():
+                    previous_yaml = before_path.read_text(encoding="utf-8")
+                    if previous_yaml.strip():
+                        args.schedule.write_text(previous_yaml, encoding="utf-8")
+                        append_event(
+                            events_log,
+                            {
+                                "ts": dt.datetime.now().isoformat(),
+                                "type": "SCHEDULE_REVERTED",
+                                "event_id": ensure_uuid(),
+                                "source": "runner",
+                            },
+                        )
+                        append_overlay_cmd(
+                            overlay_cmd_log,
+                            {
+                                "ts": dt.datetime.now().isoformat(),
+                                "cmd_id": ensure_uuid(),
+                                "source_event_id": None,
+                                "source": "runner",
+                                "level": "B",
+                                "style_id": "calm",
+                                "headline": "Recovery undone",
+                                "human_line": "Schedule reverted to the previous version.",
+                                "diagnosis": "",
+                                "next_action": "Resume the current block.",
+                                "block_id": None,
+                                "block_name": "",
+                            },
+                        )
 
         now = dt.datetime.now()
         if now.date() != current_day:
