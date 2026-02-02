@@ -124,6 +124,10 @@ function updateRecoverArmUI() {
 
   // Also reflect the confirm state in the header label so it's unmissable.
   refreshHeaderLabel();
+
+  // Keep the Enter hint honest as the recover arm state changes.
+  // (Arming recover is a primary "actionable recovery" path.)
+  updateEnterHint();
 }
 function setText(el, value) {
   el.textContent = value || "";
@@ -355,8 +359,8 @@ twoMinBtn.addEventListener("click", () => {
   if (hintEnter) {
     const twoMinOpen = twoMinPanel && !twoMinPanel.classList.contains("hidden");
     hintEnter.textContent = (window.overlayUtils && window.overlayUtils.enterHintForState)
-      ? window.overlayUtils.enterHintForState({ mode: overlay.dataset.mode, twoMinOpen })
-      : (twoMinOpen ? "Enter: Set 2‑min step" : "Enter: Back on track");
+      ? window.overlayUtils.enterHintForState({ mode: overlay.dataset.mode, twoMinOpen, recoverArmed })
+      : (twoMinOpen ? "Enter: Set 2‑min step" : (recoverArmed ? "Enter: Confirm" : "Enter: Back on track"));
   }
 });
 stuckBtn.addEventListener("click", () => {
