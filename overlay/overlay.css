@@ -274,7 +274,9 @@ button.primary:disabled:hover {
 
 .footer {
   display: flex;
-  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  justify-content: flex-start;
   font-size: 11px;
   color: rgba(246, 244, 239, 0.5);
 }

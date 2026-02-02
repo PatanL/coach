@@ -679,6 +679,14 @@ window.addEventListener("keydown", (event) => {
         event.stopPropagation();
         snoozeBtn.click();
       }
+
+      // Actionable recovery: quick diagnostics copy.
+      // Keep it opt-in and low-risk: only when not typing, no modifiers, and not in align mode.
+      if (key === "d" && copyDiagBtn) {
+        event.preventDefault();
+        event.stopPropagation();
+        copyDiagBtn.click();
+      }
     }
   }
 
