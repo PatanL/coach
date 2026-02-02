@@ -107,6 +107,16 @@ function createOverlayWindow() {
           }
           // Preserve prior visibility so rehydration doesn't cause the overlay
           // to unexpectedly pop up if it was hidden.
+          // Also re-apply size/position derived from the payload level so the
+          // overlay keeps its intended placement (e.g., A-banner vs centered)
+          // after a reload or window recreation.
+          try {
+            if (currentPayload && currentPayload.level) {
+              positionOverlay(currentPayload.level);
+            }
+          } catch (_posErr) {
+            // ignore positioning errors
+          }
           if (wasVisible) {
             overlayWindow.show();
             overlayWindow.focus();
