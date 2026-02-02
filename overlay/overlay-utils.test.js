@@ -24,11 +24,28 @@ test("isTextInputTarget: recognizes common typing targets", () => {
     }),
     true
   );
+
+  assert.equal(
+    isTextInputTarget({
+      tagName: "DIV",
+      getAttribute: (name) => (name === "contenteditable" ? "" : null)
+    }),
+    true
+  );
 });
 
 test("isTextInputTarget: ignores non-input targets", () => {
   assert.equal(isTextInputTarget({ tagName: "BUTTON" }), false);
   assert.equal(isTextInputTarget({ tagName: "DIV" }), false);
+
+  assert.equal(
+    isTextInputTarget({
+      tagName: "DIV",
+      getAttribute: (name) => (name === "contenteditable" ? "false" : null)
+    }),
+    false
+  );
+
   assert.equal(isTextInputTarget(null), false);
 });
 
@@ -46,8 +63,24 @@ test("isControlTarget: recognizes common non-typing controls", () => {
 
   assert.equal(
     isControlTarget({
+      tagName: "DIV",
+      getAttribute: (name) => (name === "role" ? "link" : null)
+    }),
+    true
+  );
+
+  assert.equal(
+    isControlTarget({
       tagName: "INPUT",
       getAttribute: (name) => (name === "type" ? "submit" : null)
+    }),
+    true
+  );
+
+  assert.equal(
+    isControlTarget({
+      tagName: "INPUT",
+      getAttribute: (name) => (name === "type" ? "checkbox" : null)
     }),
     true
   );
@@ -91,6 +124,14 @@ test("shouldTriggerBackOnTrackFromKeydown: triggers only when safe", () => {
 
   assert.equal(
     shouldTriggerBackOnKeydownTypingTarget({ tagName: "INPUT" }),
+    false
+  );
+
+  assert.equal(
+    shouldTriggerBackOnTrackFromKeydown(
+      { key: "Enter", isComposing: false, target: { tagName: "DIV" } },
+      { tagName: "BUTTON" }
+    ),
     false
   );
 });
