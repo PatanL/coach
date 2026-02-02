@@ -27,6 +27,14 @@ let tray = null;
 let currentPayload = null;
 let lastCmdId = null;
 
+// Apple Silicon reliability guard: transparent always-on-top windows can lose
+// their renderer after GPU handoffs. We auto-rehydrate, but must avoid getting
+// stuck in a rapid reload loop if something is fundamentally broken.
+let lastRehydrateAt = 0;
+let rehydrateCount = 0;
+const REHYDRATE_WINDOW_MS = 30_000;
+const REHYDRATE_MAX_PER_WINDOW = 3;
+
 const OVERLAY_SIZE = { width: 640, height: 360 };
 const BANNER_SIZE = { width: 360, height: 140 };
 
@@ -78,6 +86,26 @@ function createOverlayWindow() {
   // re-sending the last payload so recovery steps remain actionable.
   function rehydrateRenderer(reason) {
     if (!overlayUtils.shouldAutoRehydrateRenderer({ platform: process.platform, arch: process.arch })) return;
+
+    const nowMs = Date.now();
+    if (nowMs - lastRehydrateAt > REHYDRATE_WINDOW_MS) {
+      rehydrateCount = 0;
+    }
+    lastRehydrateAt = nowMs;
+    rehydrateCount += 1;
+
+    if (rehydrateCount > REHYDRATE_MAX_PER_WINDOW) {
+      appendAction({
+        ts: new Date().toISOString(),
+        type: "OVERLAY_REHYDRATE_THROTTLED",
+        reason: reason || null,
+        platform: process.platform,
+        arch: process.arch,
+        window_ms: REHYDRATE_WINDOW_MS,
+        max_per_window: REHYDRATE_MAX_PER_WINDOW
+      });
+      return;
+    }
 
     const wasVisible = Boolean(
       overlayWindow && !overlayWindow.isDestroyed() && overlayWindow.isVisible()
