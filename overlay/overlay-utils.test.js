@@ -6,9 +6,10 @@ const {
   normalizeTwoMinuteStep,
   normalizeFreeform,
   shouldTriggerBackOnTrackOnEnter,
-  isPauseShortcut
+  isPauseShortcut,
+  enterHintForState,
+  labelForPayload
 } = require("./overlay-utils");
-const { enterHintForState } = require("./overlay-utils");
 
 test("isTextInputTarget: recognizes common typing targets", () => {
   assert.equal(isTextInputTarget({ tagName: "INPUT" }), true);
@@ -82,4 +83,16 @@ test("enterHintForState: returns context-specific Enter hint", () => {
   assert.equal(enterHintForState({ mode: "align", twoMinOpen: false }), "Enter: Submit answer");
   assert.equal(enterHintForState({ mode: "", twoMinOpen: true }), "Enter: Set 2‑min step");
   assert.equal(enterHintForState({ mode: "", twoMinOpen: false }), "Enter: Back on track");
+});
+
+test("labelForPayload: derives a clear primary label", () => {
+  assert.equal(labelForPayload({ mode: "", canUndoRecover: false }), "DRIFT");
+  assert.equal(labelForPayload({ mode: "align", canUndoRecover: false }), "ALIGN");
+  assert.equal(labelForPayload({ mode: "", canUndoRecover: true }), "RECOVERED");
+});
+
+test("labelForPayload: prefers custom label and normalizes it", () => {
+  assert.equal(labelForPayload({ customLabel: "  focus  " }), "FOCUS");
+  assert.equal(labelForPayload({ customLabel: "make  it\nsmall" }), "MAKE IT SMALL");
+  assert.equal(labelForPayload({ customLabel: "x".repeat(50) }), "X".repeat(16));
 });

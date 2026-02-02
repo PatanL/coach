@@ -55,6 +55,21 @@
     return "Enter: Back on track";
   }
 
+  function labelForPayload({ mode, canUndoRecover, customLabel } = {}) {
+    const cleaned = String(customLabel || "")
+      .replace(/\s+/g, " ")
+      .trim();
+    if (cleaned) {
+      const upper = cleaned.toUpperCase();
+      return upper.length > 16 ? upper.slice(0, 16).trimEnd() : upper;
+    }
+    // When recover has already been applied, we surface that state clearly
+    // (and show an undo affordance in the UI).
+    if (canUndoRecover) return "RECOVERED";
+    if (mode === "align") return "ALIGN";
+    return "DRIFT";
+  }
+
   return {
     isTextInputTarget,
     // not exported but kept here for potential embedding contexts
@@ -64,6 +79,7 @@
     normalizeFreeform,
     shouldTriggerBackOnTrackOnEnter,
     isPauseShortcut,
-    enterHintForState
+    enterHintForState,
+    labelForPayload
   };
 });
