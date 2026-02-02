@@ -19,10 +19,22 @@
         <div class="next-action" id="nextAction"></div>
         <div class="buttons">
           <button id="backBtn" class="primary">Back on track</button>
+          <button id="pauseBtn">Pause 15</button>
+          <button id="twoMinBtn">2‑min step</button>
           <button id="stuckBtn">I'm stuck</button>
           <button id="recoverBtn">Recover schedule</button>
           <button id="snoozeBtn">Snooze</button>
         </div>
+
+        <div id="twoMinPanel" class="two-min hidden">
+          <div class="two-min-title">What’s the next 2-minute step?</div>
+          <div id="twoMinChoices" class="two-min-choices"></div>
+          <div class="two-min-input">
+            <input id="twoMinText" type="text" placeholder="Or type one" />
+            <button id="twoMinSubmit" class="primary">Set</button>
+          </div>
+        </div>
+
         <div id="choiceButtons" class="choices hidden"></div>
         <div id="alignInput" class="align-input hidden">
           <input id="alignText" type="text" placeholder="Type a custom answer" />

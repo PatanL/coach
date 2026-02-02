@@ -11,7 +11,14 @@ const alignInput = document.getElementById("alignInput");
 const alignText = document.getElementById("alignText");
 const alignSubmit = document.getElementById("alignSubmit");
 
+const twoMinPanel = document.getElementById("twoMinPanel");
+const twoMinChoices = document.getElementById("twoMinChoices");
+const twoMinText = document.getElementById("twoMinText");
+const twoMinSubmit = document.getElementById("twoMinSubmit");
+
 const backBtn = document.getElementById("backBtn");
+const pauseBtn = document.getElementById("pauseBtn");
+const twoMinBtn = document.getElementById("twoMinBtn");
 const stuckBtn = document.getElementById("stuckBtn");
 const recoverBtn = document.getElementById("recoverBtn");
 const snoozeBtn = document.getElementById("snoozeBtn");
@@ -40,10 +47,36 @@ function resetAlignInput() {
   alignInput.classList.add("hidden");
 }
 
+function resetTwoMin() {
+  if (!twoMinPanel) return;
+  twoMinPanel.classList.add("hidden");
+  twoMinChoices.innerHTML = "";
+  twoMinText.value = "";
+}
+
+function showTwoMin(choices) {
+  const defaults = ["Open TODO + pick 1 task", "Write 1 sentence", "Run the next command", "Close distraction tab"];
+  const list = Array.isArray(choices) && choices.length ? choices : defaults;
+
+  twoMinChoices.innerHTML = "";
+  list.forEach((choice) => {
+    const button = document.createElement("button");
+    button.textContent = choice;
+    button.addEventListener("click", () => {
+      const value = window.overlayUtils?.normalizeTwoMinuteStep?.(choice);
+      sendAction({ action: "two_min_step", value, kind: "choice" });
+    });
+    twoMinChoices.appendChild(button);
+  });
+  twoMinPanel.classList.remove("hidden");
+  twoMinText.focus();
+}
+
 function showOverlay(payload) {
   overlay.classList.remove("hidden");
   resetSnooze();
   resetAlignInput();
+  resetTwoMin();
   if (payload.choices && Array.isArray(payload.choices)) {
     overlay.dataset.mode = "align";
   } else {
@@ -97,6 +130,14 @@ function sendAction(action) {
 }
 
 backBtn.addEventListener("click", () => sendAction({ action: "back_on_track" }));
+pauseBtn.addEventListener("click", () => sendAction({ action: "pause_15", minutes: 15 }));
+twoMinBtn.addEventListener("click", () => {
+  if (twoMinPanel.classList.contains("hidden")) {
+    showTwoMin(currentPayload?.two_min_choices);
+  } else {
+    resetTwoMin();
+  }
+});
 stuckBtn.addEventListener("click", () => sendAction({ action: "stuck" }));
 recoverBtn.addEventListener("click", () => sendAction({ action: "recover" }));
 
@@ -113,6 +154,20 @@ alignText.addEventListener("keydown", (event) => {
     event.preventDefault();
     event.stopPropagation();
     alignSubmit.click();
+  }
+});
+
+twoMinSubmit.addEventListener("click", () => {
+  const value = window.overlayUtils?.normalizeTwoMinuteStep?.(twoMinText.value);
+  if (!value) return;
+  sendAction({ action: "two_min_step", value, kind: "custom" });
+});
+
+twoMinText.addEventListener("keydown", (event) => {
+  if (event.key === "Enter") {
+    event.preventDefault();
+    event.stopPropagation();
+    twoMinSubmit.click();
   }
 });
 

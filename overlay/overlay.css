@@ -40,9 +40,12 @@ html, body {
 #overlay[data-level="A"] .diagnosis,
 #overlay[data-level="A"] .mini-plan,
 #overlay[data-level="A"] .footer,
+#overlay[data-level="A"] #pauseBtn,
+#overlay[data-level="A"] #twoMinBtn,
 #overlay[data-level="A"] #stuckBtn,
 #overlay[data-level="A"] #recoverBtn,
 #overlay[data-level="A"] #snoozeBtn,
+#overlay[data-level="A"] #twoMinPanel,
 #overlay[data-level="A"] #choiceButtons,
 #overlay[data-level="A"] .align-input {
   display: none;
@@ -142,6 +145,46 @@ html, body {
 }
 
 .align-input input::placeholder {
+  color: rgba(246, 244, 239, 0.5);
+}
+
+.two-min {
+  margin-bottom: 12px;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.two-min-title {
+  font-size: 13px;
+  color: rgba(246, 244, 239, 0.7);
+  margin-bottom: 10px;
+}
+
+.two-min-choices {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.two-min-input {
+  display: flex;
+  gap: 10px;
+}
+
+.two-min-input input {
+  flex: 1;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.05);
+  color: #f6f4ef;
+  font-size: 14px;
+}
+
+.two-min-input input::placeholder {
   color: rgba(246, 244, 239, 0.5);
 }
 
