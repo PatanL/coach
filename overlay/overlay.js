@@ -273,6 +273,10 @@ pauseBtn.addEventListener("click", () => {
   sendAction({ action: "pause_15", minutes: 15 });
 });
 twoMinBtn.addEventListener("click", () => {
+  // Opening the 2‑min panel is an intentional alternative path; disarm recovery
+  // confirmation so a stray second press of "R" can't trigger an accidental recover.
+  resetRecoverArm();
+
   if (twoMinPanel.classList.contains("hidden")) {
     showTwoMin(currentPayload?.two_min_choices);
   } else {
