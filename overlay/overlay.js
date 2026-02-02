@@ -92,9 +92,17 @@ function armRecover() {
 
 
 function updateRecoverArmUI() {
-  if (!hintRecover) return;
   // Keep the recovery hint honest: when recover is armed, the next press confirms.
-  hintRecover.textContent = recoverArmed ? "R: Confirm" : "R: Recover";
+  if (hintRecover) {
+    hintRecover.textContent = recoverArmed ? "R: Confirm" : "R: Recover";
+  }
+
+  // Add an explicit visual + accessibility affordance when recover is armed.
+  // This reduces accidental recoveries by making the "confirm" state unmissable.
+  if (recoverBtn) {
+    recoverBtn.classList.toggle("armed", recoverArmed);
+    recoverBtn.setAttribute("aria-pressed", recoverArmed ? "true" : "false");
+  }
 }
 function setText(el, value) {
   el.textContent = value || "";

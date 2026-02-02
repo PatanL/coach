@@ -216,6 +216,16 @@ button.primary:hover {
   background: #ff7a69;
 }
 
+/* When "Recover" is armed, make the confirm state very obvious. */
+button.armed {
+  background: rgba(241, 108, 91, 0.22);
+  box-shadow: 0 0 0 2px rgba(241, 108, 91, 0.55);
+}
+
+button.armed:hover {
+  background: rgba(241, 108, 91, 0.28);
+}
+
 button:disabled {
   opacity: 0.55;
   cursor: not-allowed;
