@@ -1,0 +1,205 @@
+html, body {
+  margin: 0;
+  padding: 0;
+  font-family: "Helvetica Neue", Arial, sans-serif;
+  background: rgba(0, 0, 0, 0);
+  color: #f6f4ef;
+  height: 100%;
+}
+
+#overlay {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(6, 8, 10, 0.45);
+}
+
+.hidden {
+  display: none;
+}
+
+.card {
+  width: 560px;
+  padding: 28px 30px;
+  border-radius: 18px;
+  background: linear-gradient(140deg, rgba(19, 22, 26, 0.92), rgba(10, 12, 15, 0.96));
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(8px);
+}
+
+#overlay[data-level="A"] .card {
+  width: 320px;
+  padding: 18px 20px;
+  border-radius: 14px;
+}
+
+#overlay[data-level="A"] .header,
+#overlay[data-level="A"] .diagnosis,
+#overlay[data-level="A"] .mini-plan,
+#overlay[data-level="A"] .footer,
+#overlay[data-level="A"] #stuckBtn,
+#overlay[data-level="A"] #recoverBtn,
+#overlay[data-level="A"] #snoozeBtn,
+#overlay[data-level="A"] #choiceButtons,
+#overlay[data-level="A"] .align-input {
+  display: none;
+}
+
+#overlay[data-mode="align"] .primary-actions,
+#overlay[data-mode="align"] .secondary-actions,
+#overlay[data-mode="align"] .helper-line {
+  display: none;
+}
+
+#overlay[data-mode="align"] .choices,
+#overlay[data-mode="align"] .align-input {
+  display: grid;
+}
+
+#overlay[data-level="A"] .buttons {
+  grid-template-columns: 1fr;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 12px;
+  color: rgba(246, 244, 239, 0.6);
+  margin-bottom: 14px;
+}
+
+.label {
+  color: #f16c5b;
+  font-weight: 700;
+}
+
+.block {
+  font-weight: 600;
+  color: rgba(246, 244, 239, 0.82);
+}
+
+.headline {
+  font-size: 26px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.human-line {
+  font-size: 16px;
+  line-height: 1.4;
+  color: rgba(246, 244, 239, 0.85);
+  margin-bottom: 12px;
+}
+
+.diagnosis {
+  font-size: 14px;
+  color: rgba(246, 244, 239, 0.6);
+  margin-bottom: 12px;
+}
+
+.next-action {
+  font-size: 16px;
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  margin-bottom: 16px;
+}
+
+.buttons {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.choices {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.align-input {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.align-input input {
+  flex: 1;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.05);
+  color: #f6f4ef;
+  font-size: 14px;
+}
+
+.align-input input::placeholder {
+  color: rgba(246, 244, 239, 0.5);
+}
+
+.choices button {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+button {
+  padding: 10px 12px;
+  border: none;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #f6f4ef;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+button.primary {
+  background: #f16c5b;
+  color: #140e0b;
+  font-weight: 600;
+}
+
+button:hover {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+button.primary:hover {
+  background: #ff7a69;
+}
+
+.snooze {
+  margin-bottom: 12px;
+}
+
+.snooze-title {
+  font-size: 13px;
+  color: rgba(246, 244, 239, 0.6);
+  margin-bottom: 8px;
+}
+
+.snooze-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.mini-plan {
+  font-size: 14px;
+  color: rgba(246, 244, 239, 0.7);
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.footer {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: rgba(246, 244, 239, 0.5);
+}

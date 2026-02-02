@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Coach Overlay</title>
+    <link rel="stylesheet" href="overlay.css" />
+  </head>
+  <body>
+    <div id="overlay" class="layer-b hidden" data-level="B">
+      <div class="card">
+        <div class="header">
+          <span class="label">DRIFT</span>
+          <span id="blockName" class="block">Block</span>
+        </div>
+        <div id="headline" class="headline">Reset.</div>
+        <div id="humanLine" class="human-line"></div>
+        <div class="diagnosis" id="diagnosis"></div>
+        <div class="next-action" id="nextAction"></div>
+        <div class="buttons">
+          <button id="backBtn" class="primary">Back on track</button>
+          <button id="stuckBtn">I'm stuck</button>
+          <button id="recoverBtn">Recover schedule</button>
+          <button id="snoozeBtn">Snooze</button>
+        </div>
+        <div id="choiceButtons" class="choices hidden"></div>
+        <div id="alignInput" class="align-input hidden">
+          <input id="alignText" type="text" placeholder="Type a custom answer" />
+          <button id="alignSubmit" class="primary">Submit</button>
+        </div>
+        <div id="snoozeReason" class="snooze hidden">
+          <div class="snooze-title">Snooze reason</div>
+          <div class="snooze-buttons">
+            <button data-reason="legit_break">Legit break</button>
+            <button data-reason="low_energy">Low energy</button>
+            <button data-reason="blocked">Blocked</button>
+            <button data-reason="social_itch">Social itch</button>
+          </div>
+        </div>
+        <div id="miniPlan" class="mini-plan hidden"></div>
+        <div class="footer">
+          <span>Enter: Back on track</span>
+          <span>Esc: Snooze</span>
+          <span>Cmd/Ctrl+Shift+P: Pause 15</span>
+        </div>
+      </div>
+    </div>
+    <script src="overlay-utils.js"></script>
+    <script src="overlay.js"></script>
+  </body>
+</html>

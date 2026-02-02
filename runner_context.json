@@ -1,0 +1,38 @@
+{
+  "event": {
+    "ts": "2026-01-27T00:41:38.101941",
+    "type": "DRIFT_START",
+    "event_id": "eb3d6161-1979-4b11-b5bb-97345d868842",
+    "block_id": null,
+    "app": "",
+    "url_domain": null,
+    "confidence": 0.71,
+    "reason": "Browsing a Discord gaming community\u2019s archived channel list, unrelated to work.",
+    "source": "monitor"
+  },
+  "activity_tail": [
+    "{\"ts\": \"2026-01-27T00:39:38.086298\", \"block_id\": null, \"app\": \"\", \"title\": \"\", \"url_domain\": null, \"status\": \"off_task\", \"confidence\": 0.72, \"reason\": \"Discord gaming-themed server chat with trophies and signup form, not work related\", \"short_caption\": \"Discord gaming server chat with celebration and signup post\"}",
+    "{\"ts\": \"2026-01-27T00:40:08.090728\", \"block_id\": null, \"app\": \"\", \"title\": \"\", \"url_domain\": null, \"status\": \"off_task\", \"confidence\": 0.72, \"reason\": \"Browsing Discord channels unrelated to coding or productivity.\", \"short_caption\": \"Viewing Discord SAP Dojo channels with Nitro promo banner.\"}",
+    "{\"ts\": \"2026-01-27T00:40:38.092298\", \"block_id\": null, \"app\": \"\", \"title\": \"\", \"url_domain\": null, \"status\": \"off_task\", \"confidence\": 0.82, \"reason\": \"Browsing Discord server channels, which is social/streaming content.\", \"short_caption\": \"Discord SAP Dojo channel list on screen\"}",
+    "{\"ts\": \"2026-01-27T00:41:08.097115\", \"block_id\": null, \"app\": \"\", \"title\": \"\", \"url_domain\": null, \"status\": \"off_task\", \"confidence\": 0.75, \"reason\": \"Discord server browsing and Nitro offers not related to work\", \"short_caption\": \"Browsing SAP Dojo Discord server channels and Nitro promotion\"}",
+    "{\"ts\": \"2026-01-27T00:41:38.101941\", \"block_id\": null, \"app\": \"\", \"title\": \"\", \"url_domain\": null, \"status\": \"off_task\", \"confidence\": 0.71, \"reason\": \"Browsing a Discord gaming community\\u2019s archived channel list, unrelated to work.\", \"short_caption\": \"Discord SAP Dojo archive channels list in dark theme view\"}"
+  ],
+  "now": {
+    "ts": "2026-01-27T00:41:38.101941",
+    "app": "",
+    "title": "",
+    "block_id": null
+  },
+  "last_overlay_action": {
+    "ts": "2026-01-27T08:40:25.066Z",
+    "type": "OVERLAY_ACTION",
+    "cmd_id": "dd9ff442-34d1-426f-af3a-9273b528825a",
+    "source_event_id": "7ae07204-9bec-405a-9406-fe4b39c75582",
+    "action": "back_on_track",
+    "time_to_action_ms": 2123,
+    "block_id": null,
+    "level": "B",
+    "headline": "Back to work",
+    "source": "overlay"
+  }
+}

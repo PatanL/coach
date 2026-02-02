@@ -1,0 +1,14 @@
+{
+  "name": "coach-overlay",
+  "version": "0.1.0",
+  "private": true,
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "test": "node --test",
+    "lint": "echo \"(no lint configured)\""
+  },
+  "devDependencies": {
+    "electron": "^30.0.0"
+  }
+}
