@@ -8,6 +8,7 @@ const {
   shouldTriggerBackOnTrackOnEnter,
   isPauseShortcut
 } = require("./overlay-utils");
+const { enterHintForState } = require("./overlay-utils");
 
 test("isTextInputTarget: recognizes common typing targets", () => {
   assert.equal(isTextInputTarget({ tagName: "INPUT" }), true);
@@ -64,4 +65,10 @@ test("isPauseShortcut: detects Cmd/Ctrl+Shift+P", () => {
   assert.equal(isPauseShortcut({ key: "p", metaKey: true, ctrlKey: false, shiftKey: false }), false);
   assert.equal(isPauseShortcut({ key: "x", metaKey: true, ctrlKey: false, shiftKey: true }), false);
   assert.equal(isPauseShortcut(null), false);
+});
+
+test("enterHintForState: returns context-specific Enter hint", () => {
+  assert.equal(enterHintForState({ mode: "align", twoMinOpen: false }), "Enter: Submit answer");
+  assert.equal(enterHintForState({ mode: "", twoMinOpen: true }), "Enter: Set 2‑min step");
+  assert.equal(enterHintForState({ mode: "", twoMinOpen: false }), "Enter: Back on track");
 });

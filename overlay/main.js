@@ -123,7 +123,7 @@ function hideOverlay() {
 function registerShortcuts() {
   globalShortcut.register("CommandOrControl+Shift+P", () => {
     const now = new Date().toISOString();
-    appendAction({ ts: now, action: "pause_15", time_to_action_ms: 0, level: currentPayload?.level || "A" });
+    appendAction({ ts: now, action: "pause_15", time_to_action_ms: 0, level: currentPayload?.level || "B" });
     if (overlayWindow && overlayWindow.isVisible()) {
       overlayWindow.webContents.send("overlay:pause", {});
       hideOverlay();
@@ -138,7 +138,7 @@ function createTray() {
   const menu = Menu.buildFromTemplate([
     { label: "Pause 15 minutes", click: () => {
       const now = new Date().toISOString();
-      appendAction({ ts: now, action: "pause_15", time_to_action_ms: 0, level: currentPayload?.level || "A" });
+      appendAction({ ts: now, action: "pause_15", time_to_action_ms: 0, level: currentPayload?.level || "B" });
     } },
     { type: "separator" },
     { label: "Quit", click: () => app.quit() }
@@ -207,7 +207,7 @@ ipcMain.on("overlay:action", (event, action) => {
     cmd_id: lastCmdId,
     source_event_id: currentPayload?.source_event_id || null,
     ...action,
-    level: currentPayload?.level || "A",
+    level: currentPayload?.level || "B",
     block_id: currentPayload?.block_id || null,
     source: "overlay"
   });
