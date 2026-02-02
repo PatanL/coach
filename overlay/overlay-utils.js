@@ -64,9 +64,16 @@
 
     // Make the next action more actionable on Apple Silicon where renderers can
     // be lost after GPU handoffs: suggest copying diagnostics and reloading.
-    const nextAction = isAppleSilicon(env)
-      ? "Click ‘Copy diagnostics’, then ‘Relaunch overlay’."
-      : "Restart coach (Cmd+Q) then relaunch.";
+    // On non-macOS platforms avoid mentioning Cmd+Q.
+    const platform = (env && env.platform) || (typeof process !== "undefined" ? process.platform : "");
+    let nextAction;
+    if (isAppleSilicon(env)) {
+      nextAction = "Click ‘Copy diagnostics’, then ‘Relaunch overlay’.";
+    } else if (platform === "darwin") {
+      nextAction = "Restart coach (Cmd+Q) then relaunch.";
+    } else {
+      nextAction = "Restart coach, then relaunch.";
+    }
 
     return {
       level: "B",

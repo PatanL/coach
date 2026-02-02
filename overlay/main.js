@@ -316,13 +316,16 @@ function watchOverlayCommands() {
               ts: now,
               type: "OVERLAY_CMD_PARSE_ERROR",
               error: err && err.message ? String(err.message) : String(err),
-              raw: String(line || "").slice(0, 400)
+              raw: String(line || "").slice(0, 400),
+              platform: process.platform,
+              arch: process.arch
             });
             try {
               showOverlay(
                 overlayUtils.buildOverlayDataErrorPayload({
                   error: err && err.message ? String(err.message) : String(err),
-                  rawLine: line
+                  rawLine: line,
+                  env: { platform: process.platform, arch: process.arch }
                 })
               );
             } catch (_e) {

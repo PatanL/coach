@@ -30,6 +30,14 @@ test('buildOverlayDataErrorPayload includes actionable next step on Apple Silico
   assert.ok(p.next_action.toLowerCase().includes('copy diagnostics'));
 });
 
+test('buildOverlayDataErrorPayload uses OS-appropriate restart hint', () => {
+  const mac = overlayUtils.buildOverlayDataErrorPayload({ error: 'bad', rawLine: '{', env: { platform: 'darwin', arch: 'x64' } });
+  assert.ok(mac.next_action.toLowerCase().includes('cmd+q'));
+
+  const win = overlayUtils.buildOverlayDataErrorPayload({ error: 'bad', rawLine: '{', env: { platform: 'win32', arch: 'x64' } });
+  assert.ok(!win.next_action.toLowerCase().includes('cmd+q'));
+});
+
 test('shouldShowRelaunchButton true only on Apple Silicon + overlay data error payload', () => {
   assert.strictEqual(
     overlayUtils.shouldShowRelaunchButton({ env: { platform: 'darwin', arch: 'arm64' }, payload: { headline: 'Overlay data error' } }),
