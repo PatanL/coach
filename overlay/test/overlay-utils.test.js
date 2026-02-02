@@ -64,6 +64,11 @@ test('shouldShowRelaunchButton true only on Apple Silicon, with opt-in payload f
     overlayUtils.shouldShowRelaunchButton({ env: { platform: 'darwin', arch: 'arm64' }, payload: { headline: 'Other', relaunch_overlay: true } }),
     true
   );
+  // Also allow the renderer-issue headline to show relaunch on Apple Silicon.
+  assert.strictEqual(
+    overlayUtils.shouldShowRelaunchButton({ env: { platform: 'darwin', arch: 'arm64' }, payload: { headline: 'Overlay renderer issue' } }),
+    true
+  );
 });
 
 test('buildOverlayRendererRecoveryPayload sets relaunch_overlay + actionable next step', () => {

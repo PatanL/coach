@@ -63,7 +63,9 @@
     // On non-macOS platforms avoid mentioning Cmd+Q.
     const platform = (env && env.platform) || (typeof process !== "undefined" ? process.platform : "");
     if (isAppleSilicon(env)) {
-      return "Click ‘Copy diagnostics’, then ‘Relaunch overlay’.";
+      // Keep the primary action quick and clickable, but still mention the
+      // fallback that actually recovers stubborn renderer failures.
+      return "Click ‘Copy diagnostics’, then ‘Relaunch overlay’. If it persists, restart coach.";
     }
     if (platform === "darwin") {
       return "Restart coach (Cmd+Q) then relaunch.";
