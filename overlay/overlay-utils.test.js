@@ -82,6 +82,8 @@ test("isPauseShortcut: detects Cmd/Ctrl+Shift+P", () => {
 test("enterHintForState: returns context-specific Enter hint", () => {
   assert.equal(enterHintForState({ mode: "align", twoMinOpen: false }), "Enter: Submit answer");
   assert.equal(enterHintForState({ mode: "", twoMinOpen: true }), "Enter: Set 2‑min step");
+  // 2‑min panel should win even during align mode (prevents misleading hints).
+  assert.equal(enterHintForState({ mode: "align", twoMinOpen: true }), "Enter: Set 2‑min step");
   assert.equal(enterHintForState({ mode: "", twoMinOpen: false }), "Enter: Back on track");
 });
 

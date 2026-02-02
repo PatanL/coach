@@ -50,8 +50,10 @@
   }
 
   function enterHintForState({ mode, twoMinOpen } = {}) {
-    if (mode === "align") return "Enter: Submit answer";
+    // Highest priority: when the 2‑min panel is open, Enter should map to setting that step.
+    // This avoids misleading hints even if other modes (e.g. align) are active.
     if (twoMinOpen) return "Enter: Set 2‑min step";
+    if (mode === "align") return "Enter: Submit answer";
     return "Enter: Back on track";
   }
 
