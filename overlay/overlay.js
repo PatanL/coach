@@ -395,6 +395,10 @@ function updateEnterHint() {
 window.addEventListener("keydown", (event) => {
   if (overlay.classList.contains("hidden")) return;
 
+  // When an action is in-flight, ignore most hotkeys to prevent double-sends.
+  // Keep Escape working so users can close panels / cancel an armed recover.
+  if (overlayBusy && event.key !== "Escape") return;
+
   // Keyboard shortcuts
   // - Enter: Back on track (guarded to avoid accidental actions while typing)
   // - Cmd/Ctrl+Shift+P: Pause 15 (matches footer hint)
