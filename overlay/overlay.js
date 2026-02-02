@@ -429,11 +429,27 @@ copyDiagBtn?.addEventListener('click', () => {
   const ok = (window.overlayAPI && typeof window.overlayAPI.copyText === 'function')
     ? window.overlayAPI.copyText(text)
     : false;
+
   if (ok) {
     copyDiagBtn.textContent = 'Copied diagnostics';
+
+    // Nudge the user into the next recovery action if it's available.
+    if (relaunchBtn && !relaunchBtn.classList.contains('hidden')) {
+      setTimeout(() => {
+        try {
+          relaunchBtn.focus();
+        } catch {}
+      }, 0);
+    }
   } else {
-    copyDiagBtn.textContent = 'Copy failed';
+    // Clipboard can fail in some hardened contexts; provide a manual fallback.
+    copyDiagBtn.textContent = 'Copy failed (manual)';
+    try {
+      // eslint-disable-next-line no-alert
+      window.prompt('Copy diagnostics (Cmd/Ctrl+C):', text);
+    } catch {}
   }
+
   setTimeout(() => {
     copyDiagBtn.textContent = 'Copy diagnostics';
   }, 2000);
