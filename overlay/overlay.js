@@ -304,12 +304,16 @@ function toggleSnooze(show) {
 
 snoozeBtn.addEventListener("click", () => {
   toggleSnooze();
+  updateEnterHint();
 });
 
 snooze.addEventListener("click", (event) => {
   const reason = event.target?.dataset?.reason;
   if (reason) {
     sendAction({ action: "snooze", reason, minutes: 5 });
+    // Close the panel immediately so the overlay is ready for the next action.
+    toggleSnooze(false);
+    updateEnterHint();
   }
 });
 
