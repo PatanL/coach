@@ -152,6 +152,13 @@
     return "DRIFT";
   }
 
+  // Slightly higher-level label helper that can incorporate transient UI state
+  // (like the "Recover" two-step confirmation) in addition to payload-derived state.
+  function labelForOverlayState({ mode, canUndoRecover, customLabel, recoverArmed } = {}) {
+    if (recoverArmed) return "CONFIRM";
+    return labelForPayload({ mode, canUndoRecover, customLabel });
+  }
+
   return {
     isTextInputTarget,
     // not exported but kept here for potential embedding contexts
@@ -167,6 +174,7 @@
     isPauseShortcut,
     enterHintForState,
     labelForPayload,
+    labelForOverlayState,
     // Platform helpers exported for main-process reliability guards.
     isAppleSilicon,
     shouldAutoRehydrateRenderer

@@ -11,6 +11,7 @@ const {
   isPauseShortcut,
   enterHintForState,
   labelForPayload,
+  labelForOverlayState,
   getOverlayHotkeyAction,
   isAppleSilicon,
   shouldAutoRehydrateRenderer
@@ -109,6 +110,12 @@ test("labelForPayload: prefers custom label and normalizes it", () => {
   assert.equal(labelForPayload({ customLabel: "  focus  " }), "FOCUS");
   assert.equal(labelForPayload({ customLabel: "make  it\nsmall" }), "MAKE IT SMALL");
   assert.equal(labelForPayload({ customLabel: "x".repeat(50) }), "X".repeat(16));
+});
+
+test("labelForOverlayState: surfaces transient confirm state", () => {
+  assert.equal(labelForOverlayState({ mode: "", canUndoRecover: false, recoverArmed: true }), "CONFIRM");
+  // Falls back to payload-derived label when not armed.
+  assert.equal(labelForOverlayState({ mode: "align", canUndoRecover: false, recoverArmed: false }), "ALIGN");
 });
 
 test("getOverlayHotkeyAction: ignores hotkeys while overlay hidden", () => {

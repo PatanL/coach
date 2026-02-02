@@ -91,6 +91,19 @@ function armRecover() {
 
 
 
+function refreshHeaderLabel() {
+  if (!label) return;
+  const computed = (window.overlayUtils && window.overlayUtils.labelForOverlayState)
+    ? window.overlayUtils.labelForOverlayState({
+        mode: overlay?.dataset?.mode,
+        canUndoRecover: Boolean(currentPayload?.can_undo_recover),
+        customLabel: currentPayload?.label,
+        recoverArmed
+      })
+    : (recoverArmed ? "CONFIRM" : (currentPayload?.can_undo_recover ? "RECOVERED" : (overlay?.dataset?.mode === "align" ? "ALIGN" : "DRIFT")));
+  label.textContent = computed;
+}
+
 function updateRecoverArmUI() {
   // Keep the recovery hint honest: when recover is armed, the next press confirms.
   if (hintRecover) {
@@ -103,6 +116,9 @@ function updateRecoverArmUI() {
     recoverBtn.classList.toggle("armed", recoverArmed);
     recoverBtn.setAttribute("aria-pressed", recoverArmed ? "true" : "false");
   }
+
+  // Also reflect the confirm state in the header label so it's unmissable.
+  refreshHeaderLabel();
 }
 function setText(el, value) {
   el.textContent = value || "";
@@ -182,17 +198,9 @@ function showOverlay(payload) {
       ? window.overlayUtils.enterHintForState({ mode: overlay.dataset.mode, twoMinOpen: false })
       : "Enter: Back on track";
   }
-  // Dynamic header label for clarity (RECOVER / ALIGN / DRIFT)
-  if (label) {
-    const computed = (window.overlayUtils && window.overlayUtils.labelForPayload)
-      ? window.overlayUtils.labelForPayload({
-          mode: overlay.dataset.mode,
-          canUndoRecover: Boolean(payload?.can_undo_recover),
-          customLabel: payload?.label
-        })
-      : (payload?.can_undo_recover ? "RECOVER" : (overlay.dataset.mode === "align" ? "ALIGN" : "DRIFT"));
-    label.textContent = computed;
-  }
+  // Dynamic header label for clarity (DRIFT / ALIGN / RECOVERED / CONFIRM)
+  currentPayload = payload;
+  refreshHeaderLabel();
   setText(blockName, payload.block_name || "");
   // Hide the block label when empty so the header doesn't show a stray placeholder.
   if (blockName) {
