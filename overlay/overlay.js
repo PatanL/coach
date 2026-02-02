@@ -41,17 +41,12 @@ const DEFAULT_BUTTON_TEXT = {
   snooze: snoozeBtn?.textContent || "Snooze"
 };
 
-function setButtonsBusy(isBusy, { active } = {}) {
+function setButtonsBusy(isBusy) {
   const buttons = [backBtn, pauseBtn, twoMinBtn, stuckBtn, recoverBtn, undoRecoverBtn, snoozeBtn];
   buttons.forEach((btn) => {
     if (!btn) return;
     btn.disabled = Boolean(isBusy);
   });
-
-  // Allow one active button to remain enabled so users can re-click if they want.
-  if (isBusy && active) {
-    active.disabled = false;
-  }
 }
 
 function resetButtonStates() {
@@ -227,14 +222,14 @@ function sendAction(action) {
 backBtn.addEventListener("click", () => {
   if (backBtn.disabled) return;
   backBtn.textContent = "Logging…";
-  setButtonsBusy(true, { active: backBtn });
+  setButtonsBusy(true);
   sendAction({ action: "back_on_track" });
 });
 
 pauseBtn.addEventListener("click", () => {
   if (pauseBtn.disabled) return;
   pauseBtn.textContent = "Pausing…";
-  setButtonsBusy(true, { active: pauseBtn });
+  setButtonsBusy(true);
   sendAction({ action: "pause_15", minutes: 15 });
 });
 twoMinBtn.addEventListener("click", () => {
@@ -253,21 +248,21 @@ twoMinBtn.addEventListener("click", () => {
 stuckBtn.addEventListener("click", () => {
   if (stuckBtn.disabled) return;
   stuckBtn.textContent = "Noted…";
-  setButtonsBusy(true, { active: stuckBtn });
+  setButtonsBusy(true);
   sendAction({ action: "stuck" });
 });
 
 recoverBtn.addEventListener("click", () => {
   if (recoverBtn.disabled) return;
   recoverBtn.textContent = "Recovering…";
-  setButtonsBusy(true, { active: recoverBtn });
+  setButtonsBusy(true);
   sendAction({ action: "recover" });
 });
 
 undoRecoverBtn?.addEventListener("click", () => {
   if (undoRecoverBtn.disabled) return;
   undoRecoverBtn.textContent = "Undoing…";
-  setButtonsBusy(true, { active: undoRecoverBtn });
+  setButtonsBusy(true);
   sendAction({ action: "undo_recover" });
 });
 
@@ -325,7 +320,7 @@ window.overlayAPI.onShow((payload) => {
 window.overlayAPI.onPause(() => {
   if (pauseBtn && !pauseBtn.disabled) {
     pauseBtn.textContent = "Pausing…";
-    setButtonsBusy(true, { active: pauseBtn });
+    setButtonsBusy(true);
   }
   sendAction({ action: "pause_15" });
 });
