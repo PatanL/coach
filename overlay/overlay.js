@@ -220,8 +220,11 @@ function showOverlay(payload) {
     const sys = (window.overlayAPI && typeof window.overlayAPI.getSystemInfo === 'function')
       ? window.overlayAPI.getSystemInfo()
       : { platform: 'unknown', arch: 'unknown' };
-    const isAppleSilicon = sys.platform === 'darwin' && (sys.arch === 'arm64' || sys.arch === 'arm64e');
-    const shouldShowRelaunch = isAppleSilicon && String(payload.headline || '') === 'Overlay data error';
+
+    const shouldShowRelaunch = (window.overlayUtils && typeof window.overlayUtils.shouldShowRelaunchButton === 'function')
+      ? window.overlayUtils.shouldShowRelaunchButton({ env: sys, payload })
+      : (sys.platform === 'darwin' && (sys.arch === 'arm64' || sys.arch === 'arm64e') && String(payload.headline || '') === 'Overlay data error');
+
     relaunchBtn.classList.toggle('hidden', !shouldShowRelaunch);
   }
 

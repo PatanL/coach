@@ -64,9 +64,9 @@
 
     // Make the next action more actionable on Apple Silicon where renderers can
     // be lost after GPU handoffs: suggest copying diagnostics and reloading.
-    const nextAction = isAppleSilicon(env) ?
-      "Click ‘Copy diagnostics’, then ‘Relaunch overlay’." :
-      "Restart coach (Cmd+Q) then relaunch.";
+    const nextAction = isAppleSilicon(env)
+      ? "Click ‘Copy diagnostics’, then ‘Relaunch overlay’."
+      : "Restart coach (Cmd+Q) then relaunch.";
 
     return {
       level: "B",
@@ -79,6 +79,10 @@
       cmd_id: null,
       source_event_id: null
     };
+  }
+
+  function shouldShowRelaunchButton({ env, payload } = {}) {
+    return isAppleSilicon(env) && String(payload?.headline || "") === "Overlay data error";
   }
 
   function isInteractiveTarget(target) {
@@ -174,6 +178,7 @@
     normalizeFreeform,
     safeParseJson,
     buildOverlayDataErrorPayload,
+    shouldShowRelaunchButton,
     shouldTriggerBackOnTrackOnEnter,
     shouldShowSnoozeOnEscape,
     getOverlayHotkeyAction,

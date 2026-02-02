@@ -14,7 +14,8 @@ const {
   labelForOverlayState,
   getOverlayHotkeyAction,
   isAppleSilicon,
-  shouldAutoRehydrateRenderer
+  shouldAutoRehydrateRenderer,
+  shouldShowRelaunchButton
 } = require("./overlay-utils");
 
 test("isTextInputTarget: recognizes common typing targets", () => {
@@ -222,4 +223,19 @@ test("buildOverlayDataErrorPayload: produces a minimal actionable payload", () =
   assert.ok(payload.next_action.toLowerCase().includes("restart"));
   assert.equal("diagnosis" in payload, true);
   assert.equal("human_line" in payload, true);
+});
+
+test("shouldShowRelaunchButton: only on Apple Silicon + overlay data error payload", () => {
+  assert.equal(
+    shouldShowRelaunchButton({ env: { platform: "darwin", arch: "arm64" }, payload: { headline: "Overlay data error" } }),
+    true
+  );
+  assert.equal(
+    shouldShowRelaunchButton({ env: { platform: "darwin", arch: "x64" }, payload: { headline: "Overlay data error" } }),
+    false
+  );
+  assert.equal(
+    shouldShowRelaunchButton({ env: { platform: "darwin", arch: "arm64" }, payload: { headline: "Other" } }),
+    false
+  );
 });

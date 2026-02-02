@@ -29,3 +29,18 @@ test('buildOverlayDataErrorPayload includes actionable next step on Apple Silico
   const p = overlayUtils.buildOverlayDataErrorPayload({ error: 'bad json', rawLine: '{', env: { platform: 'darwin', arch: 'arm64' } });
   assert.ok(p.next_action.toLowerCase().includes('copy diagnostics'));
 });
+
+test('shouldShowRelaunchButton true only on Apple Silicon + overlay data error payload', () => {
+  assert.strictEqual(
+    overlayUtils.shouldShowRelaunchButton({ env: { platform: 'darwin', arch: 'arm64' }, payload: { headline: 'Overlay data error' } }),
+    true
+  );
+  assert.strictEqual(
+    overlayUtils.shouldShowRelaunchButton({ env: { platform: 'darwin', arch: 'x64' }, payload: { headline: 'Overlay data error' } }),
+    false
+  );
+  assert.strictEqual(
+    overlayUtils.shouldShowRelaunchButton({ env: { platform: 'darwin', arch: 'arm64' }, payload: { headline: 'Other' } }),
+    false
+  );
+});
