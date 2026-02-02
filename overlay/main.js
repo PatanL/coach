@@ -78,17 +78,43 @@ function createOverlayWindow() {
   // re-sending the last payload so recovery steps remain actionable.
   function rehydrateRenderer(reason) {
     if (!overlayUtils.shouldAutoRehydrateRenderer({ platform: process.platform, arch: process.arch })) return;
+
+    const wasVisible = Boolean(
+      overlayWindow && !overlayWindow.isDestroyed() && overlayWindow.isVisible()
+    );
+
     const now = new Date().toISOString();
-    appendAction({ ts: now, type: "OVERLAY_REHYDRATE", reason: reason || null, platform: process.platform, arch: process.arch });
+    appendAction({
+      ts: now,
+      type: "OVERLAY_REHYDRATE",
+      reason: reason || null,
+      platform: process.platform,
+      arch: process.arch,
+      was_visible: wasVisible
+    });
+
     try {
-      overlayWindow.reload();
+      if (!overlayWindow || overlayWindow.isDestroyed()) {
+        createOverlayWindow();
+      } else {
+        overlayWindow.reload();
+      }
+
       overlayWindow.webContents.once("did-finish-load", () => {
         try {
-          overlayWindow.show();
-          overlayWindow.focus();
-          if (currentPayload) overlayWindow.webContents.send("overlay:show", currentPayload);
+          if (currentPayload) {
+            overlayWindow.webContents.send("overlay:show", currentPayload);
+          }
+          // Preserve prior visibility so rehydration doesn't cause the overlay
+          // to unexpectedly pop up if it was hidden.
+          if (wasVisible) {
+            overlayWindow.show();
+            overlayWindow.focus();
+          } else {
+            overlayWindow.hide();
+          }
         } catch (err) {
-          // ignore resend errors
+          // ignore post-rehydrate errors
         }
       });
     } catch (err) {

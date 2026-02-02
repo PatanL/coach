@@ -153,9 +153,18 @@ test("getOverlayHotkeyAction: Escape shows snooze unless typing", () => {
 test("platform helpers: detect Apple Silicon + gate rehydration", () => {
   assert.equal(isAppleSilicon({ platform: "darwin", arch: "arm64" }), true);
   assert.equal(isAppleSilicon({ platform: "darwin", arch: "arm64e" }), true);
+
+  // Negative cases
   assert.equal(isAppleSilicon({ platform: "darwin", arch: "x64" }), false);
   assert.equal(isAppleSilicon({ platform: "linux", arch: "arm64" }), false);
+  assert.equal(isAppleSilicon({ platform: "linux", arch: "x64" }), false);
+  assert.equal(isAppleSilicon({ platform: "win32", arch: "arm64" }), false);
+  assert.equal(isAppleSilicon({ platform: "win32", arch: "x64" }), false);
 
   assert.equal(shouldAutoRehydrateRenderer({ platform: "darwin", arch: "arm64" }), true);
+
+  // Negative cases
   assert.equal(shouldAutoRehydrateRenderer({ platform: "darwin", arch: "x64" }), false);
+  assert.equal(shouldAutoRehydrateRenderer({ platform: "linux", arch: "arm64" }), false);
+  assert.equal(shouldAutoRehydrateRenderer({ platform: "win32", arch: "arm64" }), false);
 });
