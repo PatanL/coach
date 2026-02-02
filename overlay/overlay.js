@@ -275,7 +275,11 @@ function showOverlay(payload) {
           headline: 'Overlay error',
           human_line: 'Coach overlay payload was invalid.',
           diagnosis: 'Invalid overlay payload.',
-          next_action: (sys.platform === 'darwin' ? 'Restart coach (Cmd+Q) then relaunch.' : 'Restart coach, then relaunch.'),
+          next_action: (sys.platform === 'darwin'
+            ? (sys.arch === 'arm64' || sys.arch === 'arm64e'
+              ? 'Press D to copy diagnostics, then Cmd+R to relaunch. If it stays blank, restart Coach.'
+              : 'Restart coach (Cmd+Q) then relaunch.')
+            : 'Restart coach, then relaunch.'),
           relaunch_overlay: true
         };
       }

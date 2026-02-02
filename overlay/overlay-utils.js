@@ -66,7 +66,7 @@
       // Keep the primary action quick and clickable, but still mention the
       // fallback that actually recovers stubborn renderer failures. This copy
       // is intentionally specific to the overlay’s buttons and the M1 flow.
-      return "Click ‘Copy diagnostics’, then ‘Relaunch overlay’. If it stays blank, restart Coach.";
+      return "Press D (or click ‘Copy diagnostics’), then Cmd+R (or click ‘Relaunch overlay’). If it stays blank, restart Coach.";
     }
     if (platform === "darwin") {
       return "Restart coach (Cmd+Q) then relaunch.";
