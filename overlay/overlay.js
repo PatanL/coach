@@ -136,17 +136,14 @@ window.overlayAPI.onPause(() => {
 });
 
 window.addEventListener("keydown", (event) => {
-  // Don't treat Enter as "Back on track" while the user is typing.
-  if (event.key === "Enter" && !event.isComposing && !event.metaKey && !event.ctrlKey && !event.altKey) {
-    const isTextInputTarget = window.overlayUtils?.isTextInputTarget;
-    const isTypingTarget =
-      (isTextInputTarget && isTextInputTarget(event.target)) ||
-      (isTextInputTarget && isTextInputTarget(document.activeElement));
+  if (overlay.classList.contains("hidden")) return;
 
-    if (!isTypingTarget) {
-      sendAction({ action: "back_on_track" });
-    }
+  // Don't treat Enter as "Back on track" while the user is typing.
+  const shouldTrigger = window.overlayUtils?.shouldTriggerBackOnTrackFromKeydown;
+  if (shouldTrigger && shouldTrigger(event, document.activeElement)) {
+    sendAction({ action: "back_on_track" });
   }
+
   if (event.key === "Escape") {
     snooze.classList.remove("hidden");
   }

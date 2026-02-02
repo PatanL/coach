@@ -27,7 +27,19 @@
     return tag === "input" || tag === "textarea" || tag === "select";
   }
 
+  function shouldTriggerBackOnTrackFromKeydown(event, activeElement) {
+    if (!event) return false;
+
+    if (event.key !== "Enter") return false;
+    if (event.isComposing) return false;
+    if (event.metaKey || event.ctrlKey || event.altKey) return false;
+
+    const isTypingTarget = isTextInputTarget(event.target) || isTextInputTarget(activeElement);
+    return !isTypingTarget;
+  }
+
   return {
-    isTextInputTarget
+    isTextInputTarget,
+    shouldTriggerBackOnTrackFromKeydown
   };
 });

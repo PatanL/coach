@@ -1,7 +1,7 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
 
-const { isTextInputTarget } = require("./overlay-utils");
+const { isTextInputTarget, shouldTriggerBackOnTrackFromKeydown } = require("./overlay-utils");
 
 test("isTextInputTarget: recognizes common typing targets", () => {
   assert.equal(isTextInputTarget({ tagName: "INPUT" }), true);
@@ -31,3 +31,37 @@ test("isTextInputTarget: ignores non-input targets", () => {
   assert.equal(isTextInputTarget({ tagName: "DIV" }), false);
   assert.equal(isTextInputTarget(null), false);
 });
+
+test("shouldTriggerBackOnTrackFromKeydown: triggers only when safe", () => {
+  assert.equal(
+    shouldTriggerBackOnTrackFromKeydown({ key: "Enter", isComposing: false }, null),
+    true
+  );
+
+  assert.equal(
+    shouldTriggerBackOnTrackFromKeydown({ key: "Escape", isComposing: false }, null),
+    false
+  );
+
+  assert.equal(
+    shouldTriggerBackOnTrackFromKeydown({ key: "Enter", isComposing: true }, null),
+    false
+  );
+
+  assert.equal(
+    shouldTriggerBackOnTrackFromKeydown({ key: "Enter", isComposing: false, metaKey: true }, null),
+    false
+  );
+
+  assert.equal(
+    shouldTriggerBackOnKeydownTypingTarget({ tagName: "INPUT" }),
+    false
+  );
+});
+
+function shouldTriggerBackOnKeydownTypingTarget(activeEl) {
+  return shouldTriggerBackOnTrackFromKeydown(
+    { key: "Enter", isComposing: false, target: { tagName: "DIV" } },
+    activeEl
+  );
+}
