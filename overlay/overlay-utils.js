@@ -64,13 +64,31 @@
     const platform = (env && env.platform) || (typeof process !== "undefined" ? process.platform : "");
     if (isAppleSilicon(env)) {
       // Keep the primary action quick and clickable, but still mention the
-      // fallback that actually recovers stubborn renderer failures.
-      return "Click ‘Copy diagnostics’, then ‘Relaunch overlay’. If it persists, restart coach.";
+      // fallback that actually recovers stubborn renderer failures. This copy
+      // is intentionally specific to the overlay’s buttons and the M1 flow.
+      return "Click ‘Copy diagnostics’, then ‘Relaunch overlay’. If it stays blank, restart Coach.";
     }
     if (platform === "darwin") {
       return "Restart coach (Cmd+Q) then relaunch.";
     }
     return "Restart coach, then relaunch.";
+  }
+
+  // Accessibility: Recovery/error states should announce promptly. We use a
+  // conservative policy: assertive only for explicit error/recovery overlays,
+  // polite for everything else to avoid interrupting the user unnecessarily.
+  function livePolitenessForPayload(payload) {
+    const h = String(payload?.headline || "");
+    if (h === "Overlay data error" || h === "Overlay renderer issue") return "assertive";
+    return "polite";
+  }
+
+  // When actionable recovery is available on Apple Silicon (M1+), prefer to
+  // focus the diagnostics copy affordance first so users can capture context
+  // before relaunching the renderer.
+  function shouldFocusRecoveryFirst({ env, payload } = {}) {
+    if (!isAppleSilicon(env)) return false;
+    return shouldShowRelaunchButton({ env, payload }) === true;
   }
 
   function buildOverlayDataErrorPayload({ error, rawLine, env } = {}) {
@@ -248,6 +266,8 @@
     buildOverlayDataErrorPayload,
     buildOverlayRendererRecoveryPayload,
     shouldShowRelaunchButton,
+    livePolitenessForPayload,
+    shouldFocusRecoveryFirst,
     shouldTriggerBackOnTrackOnEnter,
     shouldShowSnoozeOnEscape,
     getOverlayHotkeyAction,

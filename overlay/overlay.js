@@ -227,6 +227,14 @@ function showOverlay(payload) {
   resetTwoMin();
   resetButtonStates();
   overlay.setAttribute("aria-busy", "false");
+  // Use assertive live region only for explicit recovery/error overlays so
+  // screen readers announce promptly without over-interrupting normal flows.
+  try {
+    const politeness = (window.overlayUtils && typeof window.overlayUtils.livePolitenessForPayload === 'function')
+      ? window.overlayUtils.livePolitenessForPayload(payload)
+      : 'polite';
+    overlay.setAttribute('aria-live', politeness);
+  } catch {}
   // Safety: if the payload is malformed or missing expected shape, coerce it
   // into an actionable recovery overlay so users have a clear next step.
   try {
@@ -348,6 +356,21 @@ function showOverlay(payload) {
   // - Align mode: focus the text input so users can type immediately.
   // - Otherwise: focus the primary action button.
   requestAnimationFrame(() => {
+    // On Apple Silicon when actionable recovery is present, focus the
+    // diagnostics button first so the user can copy context before relaunch.
+    try {
+      const sys = (window.overlayAPI && typeof window.overlayAPI.getSystemInfo === 'function')
+        ? window.overlayAPI.getSystemInfo()
+        : { platform: 'unknown', arch: 'unknown' };
+      const focusRecovery = (window.overlayUtils && typeof window.overlayUtils.shouldFocusRecoveryFirst === 'function')
+        ? window.overlayUtils.shouldFocusRecoveryFirst({ env: sys, payload: currentPayload })
+        : false;
+      if (focusRecovery && copyDiagBtn && !copyDiagBtn.disabled) {
+        copyDiagBtn.focus();
+        return;
+      }
+    } catch {}
+
     if (overlay.dataset.mode === "align") {
       alignText?.focus();
     } else {
