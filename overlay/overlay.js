@@ -21,6 +21,7 @@ const pauseBtn = document.getElementById("pauseBtn");
 const twoMinBtn = document.getElementById("twoMinBtn");
 const stuckBtn = document.getElementById("stuckBtn");
 const recoverBtn = document.getElementById("recoverBtn");
+const undoRecoverBtn = document.getElementById("undoRecoverBtn");
 const snoozeBtn = document.getElementById("snoozeBtn");
 
 let shownAt = null;
@@ -91,6 +92,13 @@ function showOverlay(payload) {
   // Keep the primary action label context-sensitive (habits vs. focus blocks).
   updatePrimaryLabel(payload);
 
+  // Recovery overlays should be reversible: show an explicit undo affordance.
+  if (payload?.can_undo_recover) {
+    undoRecoverBtn?.classList.remove("hidden");
+  } else {
+    undoRecoverBtn?.classList.add("hidden");
+  }
+
   if (payload.level === "C") {
     miniPlan.classList.remove("hidden");
     setText(miniPlan, payload.mini_plan || "");
@@ -143,6 +151,7 @@ twoMinBtn.addEventListener("click", () => {
 });
 stuckBtn.addEventListener("click", () => sendAction({ action: "stuck" }));
 recoverBtn.addEventListener("click", () => sendAction({ action: "recover" }));
+undoRecoverBtn?.addEventListener("click", () => sendAction({ action: "undo_recover" }));
 
 alignSubmit.addEventListener("click", () => {
   const value = window.overlayUtils?.normalizeFreeform?.(alignText.value, { maxLen: 240 }) ?? alignText.value.trim();
