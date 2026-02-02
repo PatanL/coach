@@ -19,6 +19,7 @@ const twoMinSubmit = document.getElementById("twoMinSubmit");
 const hintEnter = document.getElementById("hintEnter");
 const hintRecover = document.getElementById("hintRecover");
 const hintUndo = document.getElementById("hintUndo");
+const hintDiag = document.getElementById("hintDiag");
 const hintRelaunch = document.getElementById("hintRelaunch");
 
 const backBtn = document.getElementById("backBtn");
@@ -194,6 +195,12 @@ function updateFooterHints() {
   if (hintUndo) {
     const undoAvailable = undoRecoverBtn && !undoRecoverBtn.classList.contains("hidden");
     hintUndo.classList.toggle("hidden", isAlign || !undoAvailable);
+  }
+  if (hintDiag) {
+    // We currently disable the single-letter hotkey during align mode to avoid
+    // clobbering typing; keep the hint consistent.
+    const diagAvailable = Boolean(copyDiagBtn);
+    hintDiag.classList.toggle("hidden", isAlign || !diagAvailable);
   }
   updateRecoverArmUI();
 }
@@ -579,7 +586,30 @@ window.addEventListener("keydown", (event) => {
 
   // When an action is in-flight, ignore most hotkeys to prevent double-sends.
   // Keep Escape working so users can close panels / cancel an armed recover.
-  if (overlayBusy && event.key !== "Escape") return;
+  // Also keep *recovery* hotkeys working (copy diagnostics / relaunch) so the
+  // user isn't stuck if the renderer is behaving badly.
+  if (overlayBusy) {
+    const key = String(event.key || "");
+
+    // Always allow Esc.
+    if (key === "Escape") {
+      // fall through
+    } else {
+      // Allow Cmd+R relaunch when the button is visible.
+      const isCmdR = (event.metaKey && !event.ctrlKey && !event.altKey && !event.shiftKey) && key.toLowerCase() === "r";
+      if (isCmdR) {
+        const canRelaunch = relaunchBtn && !relaunchBtn.classList.contains("hidden");
+        if (!canRelaunch) return;
+        // fall through
+      } else {
+        // Allow D to copy diagnostics when not typing and no modifiers.
+        const isTyping = window.overlayUtils?.isTextInputTarget?.(event.target);
+        const hasModifier = Boolean(event.metaKey || event.ctrlKey || event.altKey);
+        if (!(key.toLowerCase() === "d" && !isTyping && !hasModifier && copyDiagBtn)) return;
+        // fall through
+      }
+    }
+  }
 
   // Keyboard shortcuts
   // - Enter: Back on track (guarded to avoid accidental actions while typing)
