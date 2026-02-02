@@ -17,5 +17,13 @@ contextBridge.exposeInMainWorld("overlayAPI", {
     } catch (e) {
       return false;
     }
+  },
+  relaunchOverlay: () => {
+    try {
+      ipcRenderer.send("overlay:relaunch", { source: "renderer_button" });
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 });

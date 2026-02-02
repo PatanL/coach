@@ -65,7 +65,7 @@
     // Make the next action more actionable on Apple Silicon where renderers can
     // be lost after GPU handoffs: suggest copying diagnostics and reloading.
     const nextAction = isAppleSilicon(env) ?
-      "Click ‘Copy diagnostics’, then reload the overlay (Relaunch)." :
+      "Click ‘Copy diagnostics’, then ‘Relaunch overlay’." :
       "Restart coach (Cmd+Q) then relaunch.";
 
     return {

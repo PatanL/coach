@@ -28,6 +28,7 @@ const recoverBtn = document.getElementById("recoverBtn");
 const undoRecoverBtn = document.getElementById("undoRecoverBtn");
 const snoozeBtn = document.getElementById("snoozeBtn");
 const copyDiagBtn = document.getElementById("copyDiagBtn");
+const relaunchBtn = document.getElementById("relaunchBtn");
 
 let shownAt = null;
 let currentPayload = null;
@@ -49,7 +50,7 @@ const DEFAULT_BUTTON_TEXT = {
 };
 
 function setButtonsBusy(isBusy) {
-  const buttons = [backBtn, pauseBtn, twoMinBtn, stuckBtn, recoverBtn, undoRecoverBtn, snoozeBtn, copyDiagBtn];
+  const buttons = [backBtn, pauseBtn, twoMinBtn, stuckBtn, recoverBtn, undoRecoverBtn, snoozeBtn, copyDiagBtn, relaunchBtn];
   buttons.forEach((btn) => {
     if (!btn) return;
     btn.disabled = Boolean(isBusy);
@@ -212,6 +213,17 @@ function showOverlay(payload) {
   setText(humanLine, payload.human_line || "");
   setText(diagnosis, payload.diagnosis || "");
   setText(nextAction, payload.next_action || "");
+
+  // Actionable recovery on Apple Silicon: when the overlay payload itself is an
+  // error, provide an explicit relaunch affordance (in addition to auto-rehydrate).
+  if (relaunchBtn) {
+    const sys = (window.overlayAPI && typeof window.overlayAPI.getSystemInfo === 'function')
+      ? window.overlayAPI.getSystemInfo()
+      : { platform: 'unknown', arch: 'unknown' };
+    const isAppleSilicon = sys.platform === 'darwin' && (sys.arch === 'arm64' || sys.arch === 'arm64e');
+    const shouldShowRelaunch = isAppleSilicon && String(payload.headline || '') === 'Overlay data error';
+    relaunchBtn.classList.toggle('hidden', !shouldShowRelaunch);
+  }
 
   // Keep the primary action label context-sensitive (habits vs. focus blocks).
   updatePrimaryLabel(payload);
@@ -421,6 +433,16 @@ copyDiagBtn?.addEventListener('click', () => {
   }
   setTimeout(() => {
     copyDiagBtn.textContent = 'Copy diagnostics';
+  }, 2000);
+});
+
+relaunchBtn?.addEventListener('click', () => {
+  const ok = (window.overlayAPI && typeof window.overlayAPI.relaunchOverlay === 'function')
+    ? window.overlayAPI.relaunchOverlay()
+    : false;
+  relaunchBtn.textContent = ok ? 'Relaunching…' : 'Relaunch failed';
+  setTimeout(() => {
+    relaunchBtn.textContent = 'Relaunch overlay';
   }, 2000);
 });
 

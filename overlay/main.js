@@ -27,6 +27,9 @@ let tray = null;
 let currentPayload = null;
 let lastCmdId = null;
 
+// Exposed for renderer-triggered recovery actions (e.g. manual relaunch button).
+let rehydrateRendererFn = null;
+
 // Apple Silicon reliability guard: transparent always-on-top windows can lose
 // their renderer after GPU handoffs. We auto-rehydrate, but must avoid getting
 // stuck in a rapid reload loop if something is fundamentally broken.
@@ -84,8 +87,8 @@ function createOverlayWindow() {
   // On Apple Silicon, transparent overlays can occasionally lose their renderer
   // after GPU handoffs. When that happens, auto-rehydrate by reloading and
   // re-sending the last payload so recovery steps remain actionable.
-  function rehydrateRenderer(reason) {
-    if (!overlayUtils.shouldAutoRehydrateRenderer({ platform: process.platform, arch: process.arch })) return;
+  function rehydrateRenderer(reason, { force = false } = {}) {
+    if (!force && !overlayUtils.shouldAutoRehydrateRenderer({ platform: process.platform, arch: process.arch })) return;
 
     const nowMs = Date.now();
     if (nowMs - lastRehydrateAt > REHYDRATE_WINDOW_MS) {
@@ -159,6 +162,9 @@ function createOverlayWindow() {
       // ignore reload errors
     }
   }
+
+  // Allow renderer/UI to request a relaunch (e.g. actionable recovery overlay).
+  rehydrateRendererFn = (reason, opts) => rehydrateRenderer(reason, opts);
 
   overlayWindow.webContents.on("render-process-gone", (_event, details) => {
     rehydrateRenderer(details?.reason);
@@ -353,6 +359,27 @@ ipcMain.on("overlay:action", (event, action) => {
   });
   // Pause actions should also dismiss the overlay so the user can get back to work.
   hideOverlay();
+});
+
+ipcMain.on("overlay:relaunch", (_event, meta) => {
+  const now = new Date().toISOString();
+  appendAction({
+    ts: now,
+    type: "OVERLAY_RELAUNCH_REQUESTED",
+    source: meta?.source || "renderer",
+    cmd_id: lastCmdId,
+    platform: process.platform,
+    arch: process.arch
+  });
+  try {
+    if (typeof rehydrateRendererFn === "function") {
+      rehydrateRendererFn("manual_relaunch", { force: true });
+    } else if (overlayWindow && !overlayWindow.isDestroyed()) {
+      overlayWindow.reload();
+    }
+  } catch (_e) {
+    // ignore
+  }
 });
 
 app.whenReady().then(() => {
