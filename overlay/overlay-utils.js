@@ -26,10 +26,20 @@
     return str.length > maxLen ? str.slice(0, maxLen).trimEnd() : str;
   }
 
+  function isInteractiveTarget(target) {
+    if (!target) return false;
+    const tag = String(target.tagName || "").toLowerCase();
+    if (isTextInputTarget(target)) return true;
+    // Treat buttons and links as interactive so Enter activates them,
+    // not the global "Back on track" shortcut.
+    if (tag === "button" || tag === "a") return true;
+    return false;
+  }
+
   function shouldTriggerBackOnTrackOnEnter({ target, mode, twoMinOpen } = {}) {
     if (mode === "align") return false;
     if (twoMinOpen) return false;
-    return !isTextInputTarget(target);
+    return !isInteractiveTarget(target);
   }
 
   function isPauseShortcut(event) {
@@ -47,6 +57,9 @@
 
   return {
     isTextInputTarget,
+    // not exported but kept here for potential embedding contexts
+    // isInteractiveTarget is intentionally not part of the public API
+    // to avoid widening usage surface area.
     normalizeTwoMinuteStep,
     normalizeFreeform,
     shouldTriggerBackOnTrackOnEnter,

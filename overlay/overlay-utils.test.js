@@ -59,6 +59,17 @@ test("shouldTriggerBackOnTrackOnEnter: blocks Enter while typing; allows otherwi
   );
 });
 
+test("shouldTriggerBackOnTrackOnEnter: does not fire when focus on buttons/links", () => {
+  assert.equal(
+    shouldTriggerBackOnTrackOnEnter({ target: { tagName: "BUTTON" }, mode: "", twoMinOpen: false }),
+    false
+  );
+  assert.equal(
+    shouldTriggerBackOnTrackOnEnter({ target: { tagName: "A" }, mode: "", twoMinOpen: false }),
+    false
+  );
+});
+
 test("isPauseShortcut: detects Cmd/Ctrl+Shift+P", () => {
   assert.equal(isPauseShortcut({ key: "p", metaKey: true, ctrlKey: false, shiftKey: true }), true);
   assert.equal(isPauseShortcut({ key: "P", metaKey: false, ctrlKey: true, shiftKey: true }), true);
