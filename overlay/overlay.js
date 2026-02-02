@@ -205,6 +205,37 @@ function showOverlay(payload) {
   resetTwoMin();
   resetButtonStates();
   overlay.setAttribute("aria-busy", "false");
+  // Safety: if the payload is malformed or missing expected shape, coerce it
+  // into an actionable recovery overlay so users have a clear next step.
+  try {
+    const isObj = payload && typeof payload === 'object' && !Array.isArray(payload);
+    const hasBasics = isObj && typeof payload.headline === 'string' && typeof payload.level === 'string';
+    if (!hasBasics) {
+      const sys = (window.overlayAPI && typeof window.overlayAPI.getSystemInfo === 'function')
+        ? window.overlayAPI.getSystemInfo()
+        : { platform: 'unknown', arch: 'unknown' };
+      if (window.overlayUtils && typeof window.overlayUtils.buildOverlayDataErrorPayload === 'function') {
+        payload = window.overlayUtils.buildOverlayDataErrorPayload({
+          error: 'invalid_payload',
+          rawLine: (() => { try { return JSON.stringify(payload); } catch { return String(payload); } })(),
+          env: sys
+        });
+      } else {
+        // Minimal fallback if utils are unavailable.
+        payload = {
+          level: 'B',
+          headline: 'Overlay error',
+          human_line: 'Coach overlay payload was invalid.',
+          diagnosis: 'Invalid overlay payload.',
+          next_action: (sys.platform === 'darwin' ? 'Restart coach (Cmd+Q) then relaunch.' : 'Restart coach, then relaunch.'),
+          relaunch_overlay: true
+        };
+      }
+    }
+  } catch (_coerceErr) {
+    // If anything goes wrong while coercing, keep going with the original
+    // payload; subsequent UI writes are already guarded.
+  }
   if (payload.choices && Array.isArray(payload.choices)) {
     overlay.dataset.mode = "align";
   } else {
