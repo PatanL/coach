@@ -30,6 +30,7 @@ const snoozeBtn = document.getElementById("snoozeBtn");
 
 let shownAt = null;
 let currentPayload = null;
+let overlayBusy = false;
 
 const DEFAULT_BUTTON_TEXT = {
   back: backBtn?.textContent || "Back on track",
@@ -47,6 +48,8 @@ function setButtonsBusy(isBusy) {
     if (!btn) return;
     btn.disabled = Boolean(isBusy);
   });
+  overlayBusy = Boolean(isBusy);
+  if (overlay) overlay.setAttribute("aria-busy", overlayBusy ? "true" : "false");
 }
 
 function resetButtonStates() {
@@ -125,6 +128,7 @@ function showOverlay(payload) {
   resetAlignInput();
   resetTwoMin();
   resetButtonStates();
+  overlay.setAttribute("aria-busy", "false");
   if (payload.choices && Array.isArray(payload.choices)) {
     overlay.dataset.mode = "align";
   } else {
@@ -388,6 +392,7 @@ window.addEventListener("keydown", (event) => {
   if (event.key === "Enter") {
     const action = window.overlayUtils?.getOverlayHotkeyAction?.(event, {
       overlayHidden: overlay.classList.contains("hidden"),
+      overlayBusy,
       mode: overlay.dataset.mode,
       twoMinOpen: twoMinPanel && !twoMinPanel.classList.contains("hidden")
     });

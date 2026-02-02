@@ -62,8 +62,14 @@
     return !isTextInputTarget(target);
   }
 
-  function getOverlayHotkeyAction(event, { overlayHidden = false, mode, twoMinOpen } = {}) {
+  function getOverlayHotkeyAction(
+    event,
+    { overlayHidden = false, overlayBusy = false, mode, twoMinOpen } = {}
+  ) {
     if (overlayHidden) return null;
+    // While the overlay is dispatching an action (buttons disabled),
+    // suppress global hotkeys that could accidentally submit actions.
+    if (overlayBusy) return null;
     const key = event?.key;
     if (key === "Enter") {
       return shouldTriggerBackOnTrackOnEnter({ target: event?.target, mode, twoMinOpen })

@@ -120,6 +120,23 @@ test("getOverlayHotkeyAction: Enter maps to back_on_track only in safe contexts"
   );
 });
 
+test("getOverlayHotkeyAction: suppresses while overlayBusy", () => {
+  assert.equal(
+    getOverlayHotkeyAction(
+      { key: "Enter", target: { tagName: "DIV" } },
+      { overlayHidden: false, overlayBusy: true, mode: "", twoMinOpen: false }
+    ),
+    null
+  );
+  assert.equal(
+    getOverlayHotkeyAction(
+      { key: "Escape", target: { tagName: "DIV" } },
+      { overlayHidden: false, overlayBusy: true, mode: "", twoMinOpen: false }
+    ),
+    null
+  );
+});
+
 test("getOverlayHotkeyAction: Escape shows snooze unless typing", () => {
   assert.equal(
     getOverlayHotkeyAction({ key: "Escape", target: { tagName: "DIV" } }, { overlayHidden: false }),
