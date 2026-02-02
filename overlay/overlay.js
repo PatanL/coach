@@ -19,6 +19,7 @@ const twoMinSubmit = document.getElementById("twoMinSubmit");
 const hintEnter = document.getElementById("hintEnter");
 const hintRecover = document.getElementById("hintRecover");
 const hintUndo = document.getElementById("hintUndo");
+const hintRelaunch = document.getElementById("hintRelaunch");
 
 const backBtn = document.getElementById("backBtn");
 const pauseBtn = document.getElementById("pauseBtn");
@@ -228,6 +229,11 @@ function showOverlay(payload) {
       : (sys.platform === 'darwin' && (sys.arch === 'arm64' || sys.arch === 'arm64e') && String(payload.headline || '') === 'Overlay data error');
 
     relaunchBtn.classList.toggle('hidden', !shouldShowRelaunch);
+
+    // Surface a clear shortcut hint alongside the button for faster recovery.
+    if (hintRelaunch) {
+      hintRelaunch.classList.toggle('hidden', !shouldShowRelaunch);
+    }
   }
 
   // Keep the primary action label context-sensitive (habits vs. focus blocks).
@@ -540,6 +546,18 @@ window.addEventListener("keydown", (event) => {
       sendAction({ action: "pause_15", minutes: 15 });
     }
     return;
+  }
+
+  // Explicit relaunch shortcut for actionable recovery (Apple Silicon only).
+  // Only active when the relaunch affordance is visible to avoid surprise.
+  if ((event.metaKey && !event.ctrlKey && !event.altKey && !event.shiftKey) && String(event.key).toLowerCase() === 'r') {
+    const canRelaunch = relaunchBtn && !relaunchBtn.classList.contains('hidden');
+    if (canRelaunch) {
+      event.preventDefault();
+      event.stopPropagation();
+      relaunchBtn.click();
+      return;
+    }
   }
 
   if (event.key === "Escape") {
