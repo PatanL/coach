@@ -7,3 +7,7 @@ logs/
 buffer/
 state/
 sessions/
+
+# Local scratch patches (e.g. generated diffs while iterating)
+patches/
+*.patch
