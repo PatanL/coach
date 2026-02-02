@@ -41,6 +41,40 @@
     return str.length > maxLen ? str.slice(0, maxLen).trimEnd() : str;
   }
 
+  function safeParseJson(value) {
+    try {
+      return { ok: true, value: JSON.parse(String(value)) };
+    } catch (err) {
+      const msg = err && err.message ? String(err.message) : String(err);
+      return { ok: false, error: msg };
+    }
+  }
+
+  function buildOverlayDataErrorPayload({ error, rawLine } = {}) {
+    const errStr = String(error || "").trim();
+    const raw = String(rawLine || "").trim();
+    const diagnosis = normalizeFreeform(
+      errStr ? `Failed to parse overlay payload: ${errStr}` : "Failed to parse overlay payload.",
+      { maxLen: 220 }
+    );
+
+    const human = raw
+      ? normalizeFreeform(`Raw: ${raw}`, { maxLen: 180 })
+      : "Coach couldn’t read the latest overlay update.";
+
+    return {
+      level: "B",
+      headline: "Overlay data error",
+      human_line: human,
+      diagnosis,
+      next_action: "Restart coach (Cmd+Q) then relaunch.",
+      block_id: null,
+      block_name: "",
+      cmd_id: null,
+      source_event_id: null
+    };
+  }
+
   function isInteractiveTarget(target) {
     if (!target) return false;
     const tag = String(target.tagName || "").toLowerCase();
@@ -119,6 +153,8 @@
     // to avoid widening usage surface area.
     normalizeTwoMinuteStep,
     normalizeFreeform,
+    safeParseJson,
+    buildOverlayDataErrorPayload,
     shouldTriggerBackOnTrackOnEnter,
     shouldShowSnoozeOnEscape,
     getOverlayHotkeyAction,

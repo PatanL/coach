@@ -5,6 +5,8 @@ const {
   isTextInputTarget,
   normalizeTwoMinuteStep,
   normalizeFreeform,
+  safeParseJson,
+  buildOverlayDataErrorPayload,
   shouldTriggerBackOnTrackOnEnter,
   isPauseShortcut,
   enterHintForState,
@@ -167,4 +169,27 @@ test("platform helpers: detect Apple Silicon + gate rehydration", () => {
   assert.equal(shouldAutoRehydrateRenderer({ platform: "darwin", arch: "x64" }), false);
   assert.equal(shouldAutoRehydrateRenderer({ platform: "linux", arch: "arm64" }), false);
   assert.equal(shouldAutoRehydrateRenderer({ platform: "win32", arch: "arm64" }), false);
+});
+
+test("safeParseJson: returns ok/value for valid JSON", () => {
+  const res = safeParseJson("{\"a\":1}");
+  assert.equal(res.ok, true);
+  assert.deepEqual(res.value, { a: 1 });
+});
+
+test("safeParseJson: returns ok:false + error for invalid JSON", () => {
+  const res = safeParseJson("{nope");
+  assert.equal(res.ok, false);
+  assert.ok(typeof res.error === "string");
+  assert.ok(res.error.length > 0);
+});
+
+test("buildOverlayDataErrorPayload: produces a minimal actionable payload", () => {
+  const payload = buildOverlayDataErrorPayload({ error: "boom", rawLine: "{nope" });
+  assert.equal(payload.headline, "Overlay data error");
+  assert.equal(payload.level, "B");
+  assert.equal(typeof payload.next_action, "string");
+  assert.ok(payload.next_action.toLowerCase().includes("restart"));
+  assert.equal("diagnosis" in payload, true);
+  assert.equal("human_line" in payload, true);
 });

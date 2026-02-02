@@ -239,7 +239,21 @@ function watchOverlayCommands() {
             const payload = JSON.parse(line);
             showOverlay(payload);
           } catch (err) {
-            // ignore malformed lines
+            const now = new Date().toISOString();
+            appendAction({
+              ts: now,
+              type: "OVERLAY_CMD_PARSE_ERROR",
+              error: err && err.message ? String(err.message) : String(err),
+              raw: String(line || "").slice(0, 400)
+            });
+            try {
+              showOverlay(overlayUtils.buildOverlayDataErrorPayload({
+                error: err && err.message ? String(err.message) : String(err),
+                rawLine: line
+              }));
+            } catch (_e) {
+              // ignore
+            }
           }
         }
         if (lastSize > 0) {
