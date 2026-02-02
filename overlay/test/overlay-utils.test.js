@@ -78,6 +78,8 @@ test('shouldShowSnoozeOnEscape disables snooze while typing', () => {
   assert.strictEqual(overlayUtils.shouldShowSnoozeOnEscape({ target: { tagName: 'SELECT' } }), false);
   assert.strictEqual(overlayUtils.shouldShowSnoozeOnEscape({ target: { tagName: 'DIV', isContentEditable: true } }), false);
   assert.strictEqual(overlayUtils.shouldShowSnoozeOnEscape({ target: { tagName: 'DIV' } }), true);
+  // ARIA role-based inputs should also suppress snooze.
+  assert.strictEqual(overlayUtils.shouldShowSnoozeOnEscape({ target: { tagName: 'DIV', getAttribute: (n) => n === 'role' ? 'textbox' : '' } }), false);
 });
 
 test('shouldSuppressEnterAfterShow gates carry-over Enter presses', () => {

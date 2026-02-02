@@ -24,7 +24,14 @@
     if (!target) return false;
     const tag = String(target.tagName || "").toLowerCase();
     if (target.isContentEditable) return true;
-    return tag === "input" || tag === "textarea" || tag === "select";
+    // Guard against non-string tagNames or custom elements with input roles.
+    if (tag === "input" || tag === "textarea" || tag === "select") return true;
+    // Minimal role check for better keyboard safety in custom UIs.
+    try {
+      const role = String(target.getAttribute && target.getAttribute('role') || '').toLowerCase();
+      if (role === 'textbox' || role === 'combobox' || role === 'searchbox') return true;
+    } catch (_e) {}
+    return false;
   }
 
   function normalizeTwoMinuteStep(value, opts = {}) {

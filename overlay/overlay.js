@@ -70,7 +70,9 @@ function setButtonsBusy(isBusy) {
   const buttons = [backBtn, pauseBtn, twoMinBtn, stuckBtn, recoverBtn, undoRecoverBtn, snoozeBtn];
   buttons.forEach((btn) => {
     if (!btn) return;
-    btn.disabled = Boolean(isBusy);
+    const disabled = Boolean(isBusy);
+    btn.disabled = disabled;
+    try { btn.setAttribute("aria-disabled", disabled ? "true" : "false"); } catch {}
   });
   overlayBusy = Boolean(isBusy);
   if (overlay) overlay.setAttribute("aria-busy", overlayBusy ? "true" : "false");
@@ -423,12 +425,34 @@ function buildDiagnosticsText() {
   lines.push(`RecoverArmed: ${recoverArmed ? 'true' : 'false'}`);
   lines.push(`TwoMinOpen: ${twoMinPanel && !twoMinPanel.classList.contains('hidden') ? 'true' : 'false'}`);
   lines.push(`SnoozeOpen: ${snooze && !snooze.classList.contains('hidden') ? 'true' : 'false'}`);
+  // Additional lightweight context to make recovery more actionable in reports.
+  try { lines.push(`HeaderLabel: ${label?.textContent || ''}`); } catch {}
+  try { lines.push(`EnterHint: ${hintEnter?.textContent || ''}`); } catch {}
+  try {
+    const relaunchVisible = relaunchBtn && !relaunchBtn.classList.contains('hidden');
+    lines.push(`RelaunchVisible: ${relaunchVisible ? 'true' : 'false'}`);
+  } catch {}
+  try {
+    const elig = (window.overlayUtils && typeof window.overlayUtils.shouldAutoRehydrateRenderer === 'function')
+      ? window.overlayUtils.shouldAutoRehydrateRenderer({ platform: sys.platform, arch: sys.arch })
+      : false;
+    lines.push(`AutoRehydrateEligible: ${elig ? 'true' : 'false'}`);
+  } catch {}
+  try { lines.push(`LastActionId: ${String(lastActionId || 0)}`); } catch {}
+  try { lines.push(`PendingAcks: ${String(ackSet ? ackSet.size : 0)}`); } catch {}
+  try {
+    const shownMs = typeof shownAt === 'number' ? (Date.now() - shownAt) : '';
+    lines.push(`ShownMs: ${String(shownMs)}`);
+  } catch {}
   lines.push('--- Payload ---');
   lines.push(`Level: ${payload.level || ''}`);
   lines.push(`Headline: ${payload.headline || ''}`);
   lines.push(`Block: ${payload.block_name || ''} (${payload.block_id || ''})`);
   lines.push(`CmdId: ${payload.cmd_id || ''}`);
   lines.push(`SourceEventId: ${payload.source_event_id || ''}`);
+  lines.push(`PayloadRelaunchFlag: ${payload.relaunch_overlay === true ? 'true' : 'false'}`);
+  try { lines.push(`ChoicesCount: ${Array.isArray(payload.choices) ? String(payload.choices.length) : '0'}`); } catch {}
+  try { lines.push(`CanUndoRecover: ${payload.can_undo_recover ? 'true' : 'false'}`); } catch {}
   if (payload.diagnosis) lines.push(`Diagnosis: ${payload.diagnosis}`);
   if (payload.next_action) lines.push(`Next: ${payload.next_action}`);
   return lines.join('\n');
@@ -530,6 +554,16 @@ function toggleSnooze(show) {
   const isHidden = snooze.classList.contains("hidden");
   const shouldShow = typeof show === "boolean" ? show : isHidden;
   snooze.classList.toggle("hidden", !shouldShow);
+  // Keyboard/a11y: move focus into the snooze panel when opened, and
+  // return focus to the Snooze button when closed.
+  try {
+    if (shouldShow) {
+      const first = snooze.querySelector('.snooze-buttons button');
+      first && first.focus && first.focus();
+    } else {
+      snoozeBtn && snoozeBtn.focus && snoozeBtn.focus();
+    }
+  } catch {}
 }
 
 snoozeBtn.addEventListener("click", () => {
@@ -573,6 +607,7 @@ copyDiagBtn?.addEventListener('click', () => {
     ta.value = text;
     ta.setAttribute('readonly', '');
     ta.setAttribute('data-overlay-diag', '1');
+    ta.setAttribute('aria-label', 'Diagnostics to copy');
     ta.style.position = 'fixed';
     ta.style.left = '-9999px';
     document.body.appendChild(ta);
@@ -581,7 +616,6 @@ copyDiagBtn?.addEventListener('click', () => {
   } catch {}
 
   copyDiagBtn.textContent = `Copy failed — ${hint}`;
-  try { window.overlayAPI?.logUIEvent?.('copy_diagnostics_failed', { platform: sys.platform }); } catch {}
   setTimeout(() => {
     copyDiagBtn.textContent = 'Copy diagnostics';
     // Clean up any hidden textarea(s) we created for manual copy.
