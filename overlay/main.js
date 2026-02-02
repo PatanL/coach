@@ -286,7 +286,8 @@ function watchOverlayCommands() {
       if (stats.size === lastSize) return;
       const stream = fs.createReadStream(OVERLAY_PATH, {
         start: lastSize,
-        end: stats.size
+        // `end` is inclusive; stats.size is an offset *past* the last byte.
+        end: Math.max(lastSize, stats.size - 1)
       });
       let data = "";
       stream.on("data", (chunk) => {
@@ -294,7 +295,11 @@ function watchOverlayCommands() {
       });
       stream.on("end", () => {
         lastSize = stats.size;
-        const lines = data.split("\n").filter(Boolean);
+        // Be tolerant of whitespace (some writers may append spaces).
+        const lines = data
+          .split("\n")
+          .map((line) => line.trim())
+          .filter(Boolean);
         for (const line of lines) {
           try {
             const payload = JSON.parse(line);
@@ -308,10 +313,12 @@ function watchOverlayCommands() {
               raw: String(line || "").slice(0, 400)
             });
             try {
-              showOverlay(overlayUtils.buildOverlayDataErrorPayload({
-                error: err && err.message ? String(err.message) : String(err),
-                rawLine: line
-              }));
+              showOverlay(
+                overlayUtils.buildOverlayDataErrorPayload({
+                  error: err && err.message ? String(err.message) : String(err),
+                  rawLine: line
+                })
+              );
             } catch (_e) {
               // ignore
             }
