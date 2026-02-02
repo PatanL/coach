@@ -8,7 +8,8 @@ const {
   shouldTriggerBackOnTrackOnEnter,
   isPauseShortcut,
   enterHintForState,
-  labelForPayload
+  labelForPayload,
+  getOverlayHotkeyAction
 } = require("./overlay-utils");
 
 test("isTextInputTarget: recognizes common typing targets", () => {
@@ -97,4 +98,35 @@ test("labelForPayload: prefers custom label and normalizes it", () => {
   assert.equal(labelForPayload({ customLabel: "  focus  " }), "FOCUS");
   assert.equal(labelForPayload({ customLabel: "make  it\nsmall" }), "MAKE IT SMALL");
   assert.equal(labelForPayload({ customLabel: "x".repeat(50) }), "X".repeat(16));
+});
+
+test("getOverlayHotkeyAction: ignores hotkeys while overlay hidden", () => {
+  assert.equal(getOverlayHotkeyAction({ key: "Enter", target: { tagName: "DIV" } }, { overlayHidden: true }), null);
+  assert.equal(getOverlayHotkeyAction({ key: "Escape", target: { tagName: "DIV" } }, { overlayHidden: true }), null);
+});
+
+test("getOverlayHotkeyAction: Enter maps to back_on_track only in safe contexts", () => {
+  assert.equal(
+    getOverlayHotkeyAction({ key: "Enter", target: { tagName: "DIV" } }, { overlayHidden: false, mode: "", twoMinOpen: false }),
+    "back_on_track"
+  );
+  assert.equal(
+    getOverlayHotkeyAction({ key: "Enter", target: { tagName: "INPUT" } }, { overlayHidden: false, mode: "", twoMinOpen: false }),
+    null
+  );
+  assert.equal(
+    getOverlayHotkeyAction({ key: "Enter", target: { tagName: "DIV" } }, { overlayHidden: false, mode: "align", twoMinOpen: false }),
+    null
+  );
+});
+
+test("getOverlayHotkeyAction: Escape shows snooze unless typing", () => {
+  assert.equal(
+    getOverlayHotkeyAction({ key: "Escape", target: { tagName: "DIV" } }, { overlayHidden: false }),
+    "show_snooze"
+  );
+  assert.equal(
+    getOverlayHotkeyAction({ key: "Escape", target: { tagName: "TEXTAREA" } }, { overlayHidden: false }),
+    null
+  );
 });

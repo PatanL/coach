@@ -57,6 +57,25 @@
     return "Enter: Back on track";
   }
 
+  function shouldShowSnoozeOnEscape({ target } = {}) {
+    // If the user is typing into any text input, Esc should not pop the snooze panel.
+    return !isTextInputTarget(target);
+  }
+
+  function getOverlayHotkeyAction(event, { overlayHidden = false, mode, twoMinOpen } = {}) {
+    if (overlayHidden) return null;
+    const key = event?.key;
+    if (key === "Enter") {
+      return shouldTriggerBackOnTrackOnEnter({ target: event?.target, mode, twoMinOpen })
+        ? "back_on_track"
+        : null;
+    }
+    if (key === "Escape") {
+      return shouldShowSnoozeOnEscape({ target: event?.target }) ? "show_snooze" : null;
+    }
+    return null;
+  }
+
   function labelForPayload({ mode, canUndoRecover, customLabel } = {}) {
     const cleaned = String(customLabel || "")
       .replace(/\s+/g, " ")
@@ -80,6 +99,8 @@
     normalizeTwoMinuteStep,
     normalizeFreeform,
     shouldTriggerBackOnTrackOnEnter,
+    shouldShowSnoozeOnEscape,
+    getOverlayHotkeyAction,
     isPauseShortcut,
     enterHintForState,
     labelForPayload

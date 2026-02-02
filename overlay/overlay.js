@@ -199,6 +199,17 @@ function showOverlay(payload) {
   overlay.dataset.level = payload.level || "B";
   currentPayload = payload;
   shownAt = Date.now();
+
+  // Set an explicit focus target so keyboard shortcuts are predictable.
+  // - Align mode: focus the text input so users can type immediately.
+  // - Otherwise: focus the primary action button.
+  requestAnimationFrame(() => {
+    if (overlay.dataset.mode === "align") {
+      alignText?.focus();
+    } else {
+      backBtn?.focus();
+    }
+  });
 }
 
 function sendAction(action) {
@@ -350,6 +361,7 @@ window.addEventListener("keydown", (event) => {
     event.preventDefault();
     event.stopPropagation();
 
+    // Always allow Esc to close existing panels, even while typing.
     if (!snooze.classList.contains("hidden")) {
       toggleSnooze(false);
       updateEnterHint();
@@ -362,8 +374,12 @@ window.addEventListener("keydown", (event) => {
       return;
     }
 
-    toggleSnooze(true);
-    updateEnterHint();
+    // But don't open snooze while the user is typing into an input.
+    const shouldOpen = window.overlayUtils?.shouldShowSnoozeOnEscape?.({ target: event.target });
+    if (shouldOpen) {
+      toggleSnooze(true);
+      updateEnterHint();
+    }
     return;
   }
 
@@ -371,12 +387,14 @@ window.addEventListener("keydown", (event) => {
   // - never treat Enter as "Back on track" while typing
   // - also disable the global Enter shortcut during the align + 2-min flows
   if (event.key === "Enter") {
-    const shouldTrigger = window.overlayUtils?.shouldTriggerBackOnTrackOnEnter?.({
-      target: event.target,
+    const action = window.overlayUtils?.getOverlayHotkeyAction?.(event, {
+      overlayHidden: overlay.classList.contains("hidden"),
       mode: overlay.dataset.mode,
       twoMinOpen: twoMinPanel && !twoMinPanel.classList.contains("hidden")
     });
-    if (shouldTrigger) {
+    if (action === "back_on_track") {
+      event.preventDefault();
+      event.stopPropagation();
       sendAction({ action: "back_on_track" });
     }
   }
