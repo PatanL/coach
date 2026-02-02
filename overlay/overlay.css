@@ -216,6 +216,19 @@ button.primary:hover {
   background: #ff7a69;
 }
 
+button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+button:disabled:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+button.primary:disabled:hover {
+  background: #f16c5b;
+}
+
 .snooze {
   margin-bottom: 12px;
 }

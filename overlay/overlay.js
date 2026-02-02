@@ -31,6 +31,40 @@ const snoozeBtn = document.getElementById("snoozeBtn");
 let shownAt = null;
 let currentPayload = null;
 
+const DEFAULT_BUTTON_TEXT = {
+  back: backBtn?.textContent || "Back on track",
+  pause: pauseBtn?.textContent || "Pause 15",
+  twoMin: twoMinBtn?.textContent || "2‑min step",
+  stuck: stuckBtn?.textContent || "I'm stuck",
+  recover: recoverBtn?.textContent || "Recover schedule",
+  undoRecover: undoRecoverBtn?.textContent || "Undo recover",
+  snooze: snoozeBtn?.textContent || "Snooze"
+};
+
+function setButtonsBusy(isBusy, { active } = {}) {
+  const buttons = [backBtn, pauseBtn, twoMinBtn, stuckBtn, recoverBtn, undoRecoverBtn, snoozeBtn];
+  buttons.forEach((btn) => {
+    if (!btn) return;
+    btn.disabled = Boolean(isBusy);
+  });
+
+  // Allow one active button to remain enabled so users can re-click if they want.
+  if (isBusy && active) {
+    active.disabled = false;
+  }
+}
+
+function resetButtonStates() {
+  setButtonsBusy(false);
+  if (backBtn) backBtn.textContent = DEFAULT_BUTTON_TEXT.back;
+  if (pauseBtn) pauseBtn.textContent = DEFAULT_BUTTON_TEXT.pause;
+  if (twoMinBtn) twoMinBtn.textContent = DEFAULT_BUTTON_TEXT.twoMin;
+  if (stuckBtn) stuckBtn.textContent = DEFAULT_BUTTON_TEXT.stuck;
+  if (recoverBtn) recoverBtn.textContent = DEFAULT_BUTTON_TEXT.recover;
+  if (undoRecoverBtn) undoRecoverBtn.textContent = DEFAULT_BUTTON_TEXT.undoRecover;
+  if (snoozeBtn) snoozeBtn.textContent = DEFAULT_BUTTON_TEXT.snooze;
+}
+
 function setText(el, value) {
   el.textContent = value || "";
 }
@@ -95,6 +129,7 @@ function showOverlay(payload) {
   resetSnooze();
   resetAlignInput();
   resetTwoMin();
+  resetButtonStates();
   if (payload.choices && Array.isArray(payload.choices)) {
     overlay.dataset.mode = "align";
   } else {
@@ -178,8 +213,19 @@ function sendAction(action) {
   });
 }
 
-backBtn.addEventListener("click", () => sendAction({ action: "back_on_track" }));
-pauseBtn.addEventListener("click", () => sendAction({ action: "pause_15", minutes: 15 }));
+backBtn.addEventListener("click", () => {
+  if (backBtn.disabled) return;
+  backBtn.textContent = "Logging…";
+  setButtonsBusy(true, { active: backBtn });
+  sendAction({ action: "back_on_track" });
+});
+
+pauseBtn.addEventListener("click", () => {
+  if (pauseBtn.disabled) return;
+  pauseBtn.textContent = "Pausing…";
+  setButtonsBusy(true, { active: pauseBtn });
+  sendAction({ action: "pause_15", minutes: 15 });
+});
 twoMinBtn.addEventListener("click", () => {
   if (twoMinPanel.classList.contains("hidden")) {
     showTwoMin(currentPayload?.two_min_choices);
@@ -193,9 +239,26 @@ twoMinBtn.addEventListener("click", () => {
       : (twoMinOpen ? "Enter: Set 2‑min step" : "Enter: Back on track");
   }
 });
-stuckBtn.addEventListener("click", () => sendAction({ action: "stuck" }));
-recoverBtn.addEventListener("click", () => sendAction({ action: "recover" }));
-undoRecoverBtn?.addEventListener("click", () => sendAction({ action: "undo_recover" }));
+stuckBtn.addEventListener("click", () => {
+  if (stuckBtn.disabled) return;
+  stuckBtn.textContent = "Noted…";
+  setButtonsBusy(true, { active: stuckBtn });
+  sendAction({ action: "stuck" });
+});
+
+recoverBtn.addEventListener("click", () => {
+  if (recoverBtn.disabled) return;
+  recoverBtn.textContent = "Recovering…";
+  setButtonsBusy(true, { active: recoverBtn });
+  sendAction({ action: "recover" });
+});
+
+undoRecoverBtn?.addEventListener("click", () => {
+  if (undoRecoverBtn.disabled) return;
+  undoRecoverBtn.textContent = "Undoing…";
+  setButtonsBusy(true, { active: undoRecoverBtn });
+  sendAction({ action: "undo_recover" });
+});
 
 alignSubmit.addEventListener("click", () => {
   const value = window.overlayUtils?.normalizeFreeform?.(alignText.value, { maxLen: 240 }) ?? alignText.value.trim();
@@ -249,6 +312,10 @@ window.overlayAPI.onShow((payload) => {
 });
 
 window.overlayAPI.onPause(() => {
+  if (pauseBtn && !pauseBtn.disabled) {
+    pauseBtn.textContent = "Pausing…";
+    setButtonsBusy(true, { active: pauseBtn });
+  }
   sendAction({ action: "pause_15" });
 });
 
