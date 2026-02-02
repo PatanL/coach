@@ -210,8 +210,14 @@ twoMinText.addEventListener("keydown", (event) => {
   }
 });
 
+function toggleSnooze(show) {
+  const isHidden = snooze.classList.contains("hidden");
+  const shouldShow = typeof show === "boolean" ? show : isHidden;
+  snooze.classList.toggle("hidden", !shouldShow);
+}
+
 snoozeBtn.addEventListener("click", () => {
-  snooze.classList.remove("hidden");
+  toggleSnooze();
 });
 
 snooze.addEventListener("click", (event) => {
@@ -229,17 +235,51 @@ window.overlayAPI.onPause(() => {
   sendAction({ action: "pause_15" });
 });
 
+function updateEnterHint() {
+  if (!hintEnter) return;
+  const twoMinOpen = twoMinPanel && !twoMinPanel.classList.contains("hidden");
+  hintEnter.textContent = (window.overlayUtils && window.overlayUtils.enterHintForState)
+    ? window.overlayUtils.enterHintForState({ mode: overlay.dataset.mode, twoMinOpen })
+    : (twoMinOpen ? "Enter: Set 2‑min step" : (overlay.dataset.mode === "align" ? "Enter: Submit answer" : "Enter: Back on track"));
+}
+
 window.addEventListener("keydown", (event) => {
+  if (overlay.classList.contains("hidden")) return;
+
   // Keyboard shortcuts
   // - Enter: Back on track (guarded to avoid accidental actions while typing)
   // - Cmd/Ctrl+Shift+P: Pause 15 (matches footer hint)
-  // - Escape: Snooze
+  // - Escape: Close panels / Snooze
+  // - R: Recover schedule; U: Undo recover (when available)
+  // - 2 or T: Toggle 2‑min step panel
+  // - K: I'm stuck
 
   const pauseShortcut = window.overlayUtils?.isPauseShortcut?.(event);
   if (pauseShortcut) {
     event.preventDefault();
     event.stopPropagation();
     sendAction({ action: "pause_15", minutes: 15 });
+    return;
+  }
+
+  if (event.key === "Escape") {
+    event.preventDefault();
+    event.stopPropagation();
+
+    if (!snooze.classList.contains("hidden")) {
+      toggleSnooze(false);
+      updateEnterHint();
+      return;
+    }
+
+    if (twoMinPanel && !twoMinPanel.classList.contains("hidden")) {
+      resetTwoMin();
+      updateEnterHint();
+      return;
+    }
+
+    toggleSnooze(true);
+    updateEnterHint();
     return;
   }
 
@@ -257,15 +297,47 @@ window.addEventListener("keydown", (event) => {
     }
   }
 
-  // Keep the dynamic hint in sync as user navigates with keyboard
-  if (hintEnter) {
-    const twoMinOpen = twoMinPanel && !twoMinPanel.classList.contains("hidden");
-    hintEnter.textContent = (window.overlayUtils && window.overlayUtils.enterHintForState)
-      ? window.overlayUtils.enterHintForState({ mode: overlay.dataset.mode, twoMinOpen })
-      : (twoMinOpen ? "Enter: Set 2‑min step" : (overlay.dataset.mode === "align" ? "Enter: Submit answer" : "Enter: Back on track"));
+  // Single-letter shortcuts (opt-in, low-risk):
+  // - ignore while typing
+  // - ignore when modifiers are down (avoid clobbering app/browser shortcuts)
+  // - disable during align flow (except Escape handled above)
+  if (overlay.dataset.mode !== "align") {
+    const isTyping = window.overlayUtils?.isTextInputTarget?.(event.target);
+    const hasModifier = Boolean(event.metaKey || event.ctrlKey || event.altKey);
+    if (!isTyping && !hasModifier) {
+      const key = String(event.key || "").toLowerCase();
+
+      if (key === "r" && recoverBtn && !recoverBtn.classList.contains("hidden")) {
+        event.preventDefault();
+        event.stopPropagation();
+        recoverBtn.click();
+      }
+
+      if (key === "u" && undoRecoverBtn && !undoRecoverBtn.classList.contains("hidden")) {
+        event.preventDefault();
+        event.stopPropagation();
+        undoRecoverBtn.click();
+      }
+
+      if ((key === "2" || key === "t") && twoMinBtn) {
+        event.preventDefault();
+        event.stopPropagation();
+        twoMinBtn.click();
+      }
+
+      if (key === "k" && stuckBtn) {
+        event.preventDefault();
+        event.stopPropagation();
+        stuckBtn.click();
+      }
+
+      if (key === "s" && snoozeBtn) {
+        event.preventDefault();
+        event.stopPropagation();
+        snoozeBtn.click();
+      }
+    }
   }
 
-  if (event.key === "Escape") {
-    snooze.classList.remove("hidden");
-  }
+  updateEnterHint();
 });
