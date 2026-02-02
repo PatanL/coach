@@ -71,6 +71,8 @@ function resetButtonStates() {
 
 function resetRecoverArm() {
   recoverArmed = false;
+  if (recoverBtn) recoverBtn.textContent = DEFAULT_BUTTON_TEXT.recover;
+  updateRecoverArmUI();
   if (recoverArmTimer) {
     clearTimeout(recoverArmTimer);
     recoverArmTimer = null;
@@ -80,12 +82,20 @@ function resetRecoverArm() {
 function armRecover() {
   recoverArmed = true;
   if (recoverBtn) recoverBtn.textContent = "Confirm recover";
+  updateRecoverArmUI();
   if (recoverArmTimer) clearTimeout(recoverArmTimer);
   recoverArmTimer = setTimeout(() => {
     resetRecoverArm();
   }, 8000);
 }
 
+
+
+function updateRecoverArmUI() {
+  if (!hintRecover) return;
+  // Keep the recovery hint honest: when recover is armed, the next press confirms.
+  hintRecover.textContent = recoverArmed ? "R: Confirm" : "R: Recover";
+}
 function setText(el, value) {
   el.textContent = value || "";
 }
@@ -143,6 +153,7 @@ function updateFooterHints() {
     const undoAvailable = undoRecoverBtn && !undoRecoverBtn.classList.contains("hidden");
     hintUndo.classList.toggle("hidden", isAlign || !undoAvailable);
   }
+  updateRecoverArmUI();
 }
 
 function showOverlay(payload) {
@@ -248,6 +259,7 @@ function sendAction(action) {
 
 backBtn.addEventListener("click", () => {
   if (backBtn.disabled) return;
+  resetRecoverArm();
   backBtn.textContent = "Logging…";
   setButtonsBusy(true);
   sendAction({ action: "back_on_track" });
@@ -255,6 +267,7 @@ backBtn.addEventListener("click", () => {
 
 pauseBtn.addEventListener("click", () => {
   if (pauseBtn.disabled) return;
+  resetRecoverArm();
   pauseBtn.textContent = "Pausing…";
   setButtonsBusy(true);
   sendAction({ action: "pause_15", minutes: 15 });
@@ -274,6 +287,7 @@ twoMinBtn.addEventListener("click", () => {
 });
 stuckBtn.addEventListener("click", () => {
   if (stuckBtn.disabled) return;
+  resetRecoverArm();
   stuckBtn.textContent = "Noted…";
   setButtonsBusy(true);
   sendAction({ action: "stuck" });
@@ -338,6 +352,7 @@ function toggleSnooze(show) {
 }
 
 snoozeBtn.addEventListener("click", () => {
+  resetRecoverArm();
   toggleSnooze();
   updateEnterHint();
 });
@@ -358,6 +373,7 @@ window.overlayAPI.onShow((payload) => {
 
 window.overlayAPI.onPause(() => {
   if (pauseBtn && !pauseBtn.disabled) {
+    resetRecoverArm();
     pauseBtn.textContent = "Pausing…";
     setButtonsBusy(true);
   }
@@ -394,6 +410,9 @@ window.addEventListener("keydown", (event) => {
   if (event.key === "Escape") {
     event.preventDefault();
     event.stopPropagation();
+
+    // If recover is armed, Esc should always cancel the arm state.
+    resetRecoverArm();
 
     // Always allow Esc to close existing panels, even while typing.
     if (!snooze.classList.contains("hidden")) {
