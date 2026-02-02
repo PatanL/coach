@@ -1,4 +1,5 @@
 const overlay = document.getElementById("overlay");
+const label = document.getElementById("label");
 const blockName = document.getElementById("blockName");
 const headline = document.getElementById("headline");
 const humanLine = document.getElementById("humanLine");
@@ -90,6 +91,17 @@ function showOverlay(payload) {
       ? window.overlayUtils.enterHintForState({ mode: overlay.dataset.mode, twoMinOpen: false })
       : "Enter: Back on track";
   }
+  // Dynamic header label for clarity (RECOVER / ALIGN / DRIFT)
+  if (label) {
+    const computed = (window.overlayUtils && window.overlayUtils.labelForPayload)
+      ? window.overlayUtils.labelForPayload({
+          mode: overlay.dataset.mode,
+          canUndoRecover: Boolean(payload?.can_undo_recover),
+          customLabel: payload?.label
+        })
+      : (payload?.can_undo_recover ? "RECOVER" : (overlay.dataset.mode === "align" ? "ALIGN" : "DRIFT"));
+    label.textContent = computed;
+  }
   setText(blockName, payload.block_name || "");
   setText(headline, payload.headline || "Reset.");
   setText(humanLine, payload.human_line || "");
@@ -102,8 +114,10 @@ function showOverlay(payload) {
   // Recovery overlays should be reversible: show an explicit undo affordance.
   if (payload?.can_undo_recover) {
     undoRecoverBtn?.classList.remove("hidden");
+    recoverBtn?.classList.add("hidden");
   } else {
     undoRecoverBtn?.classList.add("hidden");
+    recoverBtn?.classList.remove("hidden");
   }
 
   if (payload.level === "C") {
