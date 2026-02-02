@@ -381,7 +381,8 @@ window.overlayAPI.onPause(() => {
     pauseBtn.textContent = "Pausing…";
     setButtonsBusy(true);
   }
-  sendAction({ action: "pause_15" });
+  // Keep payload consistent with other pause paths.
+  sendAction({ action: "pause_15", minutes: 15 });
 });
 
 function updateEnterHint() {
@@ -411,7 +412,13 @@ window.addEventListener("keydown", (event) => {
   if (pauseShortcut) {
     event.preventDefault();
     event.stopPropagation();
-    sendAction({ action: "pause_15", minutes: 15 });
+    // Route through the button handler so we get consistent UI feedback
+    // (busy state + disarming recover) before the main process hides the overlay.
+    if (pauseBtn && !pauseBtn.disabled) {
+      pauseBtn.click();
+    } else {
+      sendAction({ action: "pause_15", minutes: 15 });
+    }
     return;
   }
 
@@ -458,7 +465,12 @@ window.addEventListener("keydown", (event) => {
     if (action === "back_on_track") {
       event.preventDefault();
       event.stopPropagation();
-      sendAction({ action: "back_on_track" });
+      // Use the button handler for consistent busy UI + recover disarm.
+      if (backBtn && !backBtn.disabled) {
+        backBtn.click();
+      } else {
+        sendAction({ action: "back_on_track" });
+      }
     }
   }
 
