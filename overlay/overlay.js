@@ -27,6 +27,7 @@ const stuckBtn = document.getElementById("stuckBtn");
 const recoverBtn = document.getElementById("recoverBtn");
 const undoRecoverBtn = document.getElementById("undoRecoverBtn");
 const snoozeBtn = document.getElementById("snoozeBtn");
+const copyDiagBtn = document.getElementById("copyDiagBtn");
 
 let shownAt = null;
 let currentPayload = null;
@@ -48,7 +49,7 @@ const DEFAULT_BUTTON_TEXT = {
 };
 
 function setButtonsBusy(isBusy) {
-  const buttons = [backBtn, pauseBtn, twoMinBtn, stuckBtn, recoverBtn, undoRecoverBtn, snoozeBtn];
+  const buttons = [backBtn, pauseBtn, twoMinBtn, stuckBtn, recoverBtn, undoRecoverBtn, snoozeBtn, copyDiagBtn];
   buttons.forEach((btn) => {
     if (!btn) return;
     btn.disabled = Boolean(isBusy);
@@ -278,6 +279,31 @@ function sendAction(action) {
   });
 }
 
+function buildDiagnosticsText() {
+  const sys = (window.overlayAPI && typeof window.overlayAPI.getSystemInfo === 'function')
+    ? window.overlayAPI.getSystemInfo()
+    : { platform: 'unknown', arch: 'unknown', versions: {} };
+  const payload = currentPayload || {};
+  const lines = [];
+  lines.push('[Coach Overlay Diagnostics]');
+  lines.push(`Time: ${new Date().toISOString()}`);
+  lines.push(`Platform: ${sys.platform}`);
+  lines.push(`Arch: ${sys.arch}`);
+  const v = sys.versions || {};
+  lines.push(`Electron: ${v.electron || ''}`);
+  lines.push(`Chrome: ${v.chrome || ''}`);
+  lines.push(`Node: ${v.node || ''}`);
+  lines.push('--- Payload ---');
+  lines.push(`Level: ${payload.level || ''}`);
+  lines.push(`Headline: ${payload.headline || ''}`);
+  lines.push(`Block: ${payload.block_name || ''} (${payload.block_id || ''})`);
+  lines.push(`CmdId: ${payload.cmd_id || ''}`);
+  lines.push(`SourceEventId: ${payload.source_event_id || ''}`);
+  if (payload.diagnosis) lines.push(`Diagnosis: ${payload.diagnosis}`);
+  if (payload.next_action) lines.push(`Next: ${payload.next_action}`);
+  return lines.join('\n');
+}
+
 backBtn.addEventListener("click", () => {
   if (backBtn.disabled) return;
   resetRecoverArm();
@@ -380,6 +406,22 @@ snoozeBtn.addEventListener("click", () => {
   resetRecoverArm();
   toggleSnooze();
   updateEnterHint();
+});
+
+// Copy diagnostics: small, safe helper for actionable recovery.
+copyDiagBtn?.addEventListener('click', () => {
+  const text = buildDiagnosticsText();
+  const ok = (window.overlayAPI && typeof window.overlayAPI.copyText === 'function')
+    ? window.overlayAPI.copyText(text)
+    : false;
+  if (ok) {
+    copyDiagBtn.textContent = 'Copied diagnostics';
+  } else {
+    copyDiagBtn.textContent = 'Copy failed';
+  }
+  setTimeout(() => {
+    copyDiagBtn.textContent = 'Copy diagnostics';
+  }, 2000);
 });
 
 snooze.addEventListener("click", (event) => {

@@ -50,7 +50,7 @@
     }
   }
 
-  function buildOverlayDataErrorPayload({ error, rawLine } = {}) {
+  function buildOverlayDataErrorPayload({ error, rawLine, env } = {}) {
     const errStr = String(error || "").trim();
     const raw = String(rawLine || "").trim();
     const diagnosis = normalizeFreeform(
@@ -62,12 +62,18 @@
       ? normalizeFreeform(`Raw: ${raw}`, { maxLen: 180 })
       : "Coach couldn’t read the latest overlay update.";
 
+    // Make the next action more actionable on Apple Silicon where renderers can
+    // be lost after GPU handoffs: suggest copying diagnostics and reloading.
+    const nextAction = isAppleSilicon(env) ?
+      "Click ‘Copy diagnostics’, then reload the overlay (Relaunch)." :
+      "Restart coach (Cmd+Q) then relaunch.";
+
     return {
       level: "B",
       headline: "Overlay data error",
       human_line: human,
       diagnosis,
-      next_action: "Restart coach (Cmd+Q) then relaunch.",
+      next_action: nextAction,
       block_id: null,
       block_name: "",
       cmd_id: null,

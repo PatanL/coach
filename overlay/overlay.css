@@ -239,6 +239,15 @@ button.primary:disabled:hover {
   background: #f16c5b;
 }
 
+/* Utility button styling: de-emphasize diagnostics compared to primary flow */
+#copyDiagBtn {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+#copyDiagBtn:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
 .snooze {
   margin-bottom: 12px;
 }
