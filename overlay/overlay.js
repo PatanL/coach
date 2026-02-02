@@ -15,6 +15,7 @@ const twoMinPanel = document.getElementById("twoMinPanel");
 const twoMinChoices = document.getElementById("twoMinChoices");
 const twoMinText = document.getElementById("twoMinText");
 const twoMinSubmit = document.getElementById("twoMinSubmit");
+const hintEnter = document.getElementById("hintEnter");
 
 const backBtn = document.getElementById("backBtn");
 const pauseBtn = document.getElementById("pauseBtn");
@@ -83,6 +84,12 @@ function showOverlay(payload) {
   } else {
     overlay.dataset.mode = "";
   }
+  // Update keyboard hint to reflect current mode
+  if (hintEnter) {
+    hintEnter.textContent = (window.overlayUtils && window.overlayUtils.enterHintForState)
+      ? window.overlayUtils.enterHintForState({ mode: overlay.dataset.mode, twoMinOpen: false })
+      : "Enter: Back on track";
+  }
   setText(blockName, payload.block_name || "");
   setText(headline, payload.headline || "Reset.");
   setText(humanLine, payload.human_line || "");
@@ -147,6 +154,12 @@ twoMinBtn.addEventListener("click", () => {
     showTwoMin(currentPayload?.two_min_choices);
   } else {
     resetTwoMin();
+  }
+  if (hintEnter) {
+    const twoMinOpen = twoMinPanel && !twoMinPanel.classList.contains("hidden");
+    hintEnter.textContent = (window.overlayUtils && window.overlayUtils.enterHintForState)
+      ? window.overlayUtils.enterHintForState({ mode: overlay.dataset.mode, twoMinOpen })
+      : (twoMinOpen ? "Enter: Set 2‑min step" : "Enter: Back on track");
   }
 });
 stuckBtn.addEventListener("click", () => sendAction({ action: "stuck" }));
@@ -228,6 +241,14 @@ window.addEventListener("keydown", (event) => {
     if (shouldTrigger) {
       sendAction({ action: "back_on_track" });
     }
+  }
+
+  // Keep the dynamic hint in sync as user navigates with keyboard
+  if (hintEnter) {
+    const twoMinOpen = twoMinPanel && !twoMinPanel.classList.contains("hidden");
+    hintEnter.textContent = (window.overlayUtils && window.overlayUtils.enterHintForState)
+      ? window.overlayUtils.enterHintForState({ mode: overlay.dataset.mode, twoMinOpen })
+      : (twoMinOpen ? "Enter: Set 2‑min step" : (overlay.dataset.mode === "align" ? "Enter: Submit answer" : "Enter: Back on track"));
   }
 
   if (event.key === "Escape") {

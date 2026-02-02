@@ -39,11 +39,18 @@
     return hasModifier && event.shiftKey && key === "p";
   }
 
+  function enterHintForState({ mode, twoMinOpen } = {}) {
+    if (mode === "align") return "Enter: Submit answer";
+    if (twoMinOpen) return "Enter: Set 2‑min step";
+    return "Enter: Back on track";
+  }
+
   return {
     isTextInputTarget,
     normalizeTwoMinuteStep,
     normalizeFreeform,
     shouldTriggerBackOnTrackOnEnter,
-    isPauseShortcut
+    isPauseShortcut,
+    enterHintForState
   };
 });
