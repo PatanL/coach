@@ -1,7 +1,12 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
 
-const { isTextInputTarget, isControlTarget, shouldTriggerBackOnTrackFromKeydown } = require("./overlay-utils");
+const {
+  isTextInputTarget,
+  isControlTarget,
+  shouldTriggerBackOnTrackFromKeydown,
+  shouldTriggerBackOnTrack
+} = require("./overlay-utils");
 
 test("isTextInputTarget: recognizes common typing targets", () => {
   assert.equal(isTextInputTarget({ tagName: "INPUT" }), true);
@@ -134,6 +139,19 @@ test("shouldTriggerBackOnTrackFromKeydown: triggers only when safe", () => {
     ),
     false
   );
+});
+
+test("shouldTriggerBackOnTrack: requires a short dwell after show", () => {
+  const event = { key: "Enter", isComposing: false, target: { tagName: "DIV" } };
+
+  // Within the dwell window → do not trigger.
+  assert.equal(shouldTriggerBackOnTrack(event, null, 1000, 1200), false);
+
+  // After the dwell window → ok.
+  assert.equal(shouldTriggerBackOnTrack(event, null, 1000, 2000), true);
+
+  // If we don't know shownAt, fall back to the keydown-only safety checks.
+  assert.equal(shouldTriggerBackOnTrack(event, null, null, 1200), true);
 });
 
 function shouldTriggerBackOnKeydownTypingTarget(activeEl) {

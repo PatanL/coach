@@ -139,8 +139,8 @@ window.addEventListener("keydown", (event) => {
   if (overlay.classList.contains("hidden")) return;
 
   // Don't treat Enter as "Back on track" while the user is typing.
-  const shouldTrigger = window.overlayUtils?.shouldTriggerBackOnTrackFromKeydown;
-  if (shouldTrigger && shouldTrigger(event, document.activeElement)) {
+  const shouldTrigger = window.overlayUtils?.shouldTriggerBackOnTrack;
+  if (shouldTrigger && shouldTrigger(event, document.activeElement, shownAt)) {
     sendAction({ action: "back_on_track" });
   }
 
