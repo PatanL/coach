@@ -107,6 +107,19 @@ function createOverlayWindow() {
         window_ms: REHYDRATE_WINDOW_MS,
         max_per_window: REHYDRATE_MAX_PER_WINDOW
       });
+
+      // If we are stuck rehydrating, surface an actionable recovery overlay so the
+      // user can manually relaunch (especially important on Apple Silicon).
+      try {
+        showOverlay(
+          overlayUtils.buildOverlayRendererRecoveryPayload({
+            reason,
+            env: { platform: process.platform, arch: process.arch }
+          })
+        );
+      } catch (_e) {
+        // ignore
+      }
       return;
     }
 

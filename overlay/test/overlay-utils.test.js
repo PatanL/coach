@@ -40,7 +40,7 @@ test('buildOverlayDataErrorPayload uses OS-appropriate restart hint', () => {
   assert.ok(!win.next_action.toLowerCase().includes('cmd+q'));
 });
 
-test('shouldShowRelaunchButton true only on Apple Silicon + overlay data error payload', () => {
+test('shouldShowRelaunchButton true only on Apple Silicon, with opt-in payload flag', () => {
   assert.strictEqual(
     overlayUtils.shouldShowRelaunchButton({ env: { platform: 'darwin', arch: 'arm64' }, payload: { headline: 'Overlay data error' } }),
     true
@@ -53,6 +53,18 @@ test('shouldShowRelaunchButton true only on Apple Silicon + overlay data error p
     overlayUtils.shouldShowRelaunchButton({ env: { platform: 'darwin', arch: 'arm64' }, payload: { headline: 'Other' } }),
     false
   );
+
+  // Main process can explicitly request the relaunch affordance for other recovery cases.
+  assert.strictEqual(
+    overlayUtils.shouldShowRelaunchButton({ env: { platform: 'darwin', arch: 'arm64' }, payload: { headline: 'Other', relaunch_overlay: true } }),
+    true
+  );
+});
+
+test('buildOverlayRendererRecoveryPayload sets relaunch_overlay + actionable next step', () => {
+  const p = overlayUtils.buildOverlayRendererRecoveryPayload({ reason: 'throttled', env: { platform: 'darwin', arch: 'arm64' } });
+  assert.strictEqual(p.relaunch_overlay, true);
+  assert.ok(String(p.next_action).toLowerCase().includes('relaunch'));
 });
 
 test('shouldShowSnoozeOnEscape disables snooze while typing', () => {

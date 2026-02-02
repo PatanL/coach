@@ -81,6 +81,34 @@
       human_line: human,
       diagnosis,
       next_action: nextAction,
+      relaunch_overlay: true,
+      block_id: null,
+      block_name: "",
+      cmd_id: null,
+      source_event_id: null
+    };
+  }
+
+  function buildOverlayRendererRecoveryPayload({ reason, env } = {}) {
+    const why = normalizeFreeform(String(reason || "renderer_issue"), { maxLen: 120 });
+    const platform = (env && env.platform) || (typeof process !== "undefined" ? process.platform : "");
+
+    let nextAction;
+    if (isAppleSilicon(env)) {
+      nextAction = "Click ‘Copy diagnostics’, then ‘Relaunch overlay’.";
+    } else if (platform === "darwin") {
+      nextAction = "Restart coach (Cmd+Q) then relaunch.";
+    } else {
+      nextAction = "Restart coach, then relaunch.";
+    }
+
+    return {
+      level: "B",
+      headline: "Overlay renderer issue",
+      human_line: "Overlay became unresponsive. Recovery is available.",
+      diagnosis: normalizeFreeform(`Renderer recovery throttled: ${why}`, { maxLen: 220 }),
+      next_action: nextAction,
+      relaunch_overlay: true,
       block_id: null,
       block_name: "",
       cmd_id: null,
@@ -89,7 +117,11 @@
   }
 
   function shouldShowRelaunchButton({ env, payload } = {}) {
-    return isAppleSilicon(env) && String(payload?.headline || "") === "Overlay data error";
+    if (!isAppleSilicon(env)) return false;
+    // Allow the main process (or payload builder helpers) to opt-in to showing
+    // the relaunch affordance for other renderer recovery scenarios.
+    if (payload && payload.relaunch_overlay === true) return true;
+    return String(payload?.headline || "") === "Overlay data error";
   }
 
   function isInteractiveTarget(target) {
@@ -195,6 +227,7 @@
     normalizeFreeform,
     safeParseJson,
     buildOverlayDataErrorPayload,
+    buildOverlayRendererRecoveryPayload,
     shouldShowRelaunchButton,
     shouldTriggerBackOnTrackOnEnter,
     shouldShowSnoozeOnEscape,
