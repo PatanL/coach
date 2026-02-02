@@ -178,14 +178,40 @@ function hideOverlay() {
   overlayWindow.hide();
 }
 
-function registerShortcuts() {
-  globalShortcut.register("CommandOrControl+Shift+P", () => {
-    const now = new Date().toISOString();
-    appendAction({ ts: now, action: "pause_15", time_to_action_ms: 0, level: currentPayload?.level || "B" });
-    if (overlayWindow && overlayWindow.isVisible()) {
+function emitPause15({ source } = {}) {
+  const now = new Date().toISOString();
+
+  // When the overlay is visible, route through the renderer so we get:
+  // - consistent UI feedback (busy state)
+  // - exactly one action log entry (via ipcMain overlay:action)
+  if (overlayWindow && overlayWindow.isVisible()) {
+    try {
       overlayWindow.webContents.send("overlay:pause", {});
       hideOverlay();
+      return;
+    } catch (_err) {
+      // fall through
     }
+  }
+
+  // If the overlay is hidden/unavailable, log the action directly.
+  appendAction({
+    ts: now,
+    type: "OVERLAY_ACTION",
+    cmd_id: lastCmdId,
+    source_event_id: currentPayload?.source_event_id || null,
+    action: "pause_15",
+    minutes: 15,
+    time_to_action_ms: 0,
+    level: currentPayload?.level || "B",
+    block_id: currentPayload?.block_id || null,
+    source: source || "overlay"
+  });
+}
+
+function registerShortcuts() {
+  globalShortcut.register("CommandOrControl+Shift+P", () => {
+    emitPause15({ source: "overlay_shortcut" });
   });
 }
 
@@ -194,10 +220,7 @@ function createTray() {
   const image = nativeImage.createFromPath(TRAY_ICON);
   tray = new Tray(image);
   const menu = Menu.buildFromTemplate([
-    { label: "Pause 15 minutes", click: () => {
-      const now = new Date().toISOString();
-      appendAction({ ts: now, action: "pause_15", time_to_action_ms: 0, level: currentPayload?.level || "B" });
-    } },
+    { label: "Pause 15 minutes", click: () => emitPause15({ source: "overlay_tray" }) },
     { type: "separator" },
     { label: "Quit", click: () => app.quit() }
   ]);
