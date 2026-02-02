@@ -19,8 +19,15 @@
     return str.length > maxLen ? str.slice(0, maxLen).trimEnd() : str;
   }
 
+  function shouldTriggerBackOnTrackOnEnter({ target, mode, twoMinOpen } = {}) {
+    if (mode === "align") return false;
+    if (twoMinOpen) return false;
+    return !isTextInputTarget(target);
+  }
+
   return {
     isTextInputTarget,
-    normalizeTwoMinuteStep
+    normalizeTwoMinuteStep,
+    shouldTriggerBackOnTrackOnEnter
   };
 });

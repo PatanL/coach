@@ -1,7 +1,11 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
 
-const { isTextInputTarget, normalizeTwoMinuteStep } = require("./overlay-utils");
+const {
+  isTextInputTarget,
+  normalizeTwoMinuteStep,
+  shouldTriggerBackOnTrackOnEnter
+} = require("./overlay-utils");
 
 test("isTextInputTarget: recognizes common typing targets", () => {
   assert.equal(isTextInputTarget({ tagName: "INPUT" }), true);
@@ -21,4 +25,26 @@ test("normalizeTwoMinuteStep: trims, collapses whitespace, clamps length", () =>
   assert.equal(normalizeTwoMinuteStep(""), "");
   assert.equal(normalizeTwoMinuteStep(null), "");
   assert.equal(normalizeTwoMinuteStep("a".repeat(10), { maxLen: 5 }), "aaaaa");
+});
+
+test("shouldTriggerBackOnTrackOnEnter: blocks Enter during align and 2-min flows", () => {
+  assert.equal(
+    shouldTriggerBackOnTrackOnEnter({ target: { tagName: "DIV" }, mode: "align", twoMinOpen: false }),
+    false
+  );
+  assert.equal(
+    shouldTriggerBackOnTrackOnEnter({ target: { tagName: "DIV" }, mode: "", twoMinOpen: true }),
+    false
+  );
+});
+
+test("shouldTriggerBackOnTrackOnEnter: blocks Enter while typing; allows otherwise", () => {
+  assert.equal(
+    shouldTriggerBackOnTrackOnEnter({ target: { tagName: "INPUT" }, mode: "", twoMinOpen: false }),
+    false
+  );
+  assert.equal(
+    shouldTriggerBackOnTrackOnEnter({ target: { tagName: "DIV" }, mode: "", twoMinOpen: false }),
+    true
+  );
 });

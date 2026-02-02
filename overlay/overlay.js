@@ -191,10 +191,16 @@ window.overlayAPI.onPause(() => {
 });
 
 window.addEventListener("keydown", (event) => {
-  // Don't treat Enter as "Back on track" while the user is typing.
+  // Reduce accidental recoveries:
+  // - never treat Enter as "Back on track" while typing
+  // - also disable the global Enter shortcut during the align + 2-min flows
   if (event.key === "Enter") {
-    const isTypingTarget = window.overlayUtils?.isTextInputTarget?.(event.target);
-    if (!isTypingTarget) {
+    const shouldTrigger = window.overlayUtils?.shouldTriggerBackOnTrackOnEnter?.({
+      target: event.target,
+      mode: overlay.dataset.mode,
+      twoMinOpen: twoMinPanel && !twoMinPanel.classList.contains("hidden")
+    });
+    if (shouldTrigger) {
       sendAction({ action: "back_on_track" });
     }
   }
