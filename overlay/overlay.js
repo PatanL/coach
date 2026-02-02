@@ -506,7 +506,7 @@ function buildDiagnosticsText() {
   return lines.join('\n');
 }
 
-backBtn.addEventListener("click", () => {
+backBtn?.addEventListener("click", () => {
   if (backBtn.disabled) return;
   resetRecoverArm();
   backBtn.textContent = "Logging…";
@@ -514,14 +514,14 @@ backBtn.addEventListener("click", () => {
   sendAction({ action: "back_on_track" });
 });
 
-pauseBtn.addEventListener("click", () => {
+pauseBtn?.addEventListener("click", () => {
   if (pauseBtn.disabled) return;
   resetRecoverArm();
   pauseBtn.textContent = "Pausing…";
   setButtonsBusy(true);
   sendAction({ action: "pause_15", minutes: 15 });
 });
-twoMinBtn.addEventListener("click", () => {
+twoMinBtn?.addEventListener("click", () => {
   // Opening the 2‑min panel is an intentional alternative path; disarm recovery
   // confirmation so a stray second press of "R" can't trigger an accidental recover.
   resetRecoverArm();
@@ -538,7 +538,7 @@ twoMinBtn.addEventListener("click", () => {
       : (twoMinOpen ? "Enter: Set 2‑min step" : (recoverArmed ? "Enter: Confirm" : "Enter: Back on track"));
   }
 });
-stuckBtn.addEventListener("click", () => {
+stuckBtn?.addEventListener("click", () => {
   if (stuckBtn.disabled) return;
   resetRecoverArm();
   stuckBtn.textContent = "Noted…";
@@ -546,7 +546,7 @@ stuckBtn.addEventListener("click", () => {
   sendAction({ action: "stuck" });
 });
 
-recoverBtn.addEventListener("click", () => {
+recoverBtn?.addEventListener("click", () => {
   if (recoverBtn.disabled) return;
 
   // Two-step confirm to prevent accidental recoveries.
@@ -568,14 +568,14 @@ undoRecoverBtn?.addEventListener("click", () => {
   sendAction({ action: "undo_recover" });
 });
 
-alignSubmit.addEventListener("click", () => {
+alignSubmit?.addEventListener("click", () => {
   const value = window.overlayUtils?.normalizeFreeform?.(alignText.value, { maxLen: 240 }) ?? alignText.value.trim();
   if (!value) return;
   sendAction({ action: "align_choice", value, question_id: currentPayload?.question_id || null });
   alignText.value = "";
 });
 
-alignText.addEventListener("keydown", (event) => {
+alignText?.addEventListener("keydown", (event) => {
   if (event.key === "Enter") {
     // Prevent the global Enter handler from also firing (which would mark "Back on track").
     event.preventDefault();
@@ -584,13 +584,13 @@ alignText.addEventListener("keydown", (event) => {
   }
 });
 
-twoMinSubmit.addEventListener("click", () => {
+twoMinSubmit?.addEventListener("click", () => {
   const value = window.overlayUtils?.normalizeTwoMinuteStep?.(twoMinText.value);
   if (!value) return;
   sendAction({ action: "two_min_step", value, kind: "custom" });
 });
 
-twoMinText.addEventListener("keydown", (event) => {
+twoMinText?.addEventListener("keydown", (event) => {
   if (event.key === "Enter") {
     event.preventDefault();
     event.stopPropagation();
@@ -615,7 +615,7 @@ function toggleSnooze(show) {
   } catch {}
 }
 
-snoozeBtn.addEventListener("click", () => {
+snoozeBtn?.addEventListener("click", () => {
   resetRecoverArm();
   toggleSnooze();
   updateEnterHint();
