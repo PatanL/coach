@@ -211,9 +211,8 @@ ipcMain.on("overlay:action", (event, action) => {
     block_id: currentPayload?.block_id || null,
     source: "overlay"
   });
-  if (action.action !== "pause_15") {
-    hideOverlay();
-  }
+  // Pause actions should also dismiss the overlay so the user can get back to work.
+  hideOverlay();
 });
 
 app.whenReady().then(() => {
