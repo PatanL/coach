@@ -194,6 +194,19 @@ window.overlayAPI.onPause(() => {
 });
 
 window.addEventListener("keydown", (event) => {
+  // Keyboard shortcuts
+  // - Enter: Back on track (guarded to avoid accidental actions while typing)
+  // - Cmd/Ctrl+Shift+P: Pause 15 (matches footer hint)
+  // - Escape: Snooze
+
+  const pauseShortcut = window.overlayUtils?.isPauseShortcut?.(event);
+  if (pauseShortcut) {
+    event.preventDefault();
+    event.stopPropagation();
+    sendAction({ action: "pause_15", minutes: 15 });
+    return;
+  }
+
   // Reduce accidental recoveries:
   // - never treat Enter as "Back on track" while typing
   // - also disable the global Enter shortcut during the align + 2-min flows
@@ -207,6 +220,7 @@ window.addEventListener("keydown", (event) => {
       sendAction({ action: "back_on_track" });
     }
   }
+
   if (event.key === "Escape") {
     snooze.classList.remove("hidden");
   }

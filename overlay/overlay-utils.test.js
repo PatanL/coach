@@ -5,7 +5,8 @@ const {
   isTextInputTarget,
   normalizeTwoMinuteStep,
   normalizeFreeform,
-  shouldTriggerBackOnTrackOnEnter
+  shouldTriggerBackOnTrackOnEnter,
+  isPauseShortcut
 } = require("./overlay-utils");
 
 test("isTextInputTarget: recognizes common typing targets", () => {
@@ -55,4 +56,12 @@ test("shouldTriggerBackOnTrackOnEnter: blocks Enter while typing; allows otherwi
     shouldTriggerBackOnTrackOnEnter({ target: { tagName: "DIV" }, mode: "", twoMinOpen: false }),
     true
   );
+});
+
+test("isPauseShortcut: detects Cmd/Ctrl+Shift+P", () => {
+  assert.equal(isPauseShortcut({ key: "p", metaKey: true, ctrlKey: false, shiftKey: true }), true);
+  assert.equal(isPauseShortcut({ key: "P", metaKey: false, ctrlKey: true, shiftKey: true }), true);
+  assert.equal(isPauseShortcut({ key: "p", metaKey: true, ctrlKey: false, shiftKey: false }), false);
+  assert.equal(isPauseShortcut({ key: "x", metaKey: true, ctrlKey: false, shiftKey: true }), false);
+  assert.equal(isPauseShortcut(null), false);
 });

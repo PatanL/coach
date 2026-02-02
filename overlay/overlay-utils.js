@@ -32,10 +32,18 @@
     return !isTextInputTarget(target);
   }
 
+  function isPauseShortcut(event) {
+    if (!event) return false;
+    const key = String(event.key || "").toLowerCase();
+    const hasModifier = Boolean(event.metaKey || event.ctrlKey);
+    return hasModifier && event.shiftKey && key === "p";
+  }
+
   return {
     isTextInputTarget,
     normalizeTwoMinuteStep,
     normalizeFreeform,
-    shouldTriggerBackOnTrackOnEnter
+    shouldTriggerBackOnTrackOnEnter,
+    isPauseShortcut
   };
 });
