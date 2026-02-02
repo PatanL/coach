@@ -457,9 +457,13 @@ copyDiagBtn?.addEventListener('click', () => {
   const hint = sys.platform === 'darwin' ? 'Press Cmd+C to copy' : 'Press Ctrl+C to copy';
 
   try {
+    // Ensure repeated failures don't leak hidden textareas.
+    document.querySelectorAll('[data-overlay-diag="1"]').forEach((el) => el.remove());
+
     const ta = document.createElement('textarea');
     ta.value = text;
     ta.setAttribute('readonly', '');
+    ta.setAttribute('data-overlay-diag', '1');
     ta.style.position = 'fixed';
     ta.style.left = '-9999px';
     document.body.appendChild(ta);
@@ -472,7 +476,7 @@ copyDiagBtn?.addEventListener('click', () => {
     copyDiagBtn.textContent = 'Copy diagnostics';
     // Clean up any hidden textarea(s) we created for manual copy.
     try {
-      document.querySelectorAll('textarea[readonly][style*="-9999px"]').forEach((el) => el.remove());
+      document.querySelectorAll('[data-overlay-diag="1"]').forEach((el) => el.remove());
     } catch {}
   }, 4000);
 });
