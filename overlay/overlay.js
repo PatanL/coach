@@ -38,11 +38,29 @@ let overlayBusy = false;
 
 let lastActionId = 0;
 // Track acks from main to stop retries.
-const ackSet = new Set();
+// Use a bounded Map to avoid unbounded growth if the overlay stays open a long time.
+const ackMap = new Map();
+const ACK_MAX_AGE_MS = 10 * 60 * 1000;
+const ACK_MAX_SIZE = 200;
+function noteAck(id) {
+  if (!id) return;
+  const now = Date.now();
+  ackMap.set(id, now);
+  // Prune old acks.
+  for (const [k, ts] of ackMap) {
+    if (now - ts > ACK_MAX_AGE_MS) ackMap.delete(k);
+    else break; // Map preserves insertion order; once we hit a fresh one, stop.
+  }
+  // Prune to max size (delete oldest first).
+  while (ackMap.size > ACK_MAX_SIZE) {
+    const firstKey = ackMap.keys().next().value;
+    ackMap.delete(firstKey);
+  }
+}
 try {
   window.overlayAPI?.onAck?.((ack) => {
     if (ack && ack.id) {
-      ackSet.add(ack.id);
+      noteAck(ack.id);
       // Unblock the UI if we were waiting on a response.
       if (overlayBusy) resetButtonStates();
     }
@@ -411,7 +429,7 @@ function sendAction(action) {
     const id = payload.action_id;
     const tick = () => {
       if (Date.now() - started > 2000) return; // give up after 2s
-      if (ackSet.has(id)) return; // stop once acked
+      if (ackMap.has(id)) return; // stop once acked
       try { window.overlayAPI.sendAction(payload); } catch {}
       setTimeout(tick, 250);
     };
@@ -420,7 +438,7 @@ function sendAction(action) {
 
   // Recover the UI if we never get an ack (e.g., main died). This keeps things actionable.
   setTimeout(() => {
-    if (ackSet.has(payload.action_id)) return;
+    if (ackMap.has(payload.action_id)) return;
     if (!overlayBusy) return;
     try { window.overlayAPI.logUIEvent?.("overlay_action_timeout", { action: payload.action, action_id: payload.action_id }); } catch {}
     resetButtonStates();
@@ -462,7 +480,7 @@ function buildDiagnosticsText() {
     lines.push(`AutoRehydrateEligible: ${elig ? 'true' : 'false'}`);
   } catch {}
   try { lines.push(`LastActionId: ${String(lastActionId || 0)}`); } catch {}
-  try { lines.push(`PendingAcks: ${String(ackSet ? ackSet.size : 0)}`); } catch {}
+  try { lines.push(`PendingAcks: ${String(ackMap ? ackMap.size : 0)}`); } catch {}
   try {
     const shownMs = typeof shownAt === 'number' ? (Date.now() - shownAt) : '';
     lines.push(`ShownMs: ${String(shownMs)}`);
