@@ -5,6 +5,21 @@
     root.overlayUtils = factory();
   }
 })(typeof globalThis !== "undefined" ? globalThis : this, function () {
+  // Platform helpers kept intentionally tiny and dependency-free so we can
+  // reuse them in both renderer and main processes (and unit tests).
+  function isAppleSilicon(env) {
+    const p = (typeof process !== "undefined" ? process : null);
+    const platform = (env && env.platform) || (p && p.platform) || "";
+    const arch = (env && env.arch) || (p && p.arch) || "";
+    // On macOS, Apple Silicon reports arm64/arm64e.
+    return platform === "darwin" && (arch === "arm64" || arch === "arm64e");
+  }
+
+  // We currently only auto-rehydrate the overlay renderer on Apple Silicon
+  // where GPU handoffs can occasionally blank the transparent window.
+  function shouldAutoRehydrateRenderer(env) {
+    return isAppleSilicon(env) === true;
+  }
   function isTextInputTarget(target) {
     if (!target) return false;
     const tag = String(target.tagName || "").toLowerCase();
@@ -109,6 +124,9 @@
     getOverlayHotkeyAction,
     isPauseShortcut,
     enterHintForState,
-    labelForPayload
+    labelForPayload,
+    // Platform helpers exported for main-process reliability guards.
+    isAppleSilicon,
+    shouldAutoRehydrateRenderer
   };
 });

@@ -1,6 +1,7 @@
 const { app, BrowserWindow, globalShortcut, ipcMain, Tray, Menu, screen, nativeImage } = require("electron");
 const path = require("path");
 const fs = require("fs");
+const overlayUtils = require("./overlay-utils");
 
 const LOG_DIR = path.join(__dirname, "..", "logs");
 const OVERLAY_BASE = path.join(LOG_DIR, "overlay_cmd.ndjson");
@@ -70,6 +71,37 @@ function createOverlayWindow() {
     if (overlayWindow && overlayWindow.isVisible()) {
       overlayWindow.focus();
     }
+  });
+
+  // On Apple Silicon, transparent overlays can occasionally lose their renderer
+  // after GPU handoffs. When that happens, auto-rehydrate by reloading and
+  // re-sending the last payload so recovery steps remain actionable.
+  function rehydrateRenderer(reason) {
+    if (!overlayUtils.shouldAutoRehydrateRenderer({ platform: process.platform, arch: process.arch })) return;
+    const now = new Date().toISOString();
+    appendAction({ ts: now, type: "OVERLAY_REHYDRATE", reason: reason || null, platform: process.platform, arch: process.arch });
+    try {
+      overlayWindow.reload();
+      overlayWindow.webContents.once("did-finish-load", () => {
+        try {
+          overlayWindow.show();
+          overlayWindow.focus();
+          if (currentPayload) overlayWindow.webContents.send("overlay:show", currentPayload);
+        } catch (err) {
+          // ignore resend errors
+        }
+      });
+    } catch (err) {
+      // ignore reload errors
+    }
+  }
+
+  overlayWindow.webContents.on("render-process-gone", (_event, details) => {
+    rehydrateRenderer(details?.reason);
+  });
+
+  overlayWindow.on("unresponsive", () => {
+    rehydrateRenderer("unresponsive");
   });
 
   overlayWindow.loadFile(path.join(__dirname, "overlay.html"));

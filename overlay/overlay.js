@@ -32,6 +32,11 @@ let shownAt = null;
 let currentPayload = null;
 let overlayBusy = false;
 
+// Guard against accidental "Recover" clicks / hotkeys.
+// First click arms recover; second click confirms.
+let recoverArmed = false;
+let recoverArmTimer = null;
+
 const DEFAULT_BUTTON_TEXT = {
   back: backBtn?.textContent || "Back on track",
   pause: pauseBtn?.textContent || "Pause 15",
@@ -61,6 +66,24 @@ function resetButtonStates() {
   if (recoverBtn) recoverBtn.textContent = DEFAULT_BUTTON_TEXT.recover;
   if (undoRecoverBtn) undoRecoverBtn.textContent = DEFAULT_BUTTON_TEXT.undoRecover;
   if (snoozeBtn) snoozeBtn.textContent = DEFAULT_BUTTON_TEXT.snooze;
+  resetRecoverArm();
+}
+
+function resetRecoverArm() {
+  recoverArmed = false;
+  if (recoverArmTimer) {
+    clearTimeout(recoverArmTimer);
+    recoverArmTimer = null;
+  }
+}
+
+function armRecover() {
+  recoverArmed = true;
+  if (recoverBtn) recoverBtn.textContent = "Confirm recover";
+  if (recoverArmTimer) clearTimeout(recoverArmTimer);
+  recoverArmTimer = setTimeout(() => {
+    resetRecoverArm();
+  }, 8000);
 }
 
 function setText(el, value) {
@@ -258,8 +281,16 @@ stuckBtn.addEventListener("click", () => {
 
 recoverBtn.addEventListener("click", () => {
   if (recoverBtn.disabled) return;
+
+  // Two-step confirm to prevent accidental recoveries.
+  if (!recoverArmed) {
+    armRecover();
+    return;
+  }
+
   recoverBtn.textContent = "Recovering…";
   setButtonsBusy(true);
+  resetRecoverArm();
   sendAction({ action: "recover" });
 });
 

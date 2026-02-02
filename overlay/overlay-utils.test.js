@@ -9,7 +9,9 @@ const {
   isPauseShortcut,
   enterHintForState,
   labelForPayload,
-  getOverlayHotkeyAction
+  getOverlayHotkeyAction,
+  isAppleSilicon,
+  shouldAutoRehydrateRenderer
 } = require("./overlay-utils");
 
 test("isTextInputTarget: recognizes common typing targets", () => {
@@ -146,4 +148,14 @@ test("getOverlayHotkeyAction: Escape shows snooze unless typing", () => {
     getOverlayHotkeyAction({ key: "Escape", target: { tagName: "TEXTAREA" } }, { overlayHidden: false }),
     null
   );
+});
+
+test("platform helpers: detect Apple Silicon + gate rehydration", () => {
+  assert.equal(isAppleSilicon({ platform: "darwin", arch: "arm64" }), true);
+  assert.equal(isAppleSilicon({ platform: "darwin", arch: "arm64e" }), true);
+  assert.equal(isAppleSilicon({ platform: "darwin", arch: "x64" }), false);
+  assert.equal(isAppleSilicon({ platform: "linux", arch: "arm64" }), false);
+
+  assert.equal(shouldAutoRehydrateRenderer({ platform: "darwin", arch: "arm64" }), true);
+  assert.equal(shouldAutoRehydrateRenderer({ platform: "darwin", arch: "x64" }), false);
 });
