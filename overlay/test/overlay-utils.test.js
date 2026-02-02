@@ -55,6 +55,46 @@ test('shouldShowRelaunchButton true only on Apple Silicon + overlay data error p
   );
 });
 
+test('shouldShowSnoozeOnEscape disables snooze while typing', () => {
+  assert.strictEqual(overlayUtils.shouldShowSnoozeOnEscape({ target: { tagName: 'INPUT' } }), false);
+  assert.strictEqual(overlayUtils.shouldShowSnoozeOnEscape({ target: { tagName: 'TEXTAREA' } }), false);
+  assert.strictEqual(overlayUtils.shouldShowSnoozeOnEscape({ target: { tagName: 'SELECT' } }), false);
+  assert.strictEqual(overlayUtils.shouldShowSnoozeOnEscape({ target: { tagName: 'DIV', isContentEditable: true } }), false);
+  assert.strictEqual(overlayUtils.shouldShowSnoozeOnEscape({ target: { tagName: 'DIV' } }), true);
+});
+
+test('getOverlayHotkeyAction: Escape maps to show_snooze only when safe', () => {
+  assert.strictEqual(
+    overlayUtils.getOverlayHotkeyAction(
+      { key: 'Escape', target: { tagName: 'DIV' } },
+      { overlayHidden: false, overlayBusy: false, mode: '', twoMinOpen: false, snoozeOpen: false, recoverArmed: false }
+    ),
+    'show_snooze'
+  );
+  assert.strictEqual(
+    overlayUtils.getOverlayHotkeyAction(
+      { key: 'Escape', target: { tagName: 'INPUT' } },
+      { overlayHidden: false, overlayBusy: false, mode: '', twoMinOpen: false, snoozeOpen: false, recoverArmed: false }
+    ),
+    null
+  );
+});
+
+test('shouldTriggerBackOnTrackOnEnter does not fire for interactive targets', () => {
+  assert.strictEqual(
+    overlayUtils.shouldTriggerBackOnTrackOnEnter({ target: { tagName: 'BUTTON' }, mode: '', twoMinOpen: false, snoozeOpen: false, recoverArmed: false }),
+    false
+  );
+  assert.strictEqual(
+    overlayUtils.shouldTriggerBackOnTrackOnEnter({ target: { tagName: 'A' }, mode: '', twoMinOpen: false, snoozeOpen: false, recoverArmed: false }),
+    false
+  );
+  assert.strictEqual(
+    overlayUtils.shouldTriggerBackOnTrackOnEnter({ target: { tagName: 'DIV' }, mode: '', twoMinOpen: false, snoozeOpen: false, recoverArmed: false }),
+    true
+  );
+});
+
 test('getOverlayHotkeyAction: Enter confirms recover when armed in safe contexts', () => {
   // Safe: not typing, not align mode, no panels open
   assert.strictEqual(
