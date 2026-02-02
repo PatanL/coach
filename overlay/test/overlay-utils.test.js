@@ -27,6 +27,11 @@ test('labelForOverlayState shows CONFIRM when recover armed', () => {
   assert.strictEqual(overlayUtils.labelForOverlayState({ recoverArmed: true }), 'CONFIRM');
 });
 
+test('recoverAriaLabel reflects armed state', () => {
+  assert.strictEqual(overlayUtils.recoverAriaLabel({ armed: false }), 'Recover schedule');
+  assert.strictEqual(overlayUtils.recoverAriaLabel({ armed: true }), 'Confirm recover');
+});
+
 test('buildOverlayDataErrorPayload includes actionable next step on Apple Silicon', () => {
   const p = overlayUtils.buildOverlayDataErrorPayload({ error: 'bad json', rawLine: '{', env: { platform: 'darwin', arch: 'arm64' } });
   assert.ok(p.next_action.toLowerCase().includes('copy diagnostics'));

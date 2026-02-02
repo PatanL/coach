@@ -120,6 +120,15 @@ function updateRecoverArmUI() {
   if (recoverBtn) {
     recoverBtn.classList.toggle("armed", recoverArmed);
     recoverBtn.setAttribute("aria-pressed", recoverArmed ? "true" : "false");
+    // Keep screen readers aligned with the two-step confirm state.
+    try {
+      const aria = (window.overlayUtils && typeof window.overlayUtils.recoverAriaLabel === 'function')
+        ? window.overlayUtils.recoverAriaLabel({ armed: recoverArmed })
+        : (recoverArmed ? 'Confirm recover' : 'Recover schedule');
+      recoverBtn.setAttribute('aria-label', aria);
+    } catch (_e) {
+      // noop
+    }
   }
 
   // Also reflect the confirm state in the header label so it's unmissable.

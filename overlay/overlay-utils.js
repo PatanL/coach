@@ -218,6 +218,13 @@
     return labelForPayload({ mode, canUndoRecover, customLabel });
   }
 
+  // Accessibility: provide a clear, concise aria-label for the Recover button
+  // that reflects its two-step confirmation state. Keeps screen readers aligned
+  // with the visual "Confirm recover" UI.
+  function recoverAriaLabel({ armed } = {}) {
+    return armed ? "Confirm recover" : "Recover schedule";
+  }
+
   return {
     isTextInputTarget,
     // not exported but kept here for potential embedding contexts
@@ -236,6 +243,7 @@
     enterHintForState,
     labelForPayload,
     labelForOverlayState,
+    recoverAriaLabel,
     // Platform helpers exported for main-process reliability guards.
     isAppleSilicon,
     shouldAutoRehydrateRenderer
