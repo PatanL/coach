@@ -50,7 +50,9 @@ const DEFAULT_BUTTON_TEXT = {
 };
 
 function setButtonsBusy(isBusy) {
-  const buttons = [backBtn, pauseBtn, twoMinBtn, stuckBtn, recoverBtn, undoRecoverBtn, snoozeBtn, copyDiagBtn, relaunchBtn];
+  // Keep copy/relaunch available even while other actions are busy so users
+  // can still recover during renderer issues (Apple Silicon actionable recovery).
+  const buttons = [backBtn, pauseBtn, twoMinBtn, stuckBtn, recoverBtn, undoRecoverBtn, snoozeBtn];
   buttons.forEach((btn) => {
     if (!btn) return;
     btn.disabled = Boolean(isBusy);
@@ -431,28 +433,42 @@ copyDiagBtn?.addEventListener('click', () => {
     : false;
 
   if (ok) {
-    copyDiagBtn.textContent = 'Copied diagnostics';
-
-    // Nudge the user into the next recovery action if it's available.
+    copyDiagBtn.textContent = 'Copied';
+    // After a successful copy, guide focus to relaunch when available.
     if (relaunchBtn && !relaunchBtn.classList.contains('hidden')) {
-      setTimeout(() => {
-        try {
-          relaunchBtn.focus();
-        } catch {}
-      }, 0);
+      try { relaunchBtn.focus(); } catch {}
     }
-  } else {
-    // Clipboard can fail in some hardened contexts; provide a manual fallback.
-    copyDiagBtn.textContent = 'Copy failed (manual)';
-    try {
-      // eslint-disable-next-line no-alert
-      window.prompt('Copy diagnostics (Cmd/Ctrl+C):', text);
-    } catch {}
+    setTimeout(() => {
+      copyDiagBtn.textContent = 'Copy diagnostics';
+    }, 1800);
+    return;
   }
 
+  // Clipboard can fail in some hardened contexts; provide a robust fallback.
+  const sys = (window.overlayAPI && typeof window.overlayAPI.getSystemInfo === 'function')
+    ? window.overlayAPI.getSystemInfo()
+    : { platform: 'unknown' };
+  const hint = sys.platform === 'darwin' ? 'Press Cmd+C to copy' : 'Press Ctrl+C to copy';
+
+  try {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.setAttribute('readonly', '');
+    ta.style.position = 'fixed';
+    ta.style.left = '-9999px';
+    document.body.appendChild(ta);
+    ta.focus();
+    ta.select();
+  } catch {}
+
+  copyDiagBtn.textContent = `Copy failed — ${hint}`;
   setTimeout(() => {
     copyDiagBtn.textContent = 'Copy diagnostics';
-  }, 2000);
+    // Clean up any hidden textarea(s) we created for manual copy.
+    try {
+      document.querySelectorAll('textarea[readonly][style*="-9999px"]').forEach((el) => el.remove());
+    } catch {}
+  }, 4000);
 });
 
 relaunchBtn?.addEventListener('click', () => {
