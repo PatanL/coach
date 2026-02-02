@@ -71,6 +71,21 @@ test('shouldShowRelaunchButton true only on Apple Silicon, with opt-in payload f
   );
 });
 
+test('livePolitenessForPayload asserts for recovery/error overlays', () => {
+  const u = overlayUtils;
+  assert.strictEqual(u.livePolitenessForPayload({ headline: 'Overlay data error' }), 'assertive');
+  assert.strictEqual(u.livePolitenessForPayload({ headline: 'Overlay renderer issue' }), 'assertive');
+  assert.strictEqual(u.livePolitenessForPayload({ headline: 'Something else' }), 'polite');
+});
+
+test('shouldFocusRecoveryFirst true on Apple Silicon when relaunch visible', () => {
+  const env = { platform: 'darwin', arch: 'arm64' };
+  assert.strictEqual(overlayUtils.shouldFocusRecoveryFirst({ env, payload: { headline: 'Overlay data error' } }), true);
+  assert.strictEqual(overlayUtils.shouldFocusRecoveryFirst({ env: { platform: 'darwin', arch: 'x64' }, payload: { headline: 'Overlay data error' } }), false);
+  assert.strictEqual(overlayUtils.shouldFocusRecoveryFirst({ env, payload: { headline: 'Other' } }), false);
+  assert.strictEqual(overlayUtils.shouldFocusRecoveryFirst({ env, payload: { headline: 'Other', relaunch_overlay: true } }), true);
+});
+
 test('buildOverlayRendererRecoveryPayload sets relaunch_overlay + actionable next step', () => {
   const p = overlayUtils.buildOverlayRendererRecoveryPayload({ reason: 'throttled', env: { platform: 'darwin', arch: 'arm64' } });
   assert.strictEqual(p.relaunch_overlay, true);
