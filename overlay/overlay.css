@@ -40,9 +40,12 @@ html, body {
 #overlay[data-level="A"] .diagnosis,
 #overlay[data-level="A"] .mini-plan,
 #overlay[data-level="A"] .footer,
+#overlay[data-level="A"] #pauseBtn,
+#overlay[data-level="A"] #twoMinBtn,
 #overlay[data-level="A"] #stuckBtn,
 #overlay[data-level="A"] #recoverBtn,
 #overlay[data-level="A"] #snoozeBtn,
+#overlay[data-level="A"] #twoMinPanel,
 #overlay[data-level="A"] #choiceButtons,
 #overlay[data-level="A"] .align-input {
   display: none;
@@ -145,6 +148,46 @@ html, body {
   color: rgba(246, 244, 239, 0.5);
 }
 
+.two-min {
+  margin-bottom: 12px;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.two-min-title {
+  font-size: 13px;
+  color: rgba(246, 244, 239, 0.7);
+  margin-bottom: 10px;
+}
+
+.two-min-choices {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.two-min-input {
+  display: flex;
+  gap: 10px;
+}
+
+.two-min-input input {
+  flex: 1;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.05);
+  color: #f6f4ef;
+  font-size: 14px;
+}
+
+.two-min-input input::placeholder {
+  color: rgba(246, 244, 239, 0.5);
+}
+
 .choices button {
   background: rgba(255, 255, 255, 0.12);
 }
@@ -173,6 +216,38 @@ button.primary:hover {
   background: #ff7a69;
 }
 
+/* When "Recover" is armed, make the confirm state very obvious. */
+button.armed {
+  background: rgba(241, 108, 91, 0.22);
+  box-shadow: 0 0 0 2px rgba(241, 108, 91, 0.55);
+}
+
+button.armed:hover {
+  background: rgba(241, 108, 91, 0.28);
+}
+
+button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+button:disabled:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+button.primary:disabled:hover {
+  background: #f16c5b;
+}
+
+/* Utility button styling: de-emphasize diagnostics compared to primary flow */
+#copyDiagBtn {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+#copyDiagBtn:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
 .snooze {
   margin-bottom: 12px;
 }
@@ -199,7 +274,9 @@ button.primary:hover {
 
 .footer {
   display: flex;
-  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  justify-content: flex-start;
   font-size: 11px;
   color: rgba(246, 244, 239, 0.5);
 }
