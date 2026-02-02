@@ -137,8 +137,12 @@ window.overlayAPI.onPause(() => {
 
 window.addEventListener("keydown", (event) => {
   // Don't treat Enter as "Back on track" while the user is typing.
-  if (event.key === "Enter") {
-    const isTypingTarget = window.overlayUtils?.isTextInputTarget?.(event.target);
+  if (event.key === "Enter" && !event.isComposing && !event.metaKey && !event.ctrlKey && !event.altKey) {
+    const isTextInputTarget = window.overlayUtils?.isTextInputTarget;
+    const isTypingTarget =
+      (isTextInputTarget && isTextInputTarget(event.target)) ||
+      (isTextInputTarget && isTextInputTarget(document.activeElement));
+
     if (!isTypingTarget) {
       sendAction({ action: "back_on_track" });
     }
