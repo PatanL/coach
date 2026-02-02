@@ -88,6 +88,9 @@ function showOverlay(payload) {
   setText(diagnosis, payload.diagnosis || "");
   setText(nextAction, payload.next_action || "");
 
+  // Keep the primary action label context-sensitive (habits vs. focus blocks).
+  updatePrimaryLabel(payload);
+
   if (payload.level === "C") {
     miniPlan.classList.remove("hidden");
     setText(miniPlan, payload.mini_plan || "");
