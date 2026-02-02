@@ -109,6 +109,24 @@ test('shouldSuppressEnterAfterShow gates carry-over Enter presses', () => {
   assert.strictEqual(overlayUtils.shouldSuppressEnterAfterShow({ msSinceShow: -10 }), false);
 });
 
+test('shouldSuppressHotkeyAfterShow suppresses risky non-modified hotkeys briefly', () => {
+  const u = overlayUtils;
+  // Inside window: suppress risky hotkeys.
+  assert.strictEqual(u.shouldSuppressHotkeyAfterShow({ key: 'Enter', msSinceShow: 10 }), true);
+  assert.strictEqual(u.shouldSuppressHotkeyAfterShow({ key: 'r', msSinceShow: 10 }), true);
+  assert.strictEqual(u.shouldSuppressHotkeyAfterShow({ key: 'R', msSinceShow: 10 }), true);
+  assert.strictEqual(u.shouldSuppressHotkeyAfterShow({ key: '2', msSinceShow: 10 }), true);
+  assert.strictEqual(u.shouldSuppressHotkeyAfterShow({ key: 't', msSinceShow: 10 }), true);
+  assert.strictEqual(u.shouldSuppressHotkeyAfterShow({ key: 'd', msSinceShow: 10 }), true);
+
+  // Keep Escape available.
+  assert.strictEqual(u.shouldSuppressHotkeyAfterShow({ key: 'Escape', msSinceShow: 10 }), false);
+
+  // Outside window: do not suppress.
+  assert.strictEqual(u.shouldSuppressHotkeyAfterShow({ key: 'Enter', msSinceShow: 260 }), false);
+  assert.strictEqual(u.shouldSuppressHotkeyAfterShow({ key: 'r', msSinceShow: 260 }), false);
+});
+
 test('getOverlayHotkeyAction: Escape maps to show_snooze only when safe', () => {
   assert.strictEqual(
     overlayUtils.getOverlayHotkeyAction(

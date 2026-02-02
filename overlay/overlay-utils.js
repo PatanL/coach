@@ -197,6 +197,32 @@
     return ms >= 0 && ms < threshold;
   }
 
+  // Input-focus safety: when the overlay steals focus, a carry-over keypress from
+  // another app can accidentally trigger a hotkey (e.g. "R" to recover).
+  // Suppress risky, non-modified hotkeys for a very short window after show.
+  function shouldSuppressHotkeyAfterShow({ key, msSinceShow, thresholdMs = 250 } = {}) {
+    const ms = Number(msSinceShow);
+    const threshold = Number(thresholdMs);
+    if (!Number.isFinite(ms) || !Number.isFinite(threshold)) return false;
+    if (!(ms >= 0 && ms < threshold)) return false;
+
+    const k = String(key || '');
+    if (!k) return false;
+
+    // Keep Escape available so users can dismiss/cancel even if focus was stolen.
+    if (k === 'Escape') return false;
+
+    // Risky hotkeys we support in the overlay UI.
+    // - Enter triggers primary actions
+    // - Single-letter shortcuts trigger stateful actions (recover/snooze/etc)
+    const low = k.toLowerCase();
+    if (k === 'Enter') return true;
+    if (low === 'r' || low === 'u' || low === 'k' || low === 's' || low === 'd') return true;
+    if (low === 't' || low === '2') return true;
+
+    return false;
+  }
+
   function getOverlayHotkeyAction(
     event,
     { overlayHidden = false, overlayBusy = false, mode, twoMinOpen, snoozeOpen, recoverArmed = false } = {}
@@ -279,6 +305,7 @@
     labelForOverlayState,
     recoverAriaLabel,
     shouldSuppressEnterAfterShow,
+    shouldSuppressHotkeyAfterShow,
     // Platform helpers exported for main-process reliability guards.
     isAppleSilicon,
     shouldAutoRehydrateRenderer
