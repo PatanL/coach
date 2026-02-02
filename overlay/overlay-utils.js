@@ -102,7 +102,9 @@
     return false;
   }
 
-  function shouldTriggerBackOnTrackOnEnter({ target, mode, twoMinOpen, snoozeOpen } = {}) {
+  function shouldTriggerBackOnTrackOnEnter({ target, mode, twoMinOpen, snoozeOpen, recoverArmed } = {}) {
+    // When Recover is armed, Enter should not trigger Back on track.
+    if (recoverArmed) return false;
     if (mode === "align") return false;
     if (twoMinOpen) return false;
     if (snoozeOpen) return false;
@@ -116,10 +118,12 @@
     return hasModifier && event.shiftKey && key === "p";
   }
 
-  function enterHintForState({ mode, twoMinOpen } = {}) {
+  function enterHintForState({ mode, twoMinOpen, recoverArmed } = {}) {
     // Highest priority: when the 2‑min panel is open, Enter should map to setting that step.
     // This avoids misleading hints even if other modes (e.g. align) are active.
     if (twoMinOpen) return "Enter: Set 2‑min step";
+    // When Recover is armed, hint that Enter will confirm it.
+    if (recoverArmed) return "Enter: Confirm";
     if (mode === "align") return "Enter: Submit answer";
     return "Enter: Back on track";
   }
@@ -131,7 +135,7 @@
 
   function getOverlayHotkeyAction(
     event,
-    { overlayHidden = false, overlayBusy = false, mode, twoMinOpen, snoozeOpen } = {}
+    { overlayHidden = false, overlayBusy = false, mode, twoMinOpen, snoozeOpen, recoverArmed = false } = {}
   ) {
     if (overlayHidden) return null;
     // While the overlay is dispatching an action (buttons disabled),
@@ -139,11 +143,17 @@
     if (overlayBusy) return null;
     const key = event?.key;
     if (key === "Enter") {
+      // If Recover is armed, prefer confirming it via Enter in safe contexts.
+      if (recoverArmed) {
+        const unsafe = mode === "align" || twoMinOpen || snoozeOpen || isInteractiveTarget(event?.target);
+        return unsafe ? null : "confirm_recover";
+      }
       return shouldTriggerBackOnTrackOnEnter({
         target: event?.target,
         mode,
         twoMinOpen,
-        snoozeOpen
+        snoozeOpen,
+        recoverArmed
       })
         ? "back_on_track"
         : null;

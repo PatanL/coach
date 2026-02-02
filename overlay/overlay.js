@@ -200,8 +200,8 @@ function showOverlay(payload) {
   // Update keyboard hint to reflect current mode
   if (hintEnter) {
     hintEnter.textContent = (window.overlayUtils && window.overlayUtils.enterHintForState)
-      ? window.overlayUtils.enterHintForState({ mode: overlay.dataset.mode, twoMinOpen: false })
-      : "Enter: Back on track";
+      ? window.overlayUtils.enterHintForState({ mode: overlay.dataset.mode, twoMinOpen: false, recoverArmed })
+      : (recoverArmed ? "Enter: Confirm" : "Enter: Back on track");
   }
   // Dynamic header label for clarity (DRIFT / ALIGN / RECOVERED / CONFIRM)
   currentPayload = payload;
@@ -515,8 +515,8 @@ function updateEnterHint() {
   if (!hintEnter) return;
   const twoMinOpen = twoMinPanel && !twoMinPanel.classList.contains("hidden");
   hintEnter.textContent = (window.overlayUtils && window.overlayUtils.enterHintForState)
-    ? window.overlayUtils.enterHintForState({ mode: overlay.dataset.mode, twoMinOpen })
-    : (twoMinOpen ? "Enter: Set 2‑min step" : (overlay.dataset.mode === "align" ? "Enter: Submit answer" : "Enter: Back on track"));
+    ? window.overlayUtils.enterHintForState({ mode: overlay.dataset.mode, twoMinOpen, recoverArmed })
+    : (twoMinOpen ? "Enter: Set 2‑min step" : (recoverArmed ? "Enter: Confirm" : (overlay.dataset.mode === "align" ? "Enter: Submit answer" : "Enter: Back on track")));
 }
 
 window.addEventListener("keydown", (event) => {
@@ -598,7 +598,8 @@ window.addEventListener("keydown", (event) => {
       overlayBusy,
       mode: overlay.dataset.mode,
       twoMinOpen: twoMinPanel && !twoMinPanel.classList.contains("hidden"),
-      snoozeOpen: snooze && !snooze.classList.contains("hidden")
+      snoozeOpen: snooze && !snooze.classList.contains("hidden"),
+      recoverArmed
     });
     if (action === "back_on_track") {
       event.preventDefault();
@@ -608,6 +609,16 @@ window.addEventListener("keydown", (event) => {
         backBtn.click();
       } else {
         sendAction({ action: "back_on_track" });
+      }
+    } else if (action === "confirm_recover" && recoverArmed) {
+      event.preventDefault();
+      event.stopPropagation();
+      if (recoverBtn && !recoverBtn.disabled) {
+        recoverBtn.click();
+      } else {
+        setButtonsBusy(true);
+        resetRecoverArm();
+        sendAction({ action: "recover" });
       }
     }
   }
