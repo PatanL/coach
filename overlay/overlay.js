@@ -185,22 +185,25 @@ function updatePrimaryLabel(payload) {
 }
 
 function resetSnooze() {
+  if (!snooze) return;
   snooze.classList.add("hidden");
 }
 
 function resetAlignInput() {
-  alignText.value = "";
-  alignInput.classList.add("hidden");
+  if (alignText) alignText.value = "";
+  if (alignInput) alignInput.classList.add("hidden");
 }
 
 function resetTwoMin() {
   if (!twoMinPanel) return;
   twoMinPanel.classList.add("hidden");
-  twoMinChoices.innerHTML = "";
-  twoMinText.value = "";
+  if (twoMinChoices) twoMinChoices.innerHTML = "";
+  if (twoMinText) twoMinText.value = "";
 }
 
 function showTwoMin(choices) {
+  if (!twoMinPanel || !twoMinChoices || !twoMinText) return;
+
   const defaults = ["Open TODO + pick 1 task", "Write 1 sentence", "Run the next command", "Close distraction tab"];
   const list = Array.isArray(choices) && choices.length ? choices : defaults;
 
@@ -215,7 +218,7 @@ function showTwoMin(choices) {
     twoMinChoices.appendChild(button);
   });
   twoMinPanel.classList.remove("hidden");
-  twoMinText.focus();
+  try { twoMinText.focus(); } catch {}
 }
 
 function updateFooterHints() {
@@ -596,6 +599,7 @@ twoMinText.addEventListener("keydown", (event) => {
 });
 
 function toggleSnooze(show) {
+  if (!snooze) return;
   const isHidden = snooze.classList.contains("hidden");
   const shouldShow = typeof show === "boolean" ? show : isHidden;
   snooze.classList.toggle("hidden", !shouldShow);
@@ -681,7 +685,7 @@ relaunchBtn?.addEventListener('click', () => {
   }, 2000);
 });
 
-snooze.addEventListener("click", (event) => {
+snooze?.addEventListener("click", (event) => {
   const reason = event.target?.dataset?.reason;
   if (reason) {
     sendAction({ action: "snooze", reason, minutes: 5 });
