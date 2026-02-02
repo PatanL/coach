@@ -100,11 +100,15 @@
   function buildOverlayRendererRecoveryPayload({ reason, env } = {}) {
     const why = normalizeFreeform(String(reason || "renderer_issue"), { maxLen: 120 });
 
+    const human = isAppleSilicon(env)
+      ? "Overlay became unresponsive (common after an M1 GPU handoff). Recovery is available."
+      : "Overlay became unresponsive. Recovery is available.";
+
     return {
       level: "B",
       headline: "Overlay renderer issue",
-      human_line: "Overlay became unresponsive. Recovery is available.",
-      diagnosis: normalizeFreeform(`Renderer recovery throttled: ${why}`, { maxLen: 220 }),
+      human_line: human,
+      diagnosis: normalizeFreeform(`Renderer recovery: ${why}`, { maxLen: 220 }),
       next_action: recoveryNextAction(env),
       relaunch_overlay: true,
       block_id: null,
@@ -119,7 +123,8 @@
     // Allow the main process (or payload builder helpers) to opt-in to showing
     // the relaunch affordance for other renderer recovery scenarios.
     if (payload && payload.relaunch_overlay === true) return true;
-    return String(payload?.headline || "") === "Overlay data error";
+    const h = String(payload?.headline || "");
+    return h === "Overlay data error" || h === "Overlay renderer issue";
   }
 
   function isInteractiveTarget(target) {
