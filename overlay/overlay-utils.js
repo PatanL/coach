@@ -200,11 +200,15 @@
   // Input-focus safety: when the overlay steals focus, a carry-over keypress from
   // another app can accidentally trigger a hotkey (e.g. "R" to recover).
   // Suppress risky, non-modified hotkeys for a very short window after show.
-  function shouldSuppressHotkeyAfterShow({ key, msSinceShow, thresholdMs = 250 } = {}) {
+  function shouldSuppressHotkeyAfterShow({ key, msSinceShow, thresholdMs = 250, metaKey = false, ctrlKey = false, altKey = false } = {}) {
     const ms = Number(msSinceShow);
     const threshold = Number(thresholdMs);
     if (!Number.isFinite(ms) || !Number.isFinite(threshold)) return false;
     if (!(ms >= 0 && ms < threshold)) return false;
+
+    // Only suppress *non-modified* hotkeys. Modifier chords (Cmd/Ctrl/Alt)
+    // are generally intentional and should keep working (e.g. Cmd+R relaunch).
+    if (metaKey || ctrlKey || altKey) return false;
 
     const k = String(key || '');
     if (!k) return false;

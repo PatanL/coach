@@ -725,8 +725,13 @@ window.addEventListener("keydown", (event) => {
   // so we don't accidentally mark "Back on track" / arm-confirm recover / snooze, etc.
   if (typeof shownAt === "number") {
     const msSinceShow = Date.now() - shownAt;
-    const suppress = window.overlayUtils?.shouldSuppressHotkeyAfterShow?.({ key: event.key, msSinceShow })
-      ?? (event.key === "Enter" && window.overlayUtils?.shouldSuppressEnterAfterShow?.({ msSinceShow }));
+    const suppress = window.overlayUtils?.shouldSuppressHotkeyAfterShow?.({
+      key: event.key,
+      msSinceShow,
+      metaKey: Boolean(event.metaKey),
+      ctrlKey: Boolean(event.ctrlKey),
+      altKey: Boolean(event.altKey)
+    }) ?? (event.key === "Enter" && window.overlayUtils?.shouldSuppressEnterAfterShow?.({ msSinceShow }));
     if (suppress) return;
   }
 

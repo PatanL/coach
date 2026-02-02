@@ -119,6 +119,11 @@ test('shouldSuppressHotkeyAfterShow suppresses risky non-modified hotkeys briefl
   assert.strictEqual(u.shouldSuppressHotkeyAfterShow({ key: 't', msSinceShow: 10 }), true);
   assert.strictEqual(u.shouldSuppressHotkeyAfterShow({ key: 'd', msSinceShow: 10 }), true);
 
+  // Modifier chords should not be suppressed (they're usually intentional).
+  assert.strictEqual(u.shouldSuppressHotkeyAfterShow({ key: 'r', msSinceShow: 10, metaKey: true }), false);
+  assert.strictEqual(u.shouldSuppressHotkeyAfterShow({ key: 'r', msSinceShow: 10, ctrlKey: true }), false);
+  assert.strictEqual(u.shouldSuppressHotkeyAfterShow({ key: 'r', msSinceShow: 10, altKey: true }), false);
+
   // Keep Escape available.
   assert.strictEqual(u.shouldSuppressHotkeyAfterShow({ key: 'Escape', msSinceShow: 10 }), false);
 
