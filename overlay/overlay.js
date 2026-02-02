@@ -142,7 +142,7 @@ stuckBtn.addEventListener("click", () => sendAction({ action: "stuck" }));
 recoverBtn.addEventListener("click", () => sendAction({ action: "recover" }));
 
 alignSubmit.addEventListener("click", () => {
-  const value = alignText.value.trim();
+  const value = window.overlayUtils?.normalizeFreeform?.(alignText.value, { maxLen: 240 }) ?? alignText.value.trim();
   if (!value) return;
   sendAction({ action: "align_choice", value, question_id: currentPayload?.question_id || null });
   alignText.value = "";

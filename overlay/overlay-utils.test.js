@@ -4,6 +4,7 @@ const assert = require("node:assert/strict");
 const {
   isTextInputTarget,
   normalizeTwoMinuteStep,
+  normalizeFreeform,
   shouldTriggerBackOnTrackOnEnter
 } = require("./overlay-utils");
 
@@ -25,6 +26,13 @@ test("normalizeTwoMinuteStep: trims, collapses whitespace, clamps length", () =>
   assert.equal(normalizeTwoMinuteStep(""), "");
   assert.equal(normalizeTwoMinuteStep(null), "");
   assert.equal(normalizeTwoMinuteStep("a".repeat(10), { maxLen: 5 }), "aaaaa");
+});
+
+test("normalizeFreeform: trims, collapses whitespace, clamps length", () => {
+  assert.equal(normalizeFreeform("  hello\n\tworld  "), "hello world");
+  assert.equal(normalizeFreeform(""), "");
+  assert.equal(normalizeFreeform(undefined), "");
+  assert.equal(normalizeFreeform("b".repeat(10), { maxLen: 4 }), "bbbb");
 });
 
 test("shouldTriggerBackOnTrackOnEnter: blocks Enter during align and 2-min flows", () => {

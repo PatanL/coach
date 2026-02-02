@@ -19,6 +19,13 @@
     return str.length > maxLen ? str.slice(0, maxLen).trimEnd() : str;
   }
 
+  function normalizeFreeform(value, opts = {}) {
+    const maxLen = Number.isFinite(opts.maxLen) ? opts.maxLen : 240;
+    const str = String(value || "").replace(/\s+/g, " ").trim();
+    if (!str) return "";
+    return str.length > maxLen ? str.slice(0, maxLen).trimEnd() : str;
+  }
+
   function shouldTriggerBackOnTrackOnEnter({ target, mode, twoMinOpen } = {}) {
     if (mode === "align") return false;
     if (twoMinOpen) return false;
@@ -28,6 +35,7 @@
   return {
     isTextInputTarget,
     normalizeTwoMinuteStep,
+    normalizeFreeform,
     shouldTriggerBackOnTrackOnEnter
   };
 });
