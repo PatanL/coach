@@ -36,6 +36,19 @@ let shownAt = null;
 let currentPayload = null;
 let overlayBusy = false;
 
+let lastActionId = 0;
+// Track acks from main to stop retries.
+const ackSet = new Set();
+try {
+  window.overlayAPI?.onAck?.((ack) => {
+    if (ack && ack.id) {
+      ackSet.add(ack.id);
+      // Unblock the UI if we were waiting on a response.
+      if (overlayBusy) resetButtonStates();
+    }
+  });
+} catch (_e) {}
+
 // Guard against accidental "Recover" clicks / hotkeys.
 // First click arms recover; second click confirms.
 let recoverArmed = false;
@@ -343,14 +356,50 @@ function showOverlay(payload) {
 
 function sendAction(action) {
   const timeToAction = shownAt ? Date.now() - shownAt : 0;
-  window.overlayAPI.sendAction({
+
+  // If preload/backend isn't available, unblock the UI and show an actionable hint.
+  if (!window.overlayAPI || typeof window.overlayAPI.sendAction !== "function") {
+    resetButtonStates();
+    try {
+      diagnosis.textContent = "Coach backend unavailable — try Relaunch overlay or restart Coach.";
+    } catch {}
+    return;
+  }
+
+  lastActionId += 1;
+  const payload = {
     ...action,
+    action_id: lastActionId,
     time_to_action_ms: timeToAction,
     cmd_id: currentPayload?.cmd_id || null,
     block_id: currentPayload?.block_id || null,
     level: currentPayload?.level || null,
     headline: currentPayload?.headline || null
-  });
+  };
+
+  try { window.overlayAPI.logUIEvent?.("overlay_action", { action: payload.action, action_id: payload.action_id }); } catch {}
+  try { window.overlayAPI.sendAction(payload); } catch (_e) {}
+
+  // Retry high-salience actions briefly if no ack, to survive transient hiccups.
+  if (payload.action === "recover" || payload.action === "back_on_track" || payload.action === "pause_15") {
+    const started = Date.now();
+    const id = payload.action_id;
+    const tick = () => {
+      if (Date.now() - started > 2000) return; // give up after 2s
+      if (ackSet.has(id)) return; // stop once acked
+      try { window.overlayAPI.sendAction(payload); } catch {}
+      setTimeout(tick, 250);
+    };
+    setTimeout(tick, 250);
+  }
+
+  // Recover the UI if we never get an ack (e.g., main died). This keeps things actionable.
+  setTimeout(() => {
+    if (ackSet.has(payload.action_id)) return;
+    if (!overlayBusy) return;
+    try { window.overlayAPI.logUIEvent?.("overlay_action_timeout", { action: payload.action, action_id: payload.action_id }); } catch {}
+    resetButtonStates();
+  }, 4500);
 }
 
 function buildDiagnosticsText() {
@@ -498,6 +547,7 @@ copyDiagBtn?.addEventListener('click', () => {
 
   if (ok) {
     copyDiagBtn.textContent = 'Copied';
+    try { window.overlayAPI?.logUIEvent?.('copy_diagnostics_ok'); } catch {}
     // After a successful copy, guide focus to relaunch when available.
     if (relaunchBtn && !relaunchBtn.classList.contains('hidden')) {
       try { relaunchBtn.focus(); } catch {}
@@ -513,6 +563,7 @@ copyDiagBtn?.addEventListener('click', () => {
     ? window.overlayAPI.getSystemInfo()
     : { platform: 'unknown' };
   const hint = sys.platform === 'darwin' ? 'Press Cmd+C to copy' : 'Press Ctrl+C to copy';
+  try { window.overlayAPI?.logUIEvent?.('copy_diagnostics_failed', { platform: sys.platform }); } catch {}
 
   try {
     // Ensure repeated failures don't leak hidden textareas.
@@ -530,6 +581,7 @@ copyDiagBtn?.addEventListener('click', () => {
   } catch {}
 
   copyDiagBtn.textContent = `Copy failed — ${hint}`;
+  try { window.overlayAPI?.logUIEvent?.('copy_diagnostics_failed', { platform: sys.platform }); } catch {}
   setTimeout(() => {
     copyDiagBtn.textContent = 'Copy diagnostics';
     // Clean up any hidden textarea(s) we created for manual copy.
@@ -544,6 +596,7 @@ relaunchBtn?.addEventListener('click', () => {
     ? window.overlayAPI.relaunchOverlay()
     : false;
   relaunchBtn.textContent = ok ? 'Relaunching…' : 'Relaunch failed';
+  try { window.overlayAPI?.logUIEvent?.(ok ? 'relaunch_overlay_ok' : 'relaunch_overlay_failed'); } catch {}
   setTimeout(() => {
     relaunchBtn.textContent = 'Relaunch overlay';
   }, 2000);

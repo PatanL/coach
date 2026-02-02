@@ -373,6 +373,12 @@ ipcMain.on("overlay:action", (event, action) => {
     block_id: currentPayload?.block_id || null,
     source: "overlay"
   });
+  // Best-effort ack so the renderer can safely clear retry timers.
+  try {
+    event?.sender?.send("overlay:ack", { id: action?.action_id || null });
+  } catch (_e) {
+    // ignore ack errors
+  }
   // Pause actions should also dismiss the overlay so the user can get back to work.
   hideOverlay();
 });
@@ -409,4 +415,20 @@ app.whenReady().then(() => {
 
 app.on("will-quit", () => {
   globalShortcut.unregisterAll();
+});
+
+// Lightweight UI telemetry from the renderer for reliability analysis.
+ipcMain.on("overlay:ui_event", (_event, { name, meta }) => {
+  const now = new Date().toISOString();
+  appendAction({
+    ts: now,
+    type: "OVERLAY_UI",
+    name: String(name || ""),
+    meta: meta || null,
+    cmd_id: lastCmdId,
+    source_event_id: currentPayload?.source_event_id || null,
+    platform: process.platform,
+    arch: process.arch,
+    source: "overlay"
+  });
 });
