@@ -17,6 +17,8 @@ const twoMinChoices = document.getElementById("twoMinChoices");
 const twoMinText = document.getElementById("twoMinText");
 const twoMinSubmit = document.getElementById("twoMinSubmit");
 const hintEnter = document.getElementById("hintEnter");
+const hintRecover = document.getElementById("hintRecover");
+const hintUndo = document.getElementById("hintUndo");
 
 const backBtn = document.getElementById("backBtn");
 const pauseBtn = document.getElementById("pauseBtn");
@@ -75,6 +77,19 @@ function showTwoMin(choices) {
   twoMinText.focus();
 }
 
+function updateFooterHints() {
+  // Keep footer hints honest: only show shortcuts that are currently available.
+  const isAlign = overlay.dataset.mode === "align";
+  if (hintRecover) {
+    const recoverAvailable = recoverBtn && !recoverBtn.classList.contains("hidden");
+    hintRecover.classList.toggle("hidden", isAlign || !recoverAvailable);
+  }
+  if (hintUndo) {
+    const undoAvailable = undoRecoverBtn && !undoRecoverBtn.classList.contains("hidden");
+    hintUndo.classList.toggle("hidden", isAlign || !undoAvailable);
+  }
+}
+
 function showOverlay(payload) {
   overlay.classList.remove("hidden");
   resetSnooze();
@@ -119,6 +134,8 @@ function showOverlay(payload) {
     undoRecoverBtn?.classList.add("hidden");
     recoverBtn?.classList.remove("hidden");
   }
+
+  updateFooterHints();
 
   if (payload.level === "C") {
     miniPlan.classList.remove("hidden");
