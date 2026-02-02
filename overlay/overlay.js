@@ -448,7 +448,8 @@ window.addEventListener("keydown", (event) => {
       overlayHidden: overlay.classList.contains("hidden"),
       overlayBusy,
       mode: overlay.dataset.mode,
-      twoMinOpen: twoMinPanel && !twoMinPanel.classList.contains("hidden")
+      twoMinOpen: twoMinPanel && !twoMinPanel.classList.contains("hidden"),
+      snoozeOpen: snooze && !snooze.classList.contains("hidden")
     });
     if (action === "back_on_track") {
       event.preventDefault();

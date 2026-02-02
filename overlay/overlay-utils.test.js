@@ -45,33 +45,40 @@ test("normalizeFreeform: trims, collapses whitespace, clamps length", () => {
 
 test("shouldTriggerBackOnTrackOnEnter: blocks Enter during align and 2-min flows", () => {
   assert.equal(
-    shouldTriggerBackOnTrackOnEnter({ target: { tagName: "DIV" }, mode: "align", twoMinOpen: false }),
+    shouldTriggerBackOnTrackOnEnter({ target: { tagName: "DIV" }, mode: "align", twoMinOpen: false, snoozeOpen: false }),
     false
   );
   assert.equal(
-    shouldTriggerBackOnTrackOnEnter({ target: { tagName: "DIV" }, mode: "", twoMinOpen: true }),
+    shouldTriggerBackOnTrackOnEnter({ target: { tagName: "DIV" }, mode: "", twoMinOpen: true, snoozeOpen: false }),
     false
   );
 });
 
 test("shouldTriggerBackOnTrackOnEnter: blocks Enter while typing; allows otherwise", () => {
   assert.equal(
-    shouldTriggerBackOnTrackOnEnter({ target: { tagName: "INPUT" }, mode: "", twoMinOpen: false }),
+    shouldTriggerBackOnTrackOnEnter({ target: { tagName: "INPUT" }, mode: "", twoMinOpen: false, snoozeOpen: false }),
     false
   );
   assert.equal(
-    shouldTriggerBackOnTrackOnEnter({ target: { tagName: "DIV" }, mode: "", twoMinOpen: false }),
+    shouldTriggerBackOnTrackOnEnter({ target: { tagName: "DIV" }, mode: "", twoMinOpen: false, snoozeOpen: false }),
     true
+  );
+});
+
+test("shouldTriggerBackOnTrackOnEnter: blocks Enter while snooze panel open", () => {
+  assert.equal(
+    shouldTriggerBackOnTrackOnEnter({ target: { tagName: "DIV" }, mode: "", twoMinOpen: false, snoozeOpen: true }),
+    false
   );
 });
 
 test("shouldTriggerBackOnTrackOnEnter: does not fire when focus on buttons/links", () => {
   assert.equal(
-    shouldTriggerBackOnTrackOnEnter({ target: { tagName: "BUTTON" }, mode: "", twoMinOpen: false }),
+    shouldTriggerBackOnTrackOnEnter({ target: { tagName: "BUTTON" }, mode: "", twoMinOpen: false, snoozeOpen: false }),
     false
   );
   assert.equal(
-    shouldTriggerBackOnTrackOnEnter({ target: { tagName: "A" }, mode: "", twoMinOpen: false }),
+    shouldTriggerBackOnTrackOnEnter({ target: { tagName: "A" }, mode: "", twoMinOpen: false, snoozeOpen: false }),
     false
   );
 });
@@ -111,15 +118,31 @@ test("getOverlayHotkeyAction: ignores hotkeys while overlay hidden", () => {
 
 test("getOverlayHotkeyAction: Enter maps to back_on_track only in safe contexts", () => {
   assert.equal(
-    getOverlayHotkeyAction({ key: "Enter", target: { tagName: "DIV" } }, { overlayHidden: false, mode: "", twoMinOpen: false }),
+    getOverlayHotkeyAction(
+      { key: "Enter", target: { tagName: "DIV" } },
+      { overlayHidden: false, mode: "", twoMinOpen: false, snoozeOpen: false }
+    ),
     "back_on_track"
   );
   assert.equal(
-    getOverlayHotkeyAction({ key: "Enter", target: { tagName: "INPUT" } }, { overlayHidden: false, mode: "", twoMinOpen: false }),
+    getOverlayHotkeyAction(
+      { key: "Enter", target: { tagName: "INPUT" } },
+      { overlayHidden: false, mode: "", twoMinOpen: false, snoozeOpen: false }
+    ),
     null
   );
   assert.equal(
-    getOverlayHotkeyAction({ key: "Enter", target: { tagName: "DIV" } }, { overlayHidden: false, mode: "align", twoMinOpen: false }),
+    getOverlayHotkeyAction(
+      { key: "Enter", target: { tagName: "DIV" } },
+      { overlayHidden: false, mode: "align", twoMinOpen: false, snoozeOpen: false }
+    ),
+    null
+  );
+  assert.equal(
+    getOverlayHotkeyAction(
+      { key: "Enter", target: { tagName: "DIV" } },
+      { overlayHidden: false, mode: "", twoMinOpen: false, snoozeOpen: true }
+    ),
     null
   );
 });

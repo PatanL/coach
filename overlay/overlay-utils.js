@@ -85,9 +85,10 @@
     return false;
   }
 
-  function shouldTriggerBackOnTrackOnEnter({ target, mode, twoMinOpen } = {}) {
+  function shouldTriggerBackOnTrackOnEnter({ target, mode, twoMinOpen, snoozeOpen } = {}) {
     if (mode === "align") return false;
     if (twoMinOpen) return false;
+    if (snoozeOpen) return false;
     return !isInteractiveTarget(target);
   }
 
@@ -113,7 +114,7 @@
 
   function getOverlayHotkeyAction(
     event,
-    { overlayHidden = false, overlayBusy = false, mode, twoMinOpen } = {}
+    { overlayHidden = false, overlayBusy = false, mode, twoMinOpen, snoozeOpen } = {}
   ) {
     if (overlayHidden) return null;
     // While the overlay is dispatching an action (buttons disabled),
@@ -121,7 +122,12 @@
     if (overlayBusy) return null;
     const key = event?.key;
     if (key === "Enter") {
-      return shouldTriggerBackOnTrackOnEnter({ target: event?.target, mode, twoMinOpen })
+      return shouldTriggerBackOnTrackOnEnter({
+        target: event?.target,
+        mode,
+        twoMinOpen,
+        snoozeOpen
+      })
         ? "back_on_track"
         : null;
     }
