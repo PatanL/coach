@@ -165,6 +165,13 @@
     return !isTextInputTarget(target);
   }
 
+  function shouldSuppressEnterAfterShow({ msSinceShow, thresholdMs = 250 } = {}) {
+    const ms = Number(msSinceShow);
+    const threshold = Number(thresholdMs);
+    if (!Number.isFinite(ms) || !Number.isFinite(threshold)) return false;
+    return ms >= 0 && ms < threshold;
+  }
+
   function getOverlayHotkeyAction(
     event,
     { overlayHidden = false, overlayBusy = false, mode, twoMinOpen, snoozeOpen, recoverArmed = false } = {}
@@ -244,6 +251,7 @@
     labelForPayload,
     labelForOverlayState,
     recoverAriaLabel,
+    shouldSuppressEnterAfterShow,
     // Platform helpers exported for main-process reliability guards.
     isAppleSilicon,
     shouldAutoRehydrateRenderer

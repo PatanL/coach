@@ -637,6 +637,15 @@ function updateEnterHint() {
 window.addEventListener("keydown", (event) => {
   if (overlay.classList.contains("hidden")) return;
 
+  // Input-focus safety: when the overlay first appears, it may steal focus while the
+  // user is mid-keystroke in another app. Ignore a carry-over Enter press right after
+  // show() so we don't accidentally mark "Back on track" / confirm recover.
+  if (event.key === "Enter" && typeof shownAt === "number") {
+    const msSinceShow = Date.now() - shownAt;
+    const suppress = window.overlayUtils?.shouldSuppressEnterAfterShow?.({ msSinceShow });
+    if (suppress) return;
+  }
+
   // When an action is in-flight, ignore most hotkeys to prevent double-sends.
   // Keep Escape working so users can close panels / cancel an armed recover.
   // Also keep *recovery* hotkeys working (copy diagnostics / relaunch) so the

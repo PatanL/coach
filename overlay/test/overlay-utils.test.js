@@ -80,6 +80,13 @@ test('shouldShowSnoozeOnEscape disables snooze while typing', () => {
   assert.strictEqual(overlayUtils.shouldShowSnoozeOnEscape({ target: { tagName: 'DIV' } }), true);
 });
 
+test('shouldSuppressEnterAfterShow gates carry-over Enter presses', () => {
+  assert.strictEqual(overlayUtils.shouldSuppressEnterAfterShow({ msSinceShow: 0 }), true);
+  assert.strictEqual(overlayUtils.shouldSuppressEnterAfterShow({ msSinceShow: 200 }), true);
+  assert.strictEqual(overlayUtils.shouldSuppressEnterAfterShow({ msSinceShow: 260 }), false);
+  assert.strictEqual(overlayUtils.shouldSuppressEnterAfterShow({ msSinceShow: -10 }), false);
+});
+
 test('getOverlayHotkeyAction: Escape maps to show_snooze only when safe', () => {
   assert.strictEqual(
     overlayUtils.getOverlayHotkeyAction(
