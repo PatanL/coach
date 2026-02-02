@@ -50,6 +50,20 @@
     }
   }
 
+  function recoveryNextAction(env) {
+    // Make the next action more actionable on Apple Silicon where renderers can
+    // be lost after GPU handoffs: suggest copying diagnostics and reloading.
+    // On non-macOS platforms avoid mentioning Cmd+Q.
+    const platform = (env && env.platform) || (typeof process !== "undefined" ? process.platform : "");
+    if (isAppleSilicon(env)) {
+      return "Click ‘Copy diagnostics’, then ‘Relaunch overlay’.";
+    }
+    if (platform === "darwin") {
+      return "Restart coach (Cmd+Q) then relaunch.";
+    }
+    return "Restart coach, then relaunch.";
+  }
+
   function buildOverlayDataErrorPayload({ error, rawLine, env } = {}) {
     const errStr = String(error || "").trim();
     const raw = String(rawLine || "").trim();
@@ -62,25 +76,12 @@
       ? normalizeFreeform(`Raw: ${raw}`, { maxLen: 180 })
       : "Coach couldn’t read the latest overlay update.";
 
-    // Make the next action more actionable on Apple Silicon where renderers can
-    // be lost after GPU handoffs: suggest copying diagnostics and reloading.
-    // On non-macOS platforms avoid mentioning Cmd+Q.
-    const platform = (env && env.platform) || (typeof process !== "undefined" ? process.platform : "");
-    let nextAction;
-    if (isAppleSilicon(env)) {
-      nextAction = "Click ‘Copy diagnostics’, then ‘Relaunch overlay’.";
-    } else if (platform === "darwin") {
-      nextAction = "Restart coach (Cmd+Q) then relaunch.";
-    } else {
-      nextAction = "Restart coach, then relaunch.";
-    }
-
     return {
       level: "B",
       headline: "Overlay data error",
       human_line: human,
       diagnosis,
-      next_action: nextAction,
+      next_action: recoveryNextAction(env),
       relaunch_overlay: true,
       block_id: null,
       block_name: "",
@@ -91,23 +92,13 @@
 
   function buildOverlayRendererRecoveryPayload({ reason, env } = {}) {
     const why = normalizeFreeform(String(reason || "renderer_issue"), { maxLen: 120 });
-    const platform = (env && env.platform) || (typeof process !== "undefined" ? process.platform : "");
-
-    let nextAction;
-    if (isAppleSilicon(env)) {
-      nextAction = "Click ‘Copy diagnostics’, then ‘Relaunch overlay’.";
-    } else if (platform === "darwin") {
-      nextAction = "Restart coach (Cmd+Q) then relaunch.";
-    } else {
-      nextAction = "Restart coach, then relaunch.";
-    }
 
     return {
       level: "B",
       headline: "Overlay renderer issue",
       human_line: "Overlay became unresponsive. Recovery is available.",
       diagnosis: normalizeFreeform(`Renderer recovery throttled: ${why}`, { maxLen: 220 }),
-      next_action: nextAction,
+      next_action: recoveryNextAction(env),
       relaunch_overlay: true,
       block_id: null,
       block_name: "",
