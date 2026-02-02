@@ -329,6 +329,13 @@ function buildDiagnosticsText() {
   lines.push(`Electron: ${v.electron || ''}`);
   lines.push(`Chrome: ${v.chrome || ''}`);
   lines.push(`Node: ${v.node || ''}`);
+  lines.push('--- UI State ---');
+  lines.push(`OverlayHidden: ${overlay?.classList?.contains('hidden') ? 'true' : 'false'}`);
+  lines.push(`Mode: ${overlay?.dataset?.mode || ''}`);
+  lines.push(`Busy: ${overlayBusy ? 'true' : 'false'}`);
+  lines.push(`RecoverArmed: ${recoverArmed ? 'true' : 'false'}`);
+  lines.push(`TwoMinOpen: ${twoMinPanel && !twoMinPanel.classList.contains('hidden') ? 'true' : 'false'}`);
+  lines.push(`SnoozeOpen: ${snooze && !snooze.classList.contains('hidden') ? 'true' : 'false'}`);
   lines.push('--- Payload ---');
   lines.push(`Level: ${payload.level || ''}`);
   lines.push(`Headline: ${payload.headline || ''}`);
