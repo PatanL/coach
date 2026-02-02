@@ -26,9 +26,12 @@ test("isTextInputTarget: recognizes common typing targets", () => {
 });
 
 test("isTextInputTarget: ignores non-input targets", () => {
-  assert.equal(isTextInputTarget({ tagName: "BUTTON" }), false);
   assert.equal(isTextInputTarget({ tagName: "DIV" }), false);
   assert.equal(isTextInputTarget(null), false);
+});
+
+test("isTextInputTarget: treats focused buttons as keyboard-safe targets", () => {
+  assert.equal(isTextInputTarget({ tagName: "BUTTON" }), true);
 });
 
 test("normalizeTwoMinuteStep: trims, collapses whitespace, clamps length", () => {

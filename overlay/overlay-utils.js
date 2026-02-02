@@ -25,7 +25,9 @@
     const tag = String(target.tagName || "").toLowerCase();
     if (target.isContentEditable) return true;
     // Guard against non-string tagNames or custom elements with input roles.
-    if (tag === "input" || tag === "textarea" || tag === "select") return true;
+    // Include BUTTON to avoid global Enter handler firing while a focused button
+    // is activated via keyboard (prevents accidental "Back on track").
+    if (tag === "input" || tag === "textarea" || tag === "select" || tag === "button") return true;
     // Minimal role check for better keyboard safety in custom UIs.
     try {
       const role = String(target.getAttribute && target.getAttribute('role') || '').toLowerCase();
