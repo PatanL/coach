@@ -151,8 +151,9 @@ function showOverlay(payload) {
   setText(blockName, payload.block_name || "");
   setText(headline, payload.headline || "Reset.");
   setText(humanLine, payload.human_line || "");
-  setText(diagnosis, payload.diagnosis || "");
-  setText(nextAction, payload.next_action || "");
+  // Make the details panel more glanceable by labeling the fields.
+  setText(diagnosis, payload.diagnosis ? `Why: ${payload.diagnosis}` : "");
+  setText(nextAction, payload.next_action ? `Next: ${payload.next_action}` : "");
   configureDetails(payload);
 
   if (payload.level === "C") {
