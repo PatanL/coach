@@ -134,7 +134,7 @@
     return shouldTriggerBackOnTrack(event, activeElement, shownAtMs, nowMs);
   }
 
-  function getHotkeyHints({ mode, activeElement, snoozeOpen } = {}) {
+  function getHotkeyHints({ mode, activeElement, snoozeOpen, detailsAvailable } = {}) {
     const isTyping = isTextInputTarget(activeElement);
 
     // Prefer context-specific hints when the overlay is asking for input.
@@ -144,11 +144,14 @@
     // (In align mode we auto-focus the text box; while typing, numeric hotkeys are disabled.)
     const quickHint = mode === "align" && !snoozeOpen && !isTyping ? "1-9: Choose" : null;
 
+    // Only show the details hint when it's actionable and won't interrupt typing.
+    const detailsHint = detailsAvailable && !snoozeOpen && !isTyping ? "?: Details" : null;
+
     if (snoozeOpen) {
-      return { enterHint, quickHint: null, escHint: "Esc: Close snooze" };
+      return { enterHint, quickHint: null, detailsHint: null, escHint: "Esc: Close snooze" };
     }
 
-    return { enterHint, quickHint, escHint: "Esc: Snooze" };
+    return { enterHint, quickHint, detailsHint, escHint: "Esc: Snooze" };
   }
 
   // Map a single keypress ("1".."9") to a zero-based choice index.

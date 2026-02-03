@@ -196,26 +196,47 @@ test("getHotkeyHints: switches hints based on mode/focus", () => {
   assert.deepEqual(getHotkeyHints({ mode: "", activeElement: null, snoozeOpen: false }), {
     enterHint: "Enter: Back on track",
     quickHint: null,
+    detailsHint: null,
     escHint: "Esc: Snooze"
   });
 
   assert.deepEqual(getHotkeyHints({ mode: "align", activeElement: { tagName: "INPUT" }, snoozeOpen: false }), {
     enterHint: "Enter: Submit",
     quickHint: null,
+    detailsHint: null,
     escHint: "Esc: Snooze"
   });
 
-  assert.deepEqual(getHotkeyHints({ mode: "align", activeElement: { tagName: "DIV" }, snoozeOpen: false }), {
-    enterHint: "Enter: Submit",
-    quickHint: "1-9: Choose",
-    escHint: "Esc: Snooze"
-  });
+  assert.deepEqual(
+    getHotkeyHints({ mode: "align", activeElement: { tagName: "DIV" }, snoozeOpen: false, detailsAvailable: true }),
+    {
+      enterHint: "Enter: Submit",
+      quickHint: "1-9: Choose",
+      detailsHint: "?: Details",
+      escHint: "Esc: Snooze"
+    }
+  );
 
-  assert.deepEqual(getHotkeyHints({ mode: "align", activeElement: { tagName: "DIV" }, snoozeOpen: true }), {
-    enterHint: "Enter: Submit",
-    quickHint: null,
-    escHint: "Esc: Close snooze"
-  });
+  assert.deepEqual(
+    getHotkeyHints({ mode: "align", activeElement: { tagName: "DIV" }, snoozeOpen: false, detailsAvailable: false }),
+    {
+      enterHint: "Enter: Submit",
+      quickHint: "1-9: Choose",
+      detailsHint: null,
+      escHint: "Esc: Snooze"
+    }
+  );
+
+  // When snooze is open, hide other hints that aren't actionable.
+  assert.deepEqual(
+    getHotkeyHints({ mode: "align", activeElement: { tagName: "DIV" }, snoozeOpen: true, detailsAvailable: true }),
+    {
+      enterHint: "Enter: Submit",
+      quickHint: null,
+      detailsHint: null,
+      escHint: "Esc: Close snooze"
+    }
+  );
 });
 
 test("choiceIndexFromKey: maps 1-9 to zero-based indices", () => {

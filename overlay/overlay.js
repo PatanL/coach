@@ -64,10 +64,11 @@ function updateHotkeyHints() {
   const getHints = window.overlayUtils?.getHotkeyHints;
   if (typeof getHints !== "function") return;
 
-  const { enterHint: enterText, quickHint: quickText, escHint: escText } = getHints({
+  const { enterHint: enterText, quickHint: quickText, escHint: escText, detailsHint: detailsText } = getHints({
     mode,
     activeElement: document.activeElement,
-    snoozeOpen
+    snoozeOpen,
+    detailsAvailable: Boolean(detailsBtn && !detailsBtn.hidden)
   });
 
   enterHint.textContent = enterText;
@@ -79,11 +80,8 @@ function updateHotkeyHints() {
   }
 
   if (detailsHint) {
-    const isTyping = typeof window.overlayUtils?.isTextInputTarget === "function"
-      ? window.overlayUtils.isTextInputTarget(document.activeElement)
-      : false;
-
-    detailsHint.hidden = !detailsBtn || detailsBtn.hidden || isTyping;
+    detailsHint.hidden = !detailsText;
+    if (detailsText) detailsHint.textContent = detailsText;
   }
 }
 
