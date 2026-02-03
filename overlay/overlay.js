@@ -14,6 +14,9 @@ const alignSubmit = document.getElementById("alignSubmit");
 const enterHint = document.getElementById("enterHint");
 const quickHint = document.getElementById("quickHint");
 const escHint = document.getElementById("escHint");
+const detailsHint = document.getElementById("detailsHint");
+
+const detailsBtn = document.getElementById("detailsBtn");
 
 const backBtn = document.getElementById("backBtn");
 const stuckBtn = document.getElementById("stuckBtn");
@@ -23,6 +26,7 @@ const snoozeBtn = document.getElementById("snoozeBtn");
 let shownAt = null;
 let currentPayload = null;
 let actionLocked = false;
+let detailsOpen = true;
 
 function setText(el, value) {
   if (!el) return;
@@ -73,6 +77,14 @@ function updateHotkeyHints() {
     quickHint.hidden = !quickText;
     if (quickText) quickHint.textContent = quickText;
   }
+
+  if (detailsHint) {
+    const isTyping = typeof window.overlayUtils?.isTextInputTarget === "function"
+      ? window.overlayUtils.isTextInputTarget(document.activeElement)
+      : false;
+
+    detailsHint.hidden = !detailsBtn || detailsBtn.hidden || isTyping;
+  }
 }
 
 function resetSnooze() {
@@ -89,6 +101,41 @@ function resetAlignInput() {
   // Prevent accidental submits / Enter-to-click on the submit button when empty.
   alignSubmit.disabled = true;
   alignInput.classList.add("hidden");
+}
+
+function setDetailsOpen(nextOpen) {
+  detailsOpen = Boolean(nextOpen);
+
+  // Use hidden class so the layout tightens when collapsed.
+  if (diagnosis) diagnosis.classList.toggle("hidden", !detailsOpen);
+  if (nextAction) nextAction.classList.toggle("hidden", !detailsOpen);
+
+  if (detailsBtn) {
+    detailsBtn.textContent = detailsOpen ? "Hide" : "Why?";
+  }
+
+  updateHotkeyHints();
+}
+
+function configureDetails(payload) {
+  const hasDiagnosis = Boolean((payload?.diagnosis || "").trim());
+  const hasNextAction = Boolean((payload?.next_action || "").trim());
+  const hasDetails = hasDiagnosis || hasNextAction;
+
+  if (!detailsBtn) return;
+
+  detailsBtn.hidden = !hasDetails;
+
+  if (!hasDetails) {
+    detailsOpen = false;
+    if (diagnosis) diagnosis.classList.add("hidden");
+    if (nextAction) nextAction.classList.add("hidden");
+    if (detailsHint) detailsHint.hidden = true;
+    return;
+  }
+
+  // Preserve existing behavior: default to expanded.
+  setDetailsOpen(true);
 }
 
 function showOverlay(payload) {
@@ -108,6 +155,7 @@ function showOverlay(payload) {
   setText(humanLine, payload.human_line || "");
   setText(diagnosis, payload.diagnosis || "");
   setText(nextAction, payload.next_action || "");
+  configureDetails(payload);
 
   if (payload.level === "C") {
     miniPlan.classList.remove("hidden");
@@ -203,6 +251,13 @@ backBtn.addEventListener("click", () => sendAction({ action: "back_on_track" }))
 stuckBtn.addEventListener("click", () => sendAction({ action: "stuck" }));
 recoverBtn.addEventListener("click", () => sendAction({ action: "recover" }));
 
+if (detailsBtn) {
+  detailsBtn.addEventListener("click", () => {
+    if (detailsBtn.hidden) return;
+    setDetailsOpen(!detailsOpen);
+  });
+}
+
 alignText.addEventListener("input", () => {
   syncAlignSubmitState();
   updateHotkeyHints();
@@ -289,6 +344,20 @@ window.addEventListener("keydown", (event) => {
 
   const activeElement = document.activeElement;
   const mode = overlay.dataset.mode || "";
+
+  // "?" toggles extra context (why/next action) when available.
+  const shouldToggleDetails = window.overlayUtils?.shouldTriggerDetailsToggleFromKeydown;
+  if (
+    typeof shouldToggleDetails === "function" &&
+    shouldToggleDetails(event, activeElement) &&
+    detailsBtn &&
+    !detailsBtn.hidden
+  ) {
+    event.preventDefault();
+    event.stopPropagation();
+    setDetailsOpen(!detailsOpen);
+    return;
+  }
 
   // Option B actionable overlay: allow quick 1-9 choice selection (when not typing).
   if (mode === "align" && snooze.classList.contains("hidden")) {

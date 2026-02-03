@@ -8,6 +8,7 @@ const {
   shouldTriggerBackOnTrack,
   shouldTriggerSnoozeFromKeydown,
   shouldTriggerSnooze,
+  shouldTriggerDetailsToggleFromKeydown,
   getHotkeyHints,
   choiceIndexFromKey,
   shouldTriggerChoiceFromKeydown,
@@ -157,6 +158,28 @@ test("shouldTriggerSnoozeFromKeydown: triggers only when safe", () => {
     shouldTriggerSnoozeFromKeydown({ key: "Escape", isComposing: false, target: { tagName: "BUTTON" } }, null),
     false
   );
+});
+
+test("shouldTriggerDetailsToggleFromKeydown: triggers only when safe", () => {
+  assert.equal(shouldTriggerDetailsToggleFromKeydown({ key: "?", isComposing: false }, null), true);
+
+  // Allow Shift+/ (event.key='?' with shiftKey true).
+  assert.equal(shouldTriggerDetailsToggleFromKeydown({ key: "?", isComposing: false, shiftKey: true }, null), true);
+
+  // Only '?'.
+  assert.equal(shouldTriggerDetailsToggleFromKeydown({ key: "/", isComposing: false }, null), false);
+
+  // Never while typing.
+  assert.equal(
+    shouldTriggerDetailsToggleFromKeydown({ key: "?", isComposing: false, target: { tagName: "INPUT" } }, null),
+    false
+  );
+
+  // Avoid repeat and modifier combos.
+  assert.equal(shouldTriggerDetailsToggleFromKeydown({ key: "?", isComposing: false, repeat: true }, null), false);
+  assert.equal(shouldTriggerDetailsToggleFromKeydown({ key: "?", isComposing: false, metaKey: true }, null), false);
+  assert.equal(shouldTriggerDetailsToggleFromKeydown({ key: "?", isComposing: false, ctrlKey: true }, null), false);
+  assert.equal(shouldTriggerDetailsToggleFromKeydown({ key: "?", isComposing: false, altKey: true }, null), false);
 });
 
 test("shouldTriggerSnooze: requires a short dwell after show", () => {

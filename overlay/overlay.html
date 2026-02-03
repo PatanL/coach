@@ -11,7 +11,10 @@
       <div class="card">
         <div class="header">
           <span class="label">DRIFT</span>
-          <span id="blockName" class="block">Block</span>
+          <span class="header-right">
+            <span id="blockName" class="block">Block</span>
+            <button id="detailsBtn" class="details-toggle" type="button" hidden>Why?</button>
+          </span>
         </div>
         <div id="headline" class="headline">Reset.</div>
         <div id="humanLine" class="human-line"></div>
@@ -42,6 +45,7 @@
           <span id="enterHint">Enter: Back on track</span>
           <span id="quickHint" hidden></span>
           <span id="escHint">Esc: Snooze</span>
+          <span id="detailsHint" hidden>?: Details</span>
           <span>Cmd/Ctrl+Shift+P: Pause 15</span>
         </div>
       </div>

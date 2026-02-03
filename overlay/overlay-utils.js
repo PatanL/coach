@@ -85,6 +85,26 @@
     return true;
   }
 
+  function shouldTriggerDetailsToggleFromKeydown(event, activeElement) {
+    if (!event) return false;
+
+    // On most keyboards this is Shift+/ (event.key becomes '?').
+    if (event.key !== "?") return false;
+    if (event.defaultPrevented) return false;
+    if (event.isComposing) return false;
+    if (event.repeat) return false;
+
+    // Don't hijack when a modifier combo is intended.
+    if (event.metaKey || event.ctrlKey || event.altKey) return false;
+
+    // If the user is typing, allow '?' to be entered normally.
+    const isTypingTarget = isTextInputTarget(event.target) || isTextInputTarget(activeElement);
+    if (isTypingTarget) return false;
+
+    return true;
+  }
+
+
   // Avoid accidental confirmation when the overlay steals focus mid-typing.
   // If the overlay has *just* shown, require a short dwell before a hotkey triggers.
   function shouldTriggerBackOnTrack(event, activeElement, shownAtMs, nowMs = Date.now()) {
@@ -182,6 +202,7 @@
     shouldTriggerBackOnTrackInMode,
     shouldTriggerSnoozeFromKeydown,
     shouldTriggerSnooze,
+    shouldTriggerDetailsToggleFromKeydown,
     getHotkeyHints,
     choiceIndexFromKey,
     shouldTriggerChoiceFromKeydown,
