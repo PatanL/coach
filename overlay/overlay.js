@@ -246,6 +246,29 @@ snooze.addEventListener("click", (event) => {
   }
 });
 
+function isWithin(container, target) {
+  if (!container || !target) return false;
+  if (container === target) return true;
+  return typeof container.contains === "function" ? container.contains(target) : false;
+}
+
+// UX: when the snooze panel is open, clicking elsewhere should close it.
+// (This avoids a "modal trap" and makes recovery faster.)
+document.addEventListener("click", (event) => {
+  if (overlay.classList.contains("hidden")) return;
+  if (snooze.classList.contains("hidden")) return;
+
+  const target = event.target;
+
+  // Ignore clicks inside the snooze panel (including reason buttons).
+  if (isWithin(snooze, target)) return;
+
+  // Ignore clicks on the Snooze button itself (it toggles/open behavior).
+  if (isWithin(snoozeBtn, target)) return;
+
+  closeSnoozePanel();
+});
+
 window.overlayAPI?.onShow?.((payload) => {
   showOverlay(payload);
 });

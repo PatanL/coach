@@ -54,6 +54,19 @@ async function main() {
       }
     },
     {
+      name: "overlay-snooze-open.png",
+      payload: {
+        level: "B",
+        block_id: "block:demo",
+        block_name: "Deep Work",
+        headline: "Reset.",
+        human_line: "Quick check-in.",
+        diagnosis: "You drifted from the plan.",
+        next_action: "Pick one and do it for 2 minutes."
+      },
+      postScript: "document.getElementById('snoozeBtn')?.click?.()"
+    },
+    {
       name: "overlay-off-schedule.png",
       payload: {
         level: "B",
