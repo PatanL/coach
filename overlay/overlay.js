@@ -141,10 +141,17 @@ window.addEventListener("keydown", (event) => {
   // Don't treat Enter as "Back on track" while the user is typing.
   const shouldTrigger = window.overlayUtils?.shouldTriggerBackOnTrack;
   if (shouldTrigger && shouldTrigger(event, document.activeElement, shownAt)) {
+    // Capture the key so it doesn't also activate a focused control or "fall through".
+    event.preventDefault();
+    event.stopPropagation();
     sendAction({ action: "back_on_track" });
+    return;
   }
 
   if (event.key === "Escape") {
+    // Capture Escape so it doesn't dismiss/affect other UI unexpectedly.
+    event.preventDefault();
+    event.stopPropagation();
     snooze.classList.remove("hidden");
   }
 });
