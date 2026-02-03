@@ -21,6 +21,24 @@ const snoozeBtn = document.getElementById("snoozeBtn");
 
 let shownAt = null;
 let currentPayload = null;
+let actionLocked = false;
+
+function setControlsEnabled(enabled) {
+  const controls = overlay?.querySelectorAll?.("button, input") || [];
+  controls.forEach((el) => {
+    // Don't re-enable elements that are intentionally disabled by state (e.g., empty submit).
+    if (enabled) return;
+    el.disabled = true;
+  });
+
+  if (enabled) {
+    // Re-enable everything, then let stateful logic (like syncAlignSubmitState) disable as needed.
+    controls.forEach((el) => {
+      el.disabled = false;
+    });
+    syncAlignSubmitState();
+  }
+}
 
 function updateHotkeyHints() {
   if (!enterHint || !escHint) return;
@@ -67,6 +85,8 @@ function resetAlignInput() {
 
 function showOverlay(payload) {
   overlay.classList.remove("hidden");
+  actionLocked = false;
+  setControlsEnabled(true);
   resetSnooze();
   resetAlignInput();
   if (payload.choices && Array.isArray(payload.choices)) {
@@ -119,6 +139,10 @@ function showOverlay(payload) {
 }
 
 function sendAction(action) {
+  if (actionLocked) return;
+  actionLocked = true;
+  setControlsEnabled(false);
+
   const timeToAction = shownAt ? Date.now() - shownAt : 0;
   window.overlayAPI.sendAction({
     ...action,
