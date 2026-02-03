@@ -120,6 +120,14 @@
     return { enterHint, escHint: "Esc: Snooze" };
   }
 
+  // Map a single keypress ("1".."9") to a zero-based choice index.
+  // Returns null when the key isn't a valid choice selector.
+  function choiceIndexFromKey(key) {
+    if (typeof key !== "string" || key.length !== 1) return null;
+    if (key < "1" || key > "9") return null;
+    return Number(key) - 1;
+  }
+
   return {
     isTextInputTarget,
     isControlTarget,
@@ -127,6 +135,7 @@
     shouldTriggerBackOnTrack,
     shouldTriggerSnoozeFromKeydown,
     shouldTriggerSnooze,
-    getHotkeyHints
+    getHotkeyHints,
+    choiceIndexFromKey
   };
 });

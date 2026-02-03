@@ -8,7 +8,8 @@ const {
   shouldTriggerBackOnTrack,
   shouldTriggerSnoozeFromKeydown,
   shouldTriggerSnooze,
-  getHotkeyHints
+  getHotkeyHints,
+  choiceIndexFromKey
 } = require("./overlay-utils");
 
 test("isTextInputTarget: recognizes common typing targets", () => {
@@ -135,10 +136,7 @@ test("shouldTriggerBackOnTrackFromKeydown: triggers only when safe", () => {
     false
   );
 
-  assert.equal(
-    shouldTriggerBackOnKeydownTypingTarget({ tagName: "INPUT" }),
-    false
-  );
+  assert.equal(shouldTriggerBackOnKeydownTypingTarget({ tagName: "INPUT" }), false);
 
   assert.equal(
     shouldTriggerBackOnTrackFromKeydown(
@@ -238,3 +236,16 @@ function shouldTriggerBackOnKeydownTypingTarget(activeEl) {
     activeEl
   );
 }
+
+test("choiceIndexFromKey: maps 1-9 to zero-based indices", () => {
+  assert.equal(choiceIndexFromKey("1"), 0);
+  assert.equal(choiceIndexFromKey("2"), 1);
+  assert.equal(choiceIndexFromKey("9"), 8);
+});
+
+test("choiceIndexFromKey: returns null for non-choice keys", () => {
+  assert.equal(choiceIndexFromKey("0"), null);
+  assert.equal(choiceIndexFromKey("a"), null);
+  assert.equal(choiceIndexFromKey("Enter"), null);
+  assert.equal(choiceIndexFromKey(null), null);
+});

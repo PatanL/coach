@@ -110,9 +110,10 @@ function showOverlay(payload) {
 
   if (payload.choices && Array.isArray(payload.choices)) {
     choiceButtons.innerHTML = "";
-    payload.choices.forEach((choice) => {
+    payload.choices.forEach((choice, index) => {
       const button = document.createElement("button");
-      button.textContent = choice;
+      const prefix = index < 9 ? `${index + 1}. ` : "";
+      button.textContent = `${prefix}${choice}`;
       button.addEventListener("click", () => {
         sendAction({ action: "align_choice", value: choice, question_id: currentPayload?.question_id || null });
       });
@@ -234,6 +235,31 @@ window.overlayAPI.onPause(() => {
 window.addEventListener("keydown", (event) => {
   if (overlay.classList.contains("hidden")) return;
 
+  const activeElement = document.activeElement;
+
+  // Option B actionable overlay: allow quick 1-9 choice selection (when not typing).
+  if (
+    overlay.dataset.mode === "align" &&
+    snooze.classList.contains("hidden") &&
+    currentPayload?.choices &&
+    Array.isArray(currentPayload.choices)
+  ) {
+    const isTyping =
+      window.overlayUtils?.isTextInputTarget?.(event.target) ||
+      window.overlayUtils?.isTextInputTarget?.(activeElement);
+
+    if (!isTyping) {
+      const index = window.overlayUtils?.choiceIndexFromKey?.(event.key);
+      const choice = index != null ? currentPayload.choices[index] : null;
+      if (choice) {
+        event.preventDefault();
+        event.stopPropagation();
+        sendAction({ action: "align_choice", value: choice, question_id: currentPayload?.question_id || null });
+        return;
+      }
+    }
+  }
+
   // If the snooze panel is open, Escape should close it (quickly reversible).
   if (event.key === "Escape" && !snooze.classList.contains("hidden")) {
     event.preventDefault();
@@ -244,7 +270,7 @@ window.addEventListener("keydown", (event) => {
 
   // Don't treat Enter as "Back on track" while the user is typing.
   const shouldTrigger = window.overlayUtils?.shouldTriggerBackOnTrack;
-  if (shouldTrigger && shouldTrigger(event, document.activeElement, shownAt)) {
+  if (shouldTrigger && shouldTrigger(event, activeElement, shownAt)) {
     // Capture the key so it doesn't also activate a focused control or "fall through".
     event.preventDefault();
     event.stopPropagation();
@@ -254,7 +280,7 @@ window.addEventListener("keydown", (event) => {
 
   const shouldTriggerSnooze =
     window.overlayUtils?.shouldTriggerSnooze || window.overlayUtils?.shouldTriggerSnoozeFromKeydown;
-  if (shouldTriggerSnooze && shouldTriggerSnooze(event, document.activeElement, shownAt)) {
+  if (shouldTriggerSnooze && shouldTriggerSnooze(event, activeElement, shownAt)) {
     // Capture Escape so it doesn't dismiss/affect other UI unexpectedly.
     event.preventDefault();
     event.stopPropagation();
