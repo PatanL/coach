@@ -10,7 +10,8 @@ const {
   shouldTriggerSnooze,
   getHotkeyHints,
   choiceIndexFromKey,
-  shouldTriggerChoiceFromKeydown
+  shouldTriggerChoiceFromKeydown,
+  shouldTriggerAlignSubmitFromKeydown
 } = require("./overlay-utils");
 
 test("isTextInputTarget: recognizes common typing targets", () => {
@@ -204,4 +205,23 @@ test("shouldTriggerChoiceFromKeydown: triggers only when safe", () => {
   // Avoid auto-repeat and modifier keys.
   assert.equal(shouldTriggerChoiceFromKeydown({ key: "3", isComposing: false, repeat: true }, null), false);
   assert.equal(shouldTriggerChoiceFromKeydown({ key: "4", isComposing: false, ctrlKey: true }, null), false);
+});
+
+test("shouldTriggerAlignSubmitFromKeydown: triggers only when safe", () => {
+  assert.equal(shouldTriggerAlignSubmitFromKeydown({ key: "Enter", isComposing: false }), true);
+
+  // Only Enter.
+  assert.equal(shouldTriggerAlignSubmitFromKeydown({ key: "Escape", isComposing: false }), false);
+
+  // Don't submit while composing (IME).
+  assert.equal(shouldTriggerAlignSubmitFromKeydown({ key: "Enter", isComposing: true }), false);
+
+  // Avoid auto-repeat.
+  assert.equal(shouldTriggerAlignSubmitFromKeydown({ key: "Enter", isComposing: false, repeat: true }), false);
+
+  // Don't hijack modified Enter.
+  assert.equal(shouldTriggerAlignSubmitFromKeydown({ key: "Enter", isComposing: false, metaKey: true }), false);
+  assert.equal(shouldTriggerAlignSubmitFromKeydown({ key: "Enter", isComposing: false, ctrlKey: true }), false);
+  assert.equal(shouldTriggerAlignSubmitFromKeydown({ key: "Enter", isComposing: false, altKey: true }), false);
+  assert.equal(shouldTriggerAlignSubmitFromKeydown({ key: "Enter", isComposing: false, shiftKey: true }), false);
 });

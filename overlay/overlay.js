@@ -218,11 +218,20 @@ alignSubmit.addEventListener("click", () => {
 });
 
 alignText.addEventListener("keydown", (event) => {
-  if (event.key === "Enter") {
+  const shouldSubmit = window.overlayUtils?.shouldTriggerAlignSubmitFromKeydown;
+  if (typeof shouldSubmit === "function" ? shouldSubmit(event) : event.key === "Enter") {
     // Prevent the global Enter handler from also firing.
     event.preventDefault();
     event.stopPropagation();
-    alignSubmit.click();
+
+    // Avoid relying on disabled-button click semantics.
+    const value = alignText.value.trim();
+    if (!value) return;
+
+    sendAction({ action: "align_choice", value, question_id: currentPayload?.question_id || null });
+    alignText.value = "";
+    syncAlignSubmitState();
+    updateHotkeyHints();
   }
 });
 

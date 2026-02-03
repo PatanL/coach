@@ -149,6 +149,24 @@
     return true;
   }
 
+  function shouldTriggerAlignSubmitFromKeydown(event) {
+    if (!event) return false;
+
+    if (event.key !== "Enter") return false;
+    if (event.defaultPrevented) return false;
+
+    // Enter is commonly used to finish IME composition; don't treat that as submit.
+    if (event.isComposing) return false;
+
+    // Avoid auto-repeat (holding Enter) accidentally submitting multiple times.
+    if (event.repeat) return false;
+
+    // If the user is using a modified Enter (e.g. Cmd+Enter), don't hijack it.
+    if (event.metaKey || event.ctrlKey || event.altKey || event.shiftKey) return false;
+
+    return true;
+  }
+
   return {
     isTextInputTarget,
     isControlTarget,
@@ -158,6 +176,7 @@
     shouldTriggerSnooze,
     getHotkeyHints,
     choiceIndexFromKey,
-    shouldTriggerChoiceFromKeydown
+    shouldTriggerChoiceFromKeydown,
+    shouldTriggerAlignSubmitFromKeydown
   };
 });
