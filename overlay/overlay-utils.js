@@ -138,7 +138,13 @@
     const isTyping = isTextInputTarget(activeElement);
 
     // Prefer context-specific hints when the overlay is asking for input.
-    const enterHint = mode === "align" || isTyping ? "Enter: Submit" : "Enter: Back on track";
+    let enterHint = mode === "align" || isTyping ? "Enter: Submit" : "Enter: Back on track";
+
+    // When the snooze panel is open, Enter usually activates a focused reason button.
+    // Make that explicit so the user doesn't think Enter will confirm the primary action.
+    if (snoozeOpen && isControlTarget(activeElement)) {
+      enterHint = "Enter: Select";
+    }
 
     // Only show numeric hotkey hint when it's actually usable.
     // (In align mode we auto-focus the text box; while typing, numeric hotkeys are disabled.)

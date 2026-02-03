@@ -237,6 +237,17 @@ test("getHotkeyHints: switches hints based on mode/focus", () => {
       escHint: "Esc: Close snooze"
     }
   );
+
+  // When snooze is open and a reason button is focused, make Enter behavior explicit.
+  assert.deepEqual(
+    getHotkeyHints({ mode: "align", activeElement: { tagName: "BUTTON" }, snoozeOpen: true, detailsAvailable: true }),
+    {
+      enterHint: "Enter: Select",
+      quickHint: null,
+      detailsHint: null,
+      escHint: "Esc: Close snooze"
+    }
+  );
 });
 
 test("choiceIndexFromKey: maps 1-9 to zero-based indices", () => {
