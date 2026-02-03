@@ -12,6 +12,7 @@ const alignText = document.getElementById("alignText");
 const alignSubmit = document.getElementById("alignSubmit");
 
 const enterHint = document.getElementById("enterHint");
+const quickHint = document.getElementById("quickHint");
 const escHint = document.getElementById("escHint");
 
 const backBtn = document.getElementById("backBtn");
@@ -41,10 +42,15 @@ function setControlsEnabled(enabled) {
 }
 
 function updateHotkeyHints() {
-  if (!enterHint || !escHint) return;
-
   const mode = overlay?.dataset?.mode || "";
   const snoozeOpen = snooze && !snooze.classList.contains("hidden");
+
+  // Only show the 1-9 hint when the actionable "align" mode is active.
+  if (quickHint) {
+    const showQuick = mode === "align" && !snoozeOpen;
+    quickHint.hidden = !showQuick;
+    if (showQuick) quickHint.textContent = "1-9: Choose";
+  }
 
   const getHints = window.overlayUtils?.getHotkeyHints;
   if (typeof getHints !== "function") return;
@@ -55,8 +61,8 @@ function updateHotkeyHints() {
     snoozeOpen
   });
 
-  enterHint.textContent = enterText;
-  escHint.textContent = escText;
+  if (enterHint) enterHint.textContent = enterText;
+  if (escHint) escHint.textContent = escText;
 }
 
 function setText(el, value) {

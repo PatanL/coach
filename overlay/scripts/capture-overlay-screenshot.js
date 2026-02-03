@@ -11,7 +11,7 @@ async function main() {
 
   const win = new BrowserWindow({
     width: 620,
-    height: 520,
+    height: 600,
     show: false,
     webPreferences: {
       preload: path.join(__dirname, "screenshot-preload.js")
