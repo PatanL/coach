@@ -1,17 +1,207 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
 
-const { isTextInputTarget } = require("./overlay-utils");
+const {
+  isTextInputTarget,
+  isControlTarget,
+  shouldTriggerBackOnTrackFromKeydown,
+  shouldTriggerBackOnTrack,
+  shouldTriggerSnoozeFromKeydown,
+  shouldTriggerSnooze,
+  getHotkeyHints,
+  choiceIndexFromKey,
+  shouldTriggerChoiceFromKeydown
+} = require("./overlay-utils");
 
 test("isTextInputTarget: recognizes common typing targets", () => {
   assert.equal(isTextInputTarget({ tagName: "INPUT" }), true);
   assert.equal(isTextInputTarget({ tagName: "textarea" }), true);
   assert.equal(isTextInputTarget({ tagName: "Select" }), true);
   assert.equal(isTextInputTarget({ tagName: "DIV", isContentEditable: true }), true);
+
+  assert.equal(
+    isTextInputTarget({
+      tagName: "DIV",
+      getAttribute: (name) => (name === "role" ? "textbox" : null)
+    }),
+    true
+  );
+
+  assert.equal(
+    isTextInputTarget({
+      tagName: "DIV",
+      getAttribute: (name) => (name === "contenteditable" ? "true" : null)
+    }),
+    true
+  );
 });
 
 test("isTextInputTarget: ignores non-input targets", () => {
   assert.equal(isTextInputTarget({ tagName: "BUTTON" }), false);
   assert.equal(isTextInputTarget({ tagName: "DIV" }), false);
+  assert.equal(
+    isTextInputTarget({
+      tagName: "DIV",
+      getAttribute: (name) => (name === "contenteditable" ? "false" : null)
+    }),
+    false
+  );
   assert.equal(isTextInputTarget(null), false);
+});
+
+test("isControlTarget: recognizes common control targets", () => {
+  assert.equal(isControlTarget({ tagName: "BUTTON" }), true);
+  assert.equal(isControlTarget({ tagName: "A" }), true);
+
+  assert.equal(
+    isControlTarget({
+      tagName: "DIV",
+      getAttribute: (name) => (name === "role" ? "button" : null)
+    }),
+    true
+  );
+
+  assert.equal(
+    isControlTarget({
+      tagName: "INPUT",
+      getAttribute: (name) => (name === "type" ? "submit" : null)
+    }),
+    true
+  );
+
+  assert.equal(isControlTarget({ tagName: "DIV" }), false);
+});
+
+test("shouldTriggerBackOnTrackFromKeydown: triggers only when safe", () => {
+  assert.equal(shouldTriggerBackOnTrackFromKeydown({ key: "Enter", isComposing: false }, null), true);
+
+  assert.equal(shouldTriggerBackOnTrackFromKeydown({ key: "Escape", isComposing: false }, null), false);
+
+  assert.equal(
+    shouldTriggerBackOnTrackFromKeydown({ key: "Enter", defaultPrevented: true, isComposing: false }, null),
+    false
+  );
+
+  assert.equal(shouldTriggerBackOnTrackFromKeydown({ key: "Enter", isComposing: true }, null), false);
+
+  assert.equal(shouldTriggerBackOnTrackFromKeydown({ key: "Enter", isComposing: false, repeat: true }, null), false);
+
+  assert.equal(
+    shouldTriggerBackOnTrackFromKeydown({ key: "Enter", isComposing: false, metaKey: true }, null),
+    false
+  );
+
+  // If Enter is on a control element, don't double-trigger.
+  assert.equal(
+    shouldTriggerBackOnTrackFromKeydown({ key: "Enter", isComposing: false, target: { tagName: "BUTTON" } }, null),
+    false
+  );
+
+  // If Enter is being pressed while typing, never treat it as "Back on track".
+  assert.equal(
+    shouldTriggerBackOnTrackFromKeydown({ key: "Enter", isComposing: false, target: { tagName: "INPUT" } }, null),
+    false
+  );
+
+  // Same logic when focus is elsewhere (activeElement).
+  assert.equal(
+    shouldTriggerBackOnTrackFromKeydown({ key: "Enter", isComposing: false, target: { tagName: "DIV" } }, { tagName: "INPUT" }),
+    false
+  );
+});
+
+test("shouldTriggerBackOnTrack: requires a short dwell after show", () => {
+  const event = { key: "Enter", isComposing: false, target: { tagName: "DIV" } };
+
+  // Within the dwell window → do not trigger.
+  assert.equal(shouldTriggerBackOnTrack(event, null, 1000, 1200), false);
+
+  // After the dwell window → ok.
+  assert.equal(shouldTriggerBackOnTrack(event, null, 1000, 2000), true);
+});
+
+test("shouldTriggerSnoozeFromKeydown: triggers only when safe", () => {
+  assert.equal(shouldTriggerSnoozeFromKeydown({ key: "Escape", isComposing: false }, null), true);
+
+  assert.equal(shouldTriggerSnoozeFromKeydown({ key: "Enter", isComposing: false }, null), false);
+
+  assert.equal(
+    shouldTriggerSnoozeFromKeydown({ key: "Escape", defaultPrevented: true, isComposing: false }, null),
+    false
+  );
+
+  assert.equal(shouldTriggerSnoozeFromKeydown({ key: "Escape", isComposing: true }, null), false);
+
+  // Don't hijack Escape while typing.
+  assert.equal(
+    shouldTriggerSnoozeFromKeydown({ key: "Escape", isComposing: false, target: { tagName: "INPUT" } }, null),
+    false
+  );
+
+  // Don't double-trigger on controls.
+  assert.equal(
+    shouldTriggerSnoozeFromKeydown({ key: "Escape", isComposing: false, target: { tagName: "BUTTON" } }, null),
+    false
+  );
+});
+
+test("shouldTriggerSnooze: requires a short dwell after show", () => {
+  const event = { key: "Escape", isComposing: false, target: { tagName: "DIV" } };
+
+  // Within the dwell window → do not trigger.
+  assert.equal(shouldTriggerSnooze(event, null, 1000, 1200), false);
+
+  // After the dwell window → ok.
+  assert.equal(shouldTriggerSnooze(event, null, 1000, 2000), true);
+});
+
+test("getHotkeyHints: switches hints based on mode/focus", () => {
+  assert.deepEqual(getHotkeyHints({ mode: "", activeElement: null, snoozeOpen: false }), {
+    enterHint: "Enter: Back on track",
+    quickHint: null,
+    escHint: "Esc: Snooze"
+  });
+
+  assert.deepEqual(getHotkeyHints({ mode: "align", activeElement: { tagName: "INPUT" }, snoozeOpen: false }), {
+    enterHint: "Enter: Submit",
+    quickHint: null,
+    escHint: "Esc: Snooze"
+  });
+
+  assert.deepEqual(getHotkeyHints({ mode: "align", activeElement: { tagName: "DIV" }, snoozeOpen: false }), {
+    enterHint: "Enter: Submit",
+    quickHint: "1-9: Choose",
+    escHint: "Esc: Snooze"
+  });
+
+  assert.deepEqual(getHotkeyHints({ mode: "align", activeElement: { tagName: "DIV" }, snoozeOpen: true }), {
+    enterHint: "Enter: Submit",
+    quickHint: null,
+    escHint: "Esc: Close snooze"
+  });
+});
+
+test("choiceIndexFromKey: maps 1-9 to zero-based indices", () => {
+  assert.equal(choiceIndexFromKey("1"), 0);
+  assert.equal(choiceIndexFromKey("2"), 1);
+  assert.equal(choiceIndexFromKey("9"), 8);
+  assert.equal(choiceIndexFromKey("0"), null);
+  assert.equal(choiceIndexFromKey("a"), null);
+});
+
+test("shouldTriggerChoiceFromKeydown: triggers only when safe", () => {
+  assert.equal(shouldTriggerChoiceFromKeydown({ key: "1", isComposing: false }, null), true);
+
+  // Only 1-9.
+  assert.equal(shouldTriggerChoiceFromKeydown({ key: "0", isComposing: false }, null), false);
+
+  // Never while typing.
+  assert.equal(
+    shouldTriggerChoiceFromKeydown({ key: "2", isComposing: false, target: { tagName: "INPUT" } }, null),
+    false
+  );
+
+  // Avoid auto-repeat and modifier keys.
+  assert.equal(shouldTriggerChoiceFromKeydown({ key: "3", isComposing: false, repeat: true }, null), false);
+  assert.equal(shouldTriggerChoiceFromKeydown({ key: "4", isComposing: false, ctrlKey: true }, null), false);
 });
