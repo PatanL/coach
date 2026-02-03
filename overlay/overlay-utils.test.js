@@ -131,12 +131,54 @@ test("shouldTriggerBackOnTrackFromKeydown: triggers only when safe", () => {
     false
   );
 
+  // If Enter is on a control element, don't double-trigger.
   assert.equal(
     shouldTriggerBackOnTrackFromKeydown({ key: "Enter", isComposing: false, target: { tagName: "BUTTON" } }, null),
     false
   );
 
+  assert.equal(
+    shouldTriggerBackOnTrackFromKeydown({ key: "Enter", isComposing: false, target: { tagName: "A" } }, null),
+    false
+  );
+
+  assert.equal(
+    shouldTriggerBackOnTrackFromKeydown(
+      {
+        key: "Enter",
+        isComposing: false,
+        target: { tagName: "DIV", getAttribute: (n) => (n === "role" ? "button" : null) }
+      },
+      null
+    ),
+    false
+  );
+
+  // If Enter is being pressed while typing, never treat it as "Back on track".
+  assert.equal(shouldTriggerBackOnTrackFromKeydown({ key: "Enter", isComposing: false, target: { tagName: "INPUT" } }, null), false);
+  assert.equal(
+    shouldTriggerBackOnTrackFromKeydown({ key: "Enter", isComposing: false, target: { tagName: "TEXTAREA" } }, null),
+    false
+  );
+
+  assert.equal(
+    shouldTriggerBackOnTrackFromKeydown(
+      {
+        key: "Enter",
+        isComposing: false,
+        target: { tagName: "DIV", getAttribute: (n) => (n === "role" ? "textbox" : null) }
+      },
+      null
+    ),
+    false
+  );
+
+  // Same logic when focus is elsewhere (activeElement).
   assert.equal(shouldTriggerBackOnKeydownTypingTarget({ tagName: "INPUT" }), false);
+  assert.equal(
+    shouldTriggerBackOnKeydownTypingTarget({ tagName: "DIV", getAttribute: (n) => (n === "contenteditable" ? "true" : null) }),
+    false
+  );
 
   assert.equal(
     shouldTriggerBackOnTrackFromKeydown(
