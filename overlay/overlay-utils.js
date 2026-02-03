@@ -107,12 +107,26 @@
     return true;
   }
 
+  function getHotkeyHints({ mode, activeElement, snoozeOpen } = {}) {
+    const isTyping = isTextInputTarget(activeElement);
+
+    // Prefer context-specific hints when the overlay is asking for input.
+    const enterHint = mode === "align" || isTyping ? "Enter: Submit" : "Enter: Back on track";
+
+    if (snoozeOpen) {
+      return { enterHint, escHint: "Esc: Close snooze" };
+    }
+
+    return { enterHint, escHint: "Esc: Snooze" };
+  }
+
   return {
     isTextInputTarget,
     isControlTarget,
     shouldTriggerBackOnTrackFromKeydown,
     shouldTriggerBackOnTrack,
     shouldTriggerSnoozeFromKeydown,
-    shouldTriggerSnooze
+    shouldTriggerSnooze,
+    getHotkeyHints
   };
 });

@@ -7,7 +7,8 @@ const {
   shouldTriggerBackOnTrackFromKeydown,
   shouldTriggerBackOnTrack,
   shouldTriggerSnoozeFromKeydown,
-  shouldTriggerSnooze
+  shouldTriggerSnooze,
+  getHotkeyHints
 } = require("./overlay-utils");
 
 test("isTextInputTarget: recognizes common typing targets", () => {
@@ -207,6 +208,28 @@ test("shouldTriggerSnooze: requires a short dwell after show", () => {
 
   // If we don't know shownAt, fall back to the keydown-only safety checks.
   assert.equal(shouldTriggerSnooze(event, null, null, 1200), true);
+});
+
+test("getHotkeyHints: switches hints based on mode/focus", () => {
+  assert.deepEqual(getHotkeyHints({ mode: "", activeElement: null, snoozeOpen: false }), {
+    enterHint: "Enter: Back on track",
+    escHint: "Esc: Snooze"
+  });
+
+  assert.deepEqual(getHotkeyHints({ mode: "align", activeElement: null, snoozeOpen: false }), {
+    enterHint: "Enter: Submit",
+    escHint: "Esc: Snooze"
+  });
+
+  assert.deepEqual(getHotkeyHints({ mode: "", activeElement: { tagName: "INPUT" }, snoozeOpen: false }), {
+    enterHint: "Enter: Submit",
+    escHint: "Esc: Snooze"
+  });
+
+  assert.deepEqual(getHotkeyHints({ mode: "", activeElement: null, snoozeOpen: true }), {
+    enterHint: "Enter: Back on track",
+    escHint: "Esc: Close snooze"
+  });
 });
 
 function shouldTriggerBackOnKeydownTypingTarget(activeEl) {

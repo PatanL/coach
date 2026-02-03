@@ -11,6 +11,9 @@ const alignInput = document.getElementById("alignInput");
 const alignText = document.getElementById("alignText");
 const alignSubmit = document.getElementById("alignSubmit");
 
+const enterHint = document.getElementById("enterHint");
+const escHint = document.getElementById("escHint");
+
 const backBtn = document.getElementById("backBtn");
 const stuckBtn = document.getElementById("stuckBtn");
 const recoverBtn = document.getElementById("recoverBtn");
@@ -18,6 +21,25 @@ const snoozeBtn = document.getElementById("snoozeBtn");
 
 let shownAt = null;
 let currentPayload = null;
+
+function updateHotkeyHints() {
+  if (!enterHint || !escHint) return;
+
+  const mode = overlay?.dataset?.mode || "";
+  const snoozeOpen = snooze && !snooze.classList.contains("hidden");
+
+  const getHints = window.overlayUtils?.getHotkeyHints;
+  if (typeof getHints !== "function") return;
+
+  const { enterHint: enterText, escHint: escText } = getHints({
+    mode,
+    activeElement: document.activeElement,
+    snoozeOpen
+  });
+
+  enterHint.textContent = enterText;
+  escHint.textContent = escText;
+}
 
 function setText(el, value) {
   el.textContent = value || "";
@@ -33,6 +55,7 @@ function updatePrimaryLabel(payload) {
 
 function resetSnooze() {
   snooze.classList.add("hidden");
+  updateHotkeyHints();
 }
 
 function resetAlignInput() {
@@ -51,6 +74,7 @@ function showOverlay(payload) {
   } else {
     overlay.dataset.mode = "";
   }
+  updateHotkeyHints();
   setText(blockName, payload.block_name || "");
   setText(headline, payload.headline || "Reset.");
   setText(humanLine, payload.human_line || "");
@@ -135,6 +159,7 @@ alignText.addEventListener("keydown", (event) => {
 
 snoozeBtn.addEventListener("click", () => {
   snooze.classList.remove("hidden");
+  updateHotkeyHints();
 });
 
 snooze.addEventListener("click", (event) => {
@@ -160,6 +185,7 @@ window.addEventListener("keydown", (event) => {
     event.preventDefault();
     event.stopPropagation();
     snooze.classList.add("hidden");
+    updateHotkeyHints();
     return;
   }
 
@@ -180,5 +206,11 @@ window.addEventListener("keydown", (event) => {
     event.preventDefault();
     event.stopPropagation();
     snooze.classList.remove("hidden");
+    updateHotkeyHints();
   }
+});
+
+document.addEventListener("focusin", () => {
+  if (overlay.classList.contains("hidden")) return;
+  updateHotkeyHints();
 });
