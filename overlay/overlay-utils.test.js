@@ -341,6 +341,20 @@ test("shouldTriggerChoiceFromKeydown: triggers only when safe", () => {
     ),
     false
   );
+
+  // If the keydown target is itself a control, don't hijack.
+  assert.equal(
+    shouldTriggerChoiceFromKeydown({ key: "8", isComposing: false, target: { tagName: "BUTTON" } }, null),
+    false
+  );
+
+  assert.equal(
+    shouldTriggerChoiceFromKeydown(
+      { key: "8", isComposing: false, target: { tagName: "DIV", getAttribute: (n) => (n === "role" ? "button" : null) } },
+      null
+    ),
+    false
+  );
 });
 
 test("choiceIndexFromKey: maps 1-9 to zero-based indices", () => {
