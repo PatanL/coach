@@ -7,3 +7,6 @@ logs/
 buffer/
 state/
 sessions/
+
+# Local scratch patches (should never be committed)
+patches/

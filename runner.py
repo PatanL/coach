@@ -522,6 +522,36 @@ def read_last_activity(path: Path) -> Optional[dict]:
         return None
 
 
+def format_activity_hint(activity: Optional[dict]) -> Optional[str]:
+    """Return a short user-facing hint for what they were doing when drifted.
+
+    Prefer model-provided short_caption when available; otherwise fall back to app/title.
+    """
+    if not activity:
+        return None
+
+    caption = activity.get("short_caption")
+    if isinstance(caption, str) and caption.strip():
+        hint = caption.strip()
+    else:
+        app = activity.get("app")
+        title = activity.get("title")
+        parts = []
+        if isinstance(app, str) and app.strip():
+            parts.append(app.strip())
+        if isinstance(title, str) and title.strip():
+            parts.append(title.strip())
+        hint = " — ".join(parts)
+
+    if not hint:
+        return None
+
+    if len(hint) > 80:
+        hint = hint[:77] + "…"
+    return hint
+
+
+
 def parse_json_from_text(raw: str) -> Optional[dict]:
     try:
         return json.loads(raw)
@@ -1021,6 +1051,9 @@ def main() -> int:
                                 "event_id": ensure_uuid(),
                                 "block_id": block.get("id"),
                                 "block_name": block.get("title"),
+                                "app": last_activity.get("app"),
+                                "title": last_activity.get("title"),
+                                "short_caption": last_activity.get("short_caption"),
                                 "source": "runner",
                             },
                         )
@@ -1155,6 +1188,11 @@ def main() -> int:
                 continue
 
             if event.get("type") == "OFF_SCHEDULE":
+                activity_hint = format_activity_hint(event)
+                human_line = "You drifted off the current block."
+                if activity_hint:
+                    human_line = f"You drifted: {activity_hint}."
+
                 overlay_payload = {
                     "ts": dt.datetime.now().isoformat(),
                     "cmd_id": ensure_uuid(),
@@ -1163,7 +1201,7 @@ def main() -> int:
                     "level": "B",
                     "style_id": "strict",
                     "headline": "Off schedule",
-                    "human_line": "You drifted off the current block.",
+                    "human_line": human_line,
                     "diagnosis": "Resume the scheduled task.",
                     "next_action": "Return to the planned work block now.",
                     "block_id": event.get("block_id"),
