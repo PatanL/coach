@@ -5,7 +5,8 @@ const {
   isTextInputTarget,
   isControlTarget,
   shouldTriggerBackOnTrackFromKeydown,
-  shouldTriggerBackOnTrack
+  shouldTriggerBackOnTrack,
+  shouldTriggerSnoozeFromKeydown
 } = require("./overlay-utils");
 
 test("isTextInputTarget: recognizes common typing targets", () => {
@@ -157,6 +158,39 @@ test("shouldTriggerBackOnTrack: requires a short dwell after show", () => {
 
   // If we don't know shownAt, fall back to the keydown-only safety checks.
   assert.equal(shouldTriggerBackOnTrack(event, null, null, 1200), true);
+});
+
+test("shouldTriggerSnoozeFromKeydown: triggers only when safe", () => {
+  assert.equal(shouldTriggerSnoozeFromKeydown({ key: "Escape", isComposing: false }, null), true);
+
+  assert.equal(shouldTriggerSnoozeFromKeydown({ key: "Enter", isComposing: false }, null), false);
+
+  assert.equal(
+    shouldTriggerSnoozeFromKeydown({ key: "Escape", defaultPrevented: true, isComposing: false }, null),
+    false
+  );
+
+  assert.equal(shouldTriggerSnoozeFromKeydown({ key: "Escape", isComposing: true }, null), false);
+
+  assert.equal(shouldTriggerSnoozeFromKeydown({ key: "Escape", isComposing: false, metaKey: true }, null), false);
+
+  assert.equal(
+    shouldTriggerSnoozeFromKeydown({ key: "Escape", isComposing: false, target: { tagName: "INPUT" } }, null),
+    false
+  );
+
+  assert.equal(
+    shouldTriggerSnoozeFromKeydown(
+      { key: "Escape", isComposing: false, target: { tagName: "DIV" } },
+      { tagName: "TEXTAREA" }
+    ),
+    false
+  );
+
+  assert.equal(
+    shouldTriggerSnoozeFromKeydown({ key: "Escape", isComposing: false, target: { tagName: "BUTTON" } }, null),
+    false
+  );
 });
 
 function shouldTriggerBackOnKeydownTypingTarget(activeEl) {

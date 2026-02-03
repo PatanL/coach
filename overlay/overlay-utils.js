@@ -65,6 +65,24 @@
     return !isTypingTarget;
   }
 
+  function shouldTriggerSnoozeFromKeydown(event, activeElement) {
+    if (!event) return false;
+
+    if (event.key !== "Escape") return false;
+    if (event.defaultPrevented) return false;
+    if (event.isComposing) return false;
+    if (event.metaKey || event.ctrlKey || event.altKey) return false;
+
+    // Don't hijack Escape while the user is typing into an input.
+    const isTypingTarget = isTextInputTarget(event.target) || isTextInputTarget(activeElement);
+    if (isTypingTarget) return false;
+
+    // If Escape is being used to interact with a focused control/dialog, let it handle it.
+    if (isControlTarget(event.target) || isControlTarget(activeElement)) return false;
+
+    return true;
+  }
+
   // Avoid accidental confirmation when the overlay steals focus mid-typing.
   // If the overlay has *just* shown, require a short dwell before "Enter" triggers.
   function shouldTriggerBackOnTrack(event, activeElement, shownAtMs, nowMs = Date.now()) {
@@ -81,6 +99,7 @@
     isTextInputTarget,
     isControlTarget,
     shouldTriggerBackOnTrackFromKeydown,
-    shouldTriggerBackOnTrack
+    shouldTriggerBackOnTrack,
+    shouldTriggerSnoozeFromKeydown
   };
 });
