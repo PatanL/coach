@@ -148,8 +148,9 @@ window.addEventListener("keydown", (event) => {
     return;
   }
 
-  const shouldTriggerSnooze = window.overlayUtils?.shouldTriggerSnoozeFromKeydown;
-  if (shouldTriggerSnooze && shouldTriggerSnooze(event, document.activeElement)) {
+  const shouldTriggerSnooze =
+    window.overlayUtils?.shouldTriggerSnooze || window.overlayUtils?.shouldTriggerSnoozeFromKeydown;
+  if (shouldTriggerSnooze && shouldTriggerSnooze(event, document.activeElement, shownAt)) {
     // Capture Escape so it doesn't dismiss/affect other UI unexpectedly.
     event.preventDefault();
     event.stopPropagation();

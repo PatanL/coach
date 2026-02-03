@@ -84,9 +84,19 @@
   }
 
   // Avoid accidental confirmation when the overlay steals focus mid-typing.
-  // If the overlay has *just* shown, require a short dwell before "Enter" triggers.
+  // If the overlay has *just* shown, require a short dwell before a hotkey triggers.
   function shouldTriggerBackOnTrack(event, activeElement, shownAtMs, nowMs = Date.now()) {
     const safeKeydown = shouldTriggerBackOnTrackFromKeydown(event, activeElement);
+    if (!safeKeydown) return false;
+
+    const dwellMs = typeof shownAtMs === "number" ? nowMs - shownAtMs : null;
+    if (dwellMs != null && dwellMs >= 0 && dwellMs < 450) return false;
+
+    return true;
+  }
+
+  function shouldTriggerSnooze(event, activeElement, shownAtMs, nowMs = Date.now()) {
+    const safeKeydown = shouldTriggerSnoozeFromKeydown(event, activeElement);
     if (!safeKeydown) return false;
 
     const dwellMs = typeof shownAtMs === "number" ? nowMs - shownAtMs : null;
@@ -100,6 +110,7 @@
     isControlTarget,
     shouldTriggerBackOnTrackFromKeydown,
     shouldTriggerBackOnTrack,
-    shouldTriggerSnoozeFromKeydown
+    shouldTriggerSnoozeFromKeydown,
+    shouldTriggerSnooze
   };
 });
