@@ -334,18 +334,21 @@ test("shouldTriggerChoiceFromKeydown: triggers only when safe", () => {
     false
   );
 
+  // When a non-typing control is focused (e.g., Back on track button), still allow
+  // quick number-based choice selection.
   assert.equal(
     shouldTriggerChoiceFromKeydown(
       { key: "8", isComposing: false, target: { tagName: "DIV" } },
       { tagName: "BUTTON" }
     ),
-    false
+    true
   );
 
-  // If the keydown target is itself a control, don't hijack.
+  // Even if the keydown target is a button, number keys don't have a meaningful
+  // default action, so allow choice selection.
   assert.equal(
     shouldTriggerChoiceFromKeydown({ key: "8", isComposing: false, target: { tagName: "BUTTON" } }, null),
-    false
+    true
   );
 
   assert.equal(
@@ -353,7 +356,7 @@ test("shouldTriggerChoiceFromKeydown: triggers only when safe", () => {
       { key: "8", isComposing: false, target: { tagName: "DIV", getAttribute: (n) => (n === "role" ? "button" : null) } },
       null
     ),
-    false
+    true
   );
 });
 

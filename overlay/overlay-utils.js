@@ -142,8 +142,9 @@
     const isTypingTarget = isTextInputTarget(event.target) || isTextInputTarget(activeElement);
     if (isTypingTarget) return false;
 
-    // If a control is focused, avoid hijacking its key handling.
-    if (isControlTarget(event.target) || isControlTarget(activeElement)) return false;
+    // Number hotkeys are used for quick choice selection; they don't typically
+    // interfere with focused buttons/links the way Enter/Escape might.
+    // We still avoid triggering while typing (handled above).
 
     return true;
   }
