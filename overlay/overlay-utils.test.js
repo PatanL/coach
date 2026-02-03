@@ -173,6 +173,8 @@ test("shouldTriggerSnoozeFromKeydown: triggers only when safe", () => {
 
   assert.equal(shouldTriggerSnoozeFromKeydown({ key: "Escape", isComposing: true }, null), false);
 
+  assert.equal(shouldTriggerSnoozeFromKeydown({ key: "Escape", isComposing: false, repeat: true }, null), false);
+
   assert.equal(shouldTriggerSnoozeFromKeydown({ key: "Escape", isComposing: false, metaKey: true }, null), false);
 
   assert.equal(
