@@ -175,9 +175,15 @@ test("shouldTriggerBackOnTrackFromKeydown: triggers only when safe", () => {
   );
 
   // Same logic when focus is elsewhere (activeElement).
-  assert.equal(shouldTriggerBackOnKeydownTypingTarget({ tagName: "INPUT" }), false);
   assert.equal(
-    shouldTriggerBackOnKeydownTypingTarget({ tagName: "DIV", getAttribute: (n) => (n === "contenteditable" ? "true" : null) }),
+    shouldTriggerBackOnTrackFromKeydown({ key: "Enter", isComposing: false, target: { tagName: "DIV" } }, { tagName: "INPUT" }),
+    false
+  );
+  assert.equal(
+    shouldTriggerBackOnTrackFromKeydown(
+      { key: "Enter", isComposing: false, target: { tagName: "DIV" } },
+      { tagName: "DIV", getAttribute: (n) => (n === "contenteditable" ? "true" : null) }
+    ),
     false
   );
 
