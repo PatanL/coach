@@ -236,12 +236,16 @@ function closeSnoozePanel() {
   snooze.classList.add("hidden");
   updateHotkeyHints();
 
-  // Return focus to the primary action.
-  if (backBtn) {
+  // Restore focus to the most relevant control.
+  // In align mode, prefer the text box so the user can keep typing their answer.
+  const mode = overlay?.dataset?.mode || "";
+  const restoreTarget = mode === "align" && alignText && !alignInput.classList.contains("hidden") ? alignText : backBtn;
+
+  if (restoreTarget) {
     try {
-      backBtn.focus({ preventScroll: true });
+      restoreTarget.focus({ preventScroll: true });
     } catch {
-      backBtn.focus();
+      restoreTarget.focus();
     }
   }
 }
