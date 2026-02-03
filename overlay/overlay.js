@@ -257,6 +257,10 @@ recoverBtn.addEventListener("click", () => sendAction({ action: "recover" }));
 if (detailsBtn) {
   detailsBtn.addEventListener("click", () => {
     if (detailsBtn.hidden) return;
+
+    // If snooze is open, keep the UI focused on the actionable snooze choices.
+    if (snooze && !snooze.classList.contains("hidden")) return;
+
     setDetailsOpen(!detailsOpen);
   });
 }
@@ -349,12 +353,14 @@ window.addEventListener("keydown", (event) => {
   const mode = overlay.dataset.mode || "";
 
   // "?" toggles extra context (why/next action) when available.
+  // When the snooze panel is open, avoid toggling details (it isn't actionable in that state).
   const shouldToggleDetails = window.overlayUtils?.shouldTriggerDetailsToggleFromKeydown;
   if (
     typeof shouldToggleDetails === "function" &&
     shouldToggleDetails(event, activeElement) &&
     detailsBtn &&
-    !detailsBtn.hidden
+    !detailsBtn.hidden &&
+    snooze.classList.contains("hidden")
   ) {
     event.preventDefault();
     event.stopPropagation();
