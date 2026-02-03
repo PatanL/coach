@@ -320,13 +320,14 @@ window.addEventListener("keydown", (event) => {
   }
 
   // Enter confirms "Back on track" only when safe, and never in align mode.
-  if (mode !== "align") {
-    const shouldTriggerBack = window.overlayUtils?.shouldTriggerBackOnTrack;
-    if (typeof shouldTriggerBack === "function" && shouldTriggerBack(event, activeElement, shownAt)) {
-      event.preventDefault();
-      event.stopPropagation();
-      sendAction({ action: "back_on_track" });
-    }
+  const shouldTriggerBackInMode = window.overlayUtils?.shouldTriggerBackOnTrackInMode;
+  if (
+    typeof shouldTriggerBackInMode === "function" &&
+    shouldTriggerBackInMode(mode, event, activeElement, shownAt)
+  ) {
+    event.preventDefault();
+    event.stopPropagation();
+    sendAction({ action: "back_on_track" });
   }
 });
 

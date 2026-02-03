@@ -107,6 +107,13 @@
     return true;
   }
 
+  // Global Enter hotkey should never confirm "Back on track" while in align mode.
+  // This helper centralizes the mode gate so it can be unit tested.
+  function shouldTriggerBackOnTrackInMode(mode, event, activeElement, shownAtMs, nowMs = Date.now()) {
+    if (mode === "align") return false;
+    return shouldTriggerBackOnTrack(event, activeElement, shownAtMs, nowMs);
+  }
+
   function getHotkeyHints({ mode, activeElement, snoozeOpen } = {}) {
     const isTyping = isTextInputTarget(activeElement);
 
@@ -172,6 +179,7 @@
     isControlTarget,
     shouldTriggerBackOnTrackFromKeydown,
     shouldTriggerBackOnTrack,
+    shouldTriggerBackOnTrackInMode,
     shouldTriggerSnoozeFromKeydown,
     shouldTriggerSnooze,
     getHotkeyHints,

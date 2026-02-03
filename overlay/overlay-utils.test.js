@@ -11,7 +11,8 @@ const {
   getHotkeyHints,
   choiceIndexFromKey,
   shouldTriggerChoiceFromKeydown,
-  shouldTriggerAlignSubmitFromKeydown
+  shouldTriggerAlignSubmitFromKeydown,
+  shouldTriggerBackOnTrackInMode
 } = require("./overlay-utils");
 
 test("isTextInputTarget: recognizes common typing targets", () => {
@@ -119,6 +120,15 @@ test("shouldTriggerBackOnTrack: requires a short dwell after show", () => {
 
   // After the dwell window → ok.
   assert.equal(shouldTriggerBackOnTrack(event, null, 1000, 2000), true);
+});
+
+test("shouldTriggerBackOnTrackInMode: never triggers in align mode", () => {
+  const event = { key: "Enter", isComposing: false, target: { tagName: "DIV" } };
+
+  assert.equal(shouldTriggerBackOnTrackInMode("align", event, null, 1000, 2000), false);
+
+  // Outside align mode, it delegates to the normal safety + dwell logic.
+  assert.equal(shouldTriggerBackOnTrackInMode("", event, null, 1000, 2000), true);
 });
 
 test("shouldTriggerSnoozeFromKeydown: triggers only when safe", () => {
