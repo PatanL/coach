@@ -209,12 +209,14 @@ function closeSnoozePanel() {
   snooze.classList.add("hidden");
   updateHotkeyHints();
 
-  // Keep focus on a safe control so Enter won't accidentally confirm "Back on track".
-  if (snoozeBtn) {
+  // After closing snooze, move focus to the primary action.
+  // This keeps keyboard flow tight: Enter will activate the focused button (without falling back
+  // to the global hotkey handler) and avoids immediately re-opening snooze.
+  if (backBtn) {
     try {
-      snoozeBtn.focus({ preventScroll: true });
+      backBtn.focus({ preventScroll: true });
     } catch {
-      snoozeBtn.focus();
+      backBtn.focus();
     }
   }
 }
