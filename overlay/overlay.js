@@ -236,6 +236,13 @@ alignText.addEventListener("keydown", (event) => {
 });
 
 snoozeBtn.addEventListener("click", () => {
+  // Toggle behavior: if the snooze panel is already open, clicking Snooze closes it.
+  // This reduces friction and matches the Escape-to-close affordance.
+  if (snooze && !snooze.classList.contains("hidden")) {
+    closeSnoozePanel();
+    return;
+  }
+
   openSnoozePanel();
 });
 
