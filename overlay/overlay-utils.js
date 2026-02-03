@@ -53,6 +53,8 @@
     if (event.key !== "Enter") return false;
     if (event.defaultPrevented) return false;
     if (event.isComposing) return false;
+    // Avoid auto-repeat (holding Enter) accidentally confirming multiple times.
+    if (event.repeat) return false;
     if (event.metaKey || event.ctrlKey || event.altKey || event.shiftKey) return false;
 
     // If Enter is being used to activate a focused control, let the control handle it
