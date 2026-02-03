@@ -260,21 +260,40 @@ test("shouldTriggerSnooze: requires a short dwell after show", () => {
 test("getHotkeyHints: switches hints based on mode/focus", () => {
   assert.deepEqual(getHotkeyHints({ mode: "", activeElement: null, snoozeOpen: false }), {
     enterHint: "Enter: Back on track",
+    quickHint: null,
     escHint: "Esc: Snooze"
   });
 
-  assert.deepEqual(getHotkeyHints({ mode: "align", activeElement: null, snoozeOpen: false }), {
+  // In align mode we auto-focus an input; while typing, numeric hotkeys are disabled.
+  assert.deepEqual(getHotkeyHints({ mode: "align", activeElement: { tagName: "INPUT" }, snoozeOpen: false }), {
     enterHint: "Enter: Submit",
+    quickHint: null,
+    escHint: "Esc: Snooze"
+  });
+
+  // If focus isn't on a typing target, show numeric hotkey hint.
+  assert.deepEqual(getHotkeyHints({ mode: "align", activeElement: { tagName: "DIV" }, snoozeOpen: false }), {
+    enterHint: "Enter: Submit",
+    quickHint: "1-9: Choose",
     escHint: "Esc: Snooze"
   });
 
   assert.deepEqual(getHotkeyHints({ mode: "", activeElement: { tagName: "INPUT" }, snoozeOpen: false }), {
     enterHint: "Enter: Submit",
+    quickHint: null,
     escHint: "Esc: Snooze"
+  });
+
+  // Snooze open overrides Esc hint and hides quick hint.
+  assert.deepEqual(getHotkeyHints({ mode: "align", activeElement: { tagName: "DIV" }, snoozeOpen: true }), {
+    enterHint: "Enter: Submit",
+    quickHint: null,
+    escHint: "Esc: Close snooze"
   });
 
   assert.deepEqual(getHotkeyHints({ mode: "", activeElement: null, snoozeOpen: true }), {
     enterHint: "Enter: Back on track",
+    quickHint: null,
     escHint: "Esc: Close snooze"
   });
 });

@@ -113,11 +113,15 @@
     // Prefer context-specific hints when the overlay is asking for input.
     const enterHint = mode === "align" || isTyping ? "Enter: Submit" : "Enter: Back on track";
 
+    // Only show numeric hotkey hint when it's actually usable.
+    // (In align mode we auto-focus the text box; while typing, numeric hotkeys are disabled.)
+    const quickHint = mode === "align" && !snoozeOpen && !isTyping ? "1-9: Choose" : null;
+
     if (snoozeOpen) {
-      return { enterHint, escHint: "Esc: Close snooze" };
+      return { enterHint, quickHint, escHint: "Esc: Close snooze" };
     }
 
-    return { enterHint, escHint: "Esc: Snooze" };
+    return { enterHint, quickHint, escHint: "Esc: Snooze" };
   }
 
   // Map a single keypress ("1".."9") to a zero-based choice index.

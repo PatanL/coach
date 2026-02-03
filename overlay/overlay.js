@@ -45,17 +45,10 @@ function updateHotkeyHints() {
   const mode = overlay?.dataset?.mode || "";
   const snoozeOpen = snooze && !snooze.classList.contains("hidden");
 
-  // Only show the 1-9 hint when the actionable "align" mode is active.
-  if (quickHint) {
-    const showQuick = mode === "align" && !snoozeOpen;
-    quickHint.hidden = !showQuick;
-    if (showQuick) quickHint.textContent = "1-9: Choose";
-  }
-
   const getHints = window.overlayUtils?.getHotkeyHints;
   if (typeof getHints !== "function") return;
 
-  const { enterHint: enterText, escHint: escText } = getHints({
+  const { enterHint: enterText, quickHint: quickText, escHint: escText } = getHints({
     mode,
     activeElement: document.activeElement,
     snoozeOpen
@@ -63,6 +56,11 @@ function updateHotkeyHints() {
 
   if (enterHint) enterHint.textContent = enterText;
   if (escHint) escHint.textContent = escText;
+
+  if (quickHint) {
+    quickHint.hidden = !quickText;
+    if (quickText) quickHint.textContent = quickText;
+  }
 }
 
 function setText(el, value) {

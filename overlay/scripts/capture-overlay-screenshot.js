@@ -38,6 +38,27 @@ async function main() {
           "Start 2-min timer",
           "Write next step"
         ]
+      },
+      // Move focus off the text box so the "1-9: Choose" hint is visible.
+      postScript: "document.getElementById('backBtn')?.focus?.()"
+    },
+    {
+      name: "overlay-align-typing.png",
+      payload: {
+        level: "B",
+        block_id: "block:demo",
+        block_name: "Deep Work",
+        headline: "Reset.",
+        human_line: "Quick check-in.",
+        diagnosis: "You drifted from the plan.",
+        next_action: "Pick one and do it for 2 minutes.",
+        question_id: "q:demo",
+        choices: [
+          "Close tabs",
+          "Open task doc",
+          "Start 2-min timer",
+          "Write next step"
+        ]
       }
     },
     {
@@ -60,6 +81,10 @@ async function main() {
     await win.webContents.executeJavaScript(
       `window.__overlayScreenshot && window.__overlayScreenshot.show(${JSON.stringify(scenario.payload)})`
     );
+
+    if (scenario.postScript) {
+      await win.webContents.executeJavaScript(scenario.postScript);
+    }
 
     // Give the UI a moment to settle.
     await new Promise((r) => setTimeout(r, 150));
