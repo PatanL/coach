@@ -73,7 +73,7 @@
     if (event.isComposing) return false;
     // Avoid auto-repeat (holding Escape) accidentally toggling multiple times.
     if (event.repeat) return false;
-    if (event.metaKey || event.ctrlKey || event.altKey) return false;
+    if (event.metaKey || event.ctrlKey || event.altKey || event.shiftKey) return false;
 
     // Don't hijack Escape while the user is typing into an input.
     const isTypingTarget = isTextInputTarget(event.target) || isTextInputTarget(activeElement);
