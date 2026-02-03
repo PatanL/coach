@@ -157,9 +157,39 @@ alignText.addEventListener("keydown", (event) => {
   }
 });
 
-snoozeBtn.addEventListener("click", () => {
+function openSnoozePanel() {
   snooze.classList.remove("hidden");
   updateHotkeyHints();
+
+  // Keyboard-first: when the snooze panel opens, move focus onto the first
+  // reason button so Enter/Space selects a reason (instead of falling back to
+  // global overlay hotkeys).
+  const firstReasonButton = snooze.querySelector("button[data-reason]");
+  if (firstReasonButton) {
+    try {
+      firstReasonButton.focus({ preventScroll: true });
+    } catch {
+      firstReasonButton.focus();
+    }
+  }
+}
+
+function closeSnoozePanel() {
+  snooze.classList.add("hidden");
+  updateHotkeyHints();
+
+  // Keep focus on a safe control so Enter won't accidentally confirm "Back on track".
+  if (snoozeBtn) {
+    try {
+      snoozeBtn.focus({ preventScroll: true });
+    } catch {
+      snoozeBtn.focus();
+    }
+  }
+}
+
+snoozeBtn.addEventListener("click", () => {
+  openSnoozePanel();
 });
 
 snooze.addEventListener("click", (event) => {
@@ -184,8 +214,7 @@ window.addEventListener("keydown", (event) => {
   if (event.key === "Escape" && !snooze.classList.contains("hidden")) {
     event.preventDefault();
     event.stopPropagation();
-    snooze.classList.add("hidden");
-    updateHotkeyHints();
+    closeSnoozePanel();
     return;
   }
 
@@ -205,8 +234,7 @@ window.addEventListener("keydown", (event) => {
     // Capture Escape so it doesn't dismiss/affect other UI unexpectedly.
     event.preventDefault();
     event.stopPropagation();
-    snooze.classList.remove("hidden");
-    updateHotkeyHints();
+    openSnoozePanel();
   }
 });
 
