@@ -155,6 +155,14 @@ window.overlayAPI.onPause(() => {
 window.addEventListener("keydown", (event) => {
   if (overlay.classList.contains("hidden")) return;
 
+  // If the snooze panel is open, Escape should close it (quickly reversible).
+  if (event.key === "Escape" && !snooze.classList.contains("hidden")) {
+    event.preventDefault();
+    event.stopPropagation();
+    snooze.classList.add("hidden");
+    return;
+  }
+
   // Don't treat Enter as "Back on track" while the user is typing.
   const shouldTrigger = window.overlayUtils?.shouldTriggerBackOnTrack;
   if (shouldTrigger && shouldTrigger(event, document.activeElement, shownAt)) {
