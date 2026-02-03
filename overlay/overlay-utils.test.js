@@ -9,7 +9,8 @@ const {
   shouldTriggerSnoozeFromKeydown,
   shouldTriggerSnooze,
   getHotkeyHints,
-  choiceIndexFromKey
+  choiceIndexFromKey,
+  shouldTriggerChoiceFromKeydown
 } = require("./overlay-utils");
 
 test("isTextInputTarget: recognizes common typing targets", () => {
@@ -278,6 +279,44 @@ function shouldTriggerBackOnKeydownTypingTarget(activeEl) {
     activeEl
   );
 }
+
+test("shouldTriggerChoiceFromKeydown: triggers only when safe", () => {
+  assert.equal(shouldTriggerChoiceFromKeydown({ key: "1", isComposing: false }, null), true);
+
+  assert.equal(shouldTriggerChoiceFromKeydown({ key: "0", isComposing: false }, null), false);
+
+  assert.equal(
+    shouldTriggerChoiceFromKeydown({ key: "2", defaultPrevented: true, isComposing: false }, null),
+    false
+  );
+
+  assert.equal(shouldTriggerChoiceFromKeydown({ key: "3", isComposing: true }, null), false);
+
+  assert.equal(shouldTriggerChoiceFromKeydown({ key: "4", isComposing: false, repeat: true }, null), false);
+
+  assert.equal(shouldTriggerChoiceFromKeydown({ key: "5", isComposing: false, ctrlKey: true }, null), false);
+
+  assert.equal(
+    shouldTriggerChoiceFromKeydown({ key: "6", isComposing: false, target: { tagName: "INPUT" } }, null),
+    false
+  );
+
+  assert.equal(
+    shouldTriggerChoiceFromKeydown(
+      { key: "7", isComposing: false, target: { tagName: "DIV" } },
+      { tagName: "TEXTAREA" }
+    ),
+    false
+  );
+
+  assert.equal(
+    shouldTriggerChoiceFromKeydown(
+      { key: "8", isComposing: false, target: { tagName: "DIV" } },
+      { tagName: "BUTTON" }
+    ),
+    false
+  );
+});
 
 test("choiceIndexFromKey: maps 1-9 to zero-based indices", () => {
   assert.equal(choiceIndexFromKey("1"), 0);

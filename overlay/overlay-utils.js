@@ -128,6 +128,26 @@
     return Number(key) - 1;
   }
 
+  function shouldTriggerChoiceFromKeydown(event, activeElement) {
+    if (!event) return false;
+
+    if (choiceIndexFromKey(event.key) == null) return false;
+    if (event.defaultPrevented) return false;
+    if (event.isComposing) return false;
+    // Avoid auto-repeat (holding a number key) accidentally firing multiple times.
+    if (event.repeat) return false;
+    if (event.metaKey || event.ctrlKey || event.altKey) return false;
+
+    // Don't trigger choice hotkeys while the user is typing.
+    const isTypingTarget = isTextInputTarget(event.target) || isTextInputTarget(activeElement);
+    if (isTypingTarget) return false;
+
+    // If a control is focused, avoid hijacking its key handling.
+    if (isControlTarget(event.target) || isControlTarget(activeElement)) return false;
+
+    return true;
+  }
+
   return {
     isTextInputTarget,
     isControlTarget,
@@ -136,6 +156,7 @@
     shouldTriggerSnoozeFromKeydown,
     shouldTriggerSnooze,
     getHotkeyHints,
-    choiceIndexFromKey
+    choiceIndexFromKey,
+    shouldTriggerChoiceFromKeydown
   };
 });

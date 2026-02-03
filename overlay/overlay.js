@@ -250,11 +250,8 @@ window.addEventListener("keydown", (event) => {
     currentPayload?.choices &&
     Array.isArray(currentPayload.choices)
   ) {
-    const isTyping =
-      window.overlayUtils?.isTextInputTarget?.(event.target) ||
-      window.overlayUtils?.isTextInputTarget?.(activeElement);
-
-    if (!isTyping) {
+    const shouldTriggerChoice = window.overlayUtils?.shouldTriggerChoiceFromKeydown;
+    if (shouldTriggerChoice && shouldTriggerChoice(event, activeElement)) {
       const index = window.overlayUtils?.choiceIndexFromKey?.(event.key);
       const choice = index != null ? currentPayload.choices[index] : null;
       if (choice) {
