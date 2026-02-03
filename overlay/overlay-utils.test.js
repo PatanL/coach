@@ -309,6 +309,31 @@ test("shouldTriggerChoiceFromKeydown: triggers only when safe", () => {
     false
   );
 
+  // ContentEditable / ARIA textbox should also be treated as typing targets.
+  assert.equal(
+    shouldTriggerChoiceFromKeydown(
+      { key: "8", isComposing: false, target: { tagName: "DIV", isContentEditable: true } },
+      null
+    ),
+    false
+  );
+
+  assert.equal(
+    shouldTriggerChoiceFromKeydown(
+      { key: "8", isComposing: false, target: { tagName: "DIV" } },
+      { tagName: "DIV", getAttribute: (n) => (n === "role" ? "textbox" : null) }
+    ),
+    false
+  );
+
+  assert.equal(
+    shouldTriggerChoiceFromKeydown(
+      { key: "8", isComposing: false, target: { tagName: "DIV" } },
+      { tagName: "DIV", getAttribute: (n) => (n === "contenteditable" ? "" : null) }
+    ),
+    false
+  );
+
   assert.equal(
     shouldTriggerChoiceFromKeydown(
       { key: "8", isComposing: false, target: { tagName: "DIV" } },
