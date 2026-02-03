@@ -37,6 +37,8 @@ function resetSnooze() {
 
 function resetAlignInput() {
   alignText.value = "";
+  // Prevent accidental submits / Enter-to-click on the submit button when empty.
+  alignSubmit.disabled = true;
   alignInput.classList.add("hidden");
 }
 
@@ -74,6 +76,14 @@ function showOverlay(payload) {
     });
     choiceButtons.classList.remove("hidden");
     alignInput.classList.remove("hidden");
+
+    // Ensure the user can immediately type a custom answer without accidentally
+    // confirming "Back on track" via the global Enter hotkey.
+    try {
+      alignText.focus({ preventScroll: true });
+    } catch {
+      alignText.focus();
+    }
   } else {
     choiceButtons.classList.add("hidden");
     alignInput.classList.add("hidden");
@@ -100,11 +110,18 @@ backBtn.addEventListener("click", () => sendAction({ action: "back_on_track" }))
 stuckBtn.addEventListener("click", () => sendAction({ action: "stuck" }));
 recoverBtn.addEventListener("click", () => sendAction({ action: "recover" }));
 
+function syncAlignSubmitState() {
+  alignSubmit.disabled = !alignText.value.trim();
+}
+
+alignText.addEventListener("input", syncAlignSubmitState);
+
 alignSubmit.addEventListener("click", () => {
   const value = alignText.value.trim();
   if (!value) return;
   sendAction({ action: "align_choice", value, question_id: currentPayload?.question_id || null });
   alignText.value = "";
+  syncAlignSubmitState();
 });
 
 alignText.addEventListener("keydown", (event) => {
