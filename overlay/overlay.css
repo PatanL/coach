@@ -7,6 +7,13 @@ html, body {
   height: 100%;
 }
 
+body[data-screenshot="true"] *,
+body[data-screenshot="true"] *::before,
+body[data-screenshot="true"] *::after {
+  animation: none !important;
+  transition: none !important;
+}
+
 #overlay {
   width: 100vw;
   height: 100vh;
@@ -28,6 +35,25 @@ html, body {
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
   border: 1px solid rgba(255, 255, 255, 0.08);
   backdrop-filter: blur(8px);
+}
+
+/* Visual pattern-break for DRIFT_PERSIST: higher contrast + unmistakable frame */
+#overlay[data-event-type="DRIFT_PERSIST"] .card {
+  border: 1px solid rgba(241, 108, 91, 0.55);
+  box-shadow: 0 28px 90px rgba(0, 0, 0, 0.6);
+  background:
+    repeating-linear-gradient(
+      135deg,
+      rgba(241, 108, 91, 0.12) 0,
+      rgba(241, 108, 91, 0.12) 10px,
+      rgba(10, 12, 15, 0.96) 10px,
+      rgba(10, 12, 15, 0.96) 20px
+    ),
+    linear-gradient(140deg, rgba(19, 22, 26, 0.92), rgba(10, 12, 15, 0.96));
+}
+
+#overlay[data-event-type="DRIFT_PERSIST"] .label {
+  color: rgba(255, 255, 255, 0.92);
 }
 
 #overlay[data-level="A"] .card {
