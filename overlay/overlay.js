@@ -187,6 +187,9 @@ window.__overlayOnShow = showOverlay;
 
 window.addEventListener("keydown", (event) => {
   if (event.key === "Enter") {
+    // If an input handler already consumed this, don't also run the global fallback.
+    if (event.defaultPrevented) return;
+
     const sinceShownMs = shownAt ? Date.now() - shownAt : null;
     const shouldTrigger = window.overlayUtils?.shouldTriggerBackOnTrack?.({
       eventTarget: event.target,

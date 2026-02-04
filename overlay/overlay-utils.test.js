@@ -6,7 +6,8 @@ const {
   isPatternBreakEvent,
   isTypingContext,
   primaryEnterAction,
-  shouldTriggerBackOnTrack
+  shouldTriggerBackOnTrack,
+  isButtonLikeTarget
 } = require("./overlay-utils");
 
 test("isTextInputTarget: recognizes common typing targets", () => {
@@ -63,6 +64,25 @@ test("shouldTriggerBackOnTrack: never triggers while typing", () => {
   );
   assert.equal(
     shouldTriggerBackOnTrack({ eventTarget: { tagName: "DIV" }, activeElement: { tagName: "TEXTAREA" }, sinceShownMs: 1000 }),
+    false
+  );
+});
+
+test("isButtonLikeTarget: recognizes common click controls", () => {
+  assert.equal(isButtonLikeTarget({ tagName: "BUTTON" }), true);
+  assert.equal(isButtonLikeTarget({ tagName: "a" }), true);
+  assert.equal(isButtonLikeTarget({ tagName: "DIV", getAttribute: () => "button" }), true);
+  assert.equal(isButtonLikeTarget({ tagName: "DIV", getAttribute: () => "" }), false);
+  assert.equal(isButtonLikeTarget(null), false);
+});
+
+test("shouldTriggerBackOnTrack: does not double-fire when a button is focused", () => {
+  assert.equal(
+    shouldTriggerBackOnTrack({ eventTarget: { tagName: "BUTTON" }, activeElement: { tagName: "BUTTON" }, sinceShownMs: 1000 }),
+    false
+  );
+  assert.equal(
+    shouldTriggerBackOnTrack({ eventTarget: { tagName: "DIV" }, activeElement: { tagName: "BUTTON" }, sinceShownMs: 1000 }),
     false
   );
 });
