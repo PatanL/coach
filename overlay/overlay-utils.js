@@ -138,7 +138,16 @@
     const isTyping = isTextInputTarget(activeElement);
 
     // Prefer context-specific hints when the overlay is asking for input.
-    let enterHint = mode === "align" || isTyping ? "Enter: Submit" : "Enter: Back on track";
+    // In align mode, global Enter-to-confirm is disabled; only focused controls (or the textbox) respond.
+    let enterHint;
+
+    if (isTyping) {
+      enterHint = "Enter: Submit";
+    } else if (isControlTarget(activeElement)) {
+      enterHint = "Enter: Activate";
+    } else {
+      enterHint = mode === "align" ? "Enter: Activate" : "Enter: Back on track";
+    }
 
     // When the snooze panel is open, Enter usually activates a focused reason button.
     // Make that explicit so the user doesn't think Enter will confirm the primary action.
