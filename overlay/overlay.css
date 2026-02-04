@@ -181,8 +181,29 @@ html[data-screenshot="1"] *::after {
 .buttons {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
+  grid-template-areas:
+    "back stuck"
+    "recover snooze";
   gap: 10px;
   margin-bottom: 14px;
+}
+
+/* DRIFT_PERSIST: move the concrete recovery actions to the top row.
+   This is a subtle, high-signal pattern-break without removing options. */
+#overlay.pattern-break .buttons {
+  grid-template-areas:
+    "recover snooze"
+    "back stuck";
+}
+
+#backBtn { grid-area: back; }
+#stuckBtn { grid-area: stuck; }
+#recoverBtn { grid-area: recover; }
+#snoozeBtn { grid-area: snooze; }
+
+#overlay.pattern-break #backBtn,
+#overlay.pattern-break #stuckBtn {
+  opacity: 0.78;
 }
 
 .choices {
