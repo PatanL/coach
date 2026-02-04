@@ -109,7 +109,7 @@ function setDetailsOpen(nextOpen) {
   if (nextAction) nextAction.classList.toggle("hidden", !detailsOpen);
 
   if (detailsBtn) {
-    detailsBtn.textContent = detailsOpen ? "Hide" : "Why?";
+    detailsBtn.textContent = detailsOpen ? "Hide details" : "Details";
   }
 
   updateHotkeyHints();
