@@ -9,9 +9,11 @@ const {
   shouldTriggerSnoozeFromKeydown,
   shouldTriggerSnooze,
   shouldTriggerDetailsToggleFromKeydown,
+  shouldTriggerDetailsToggle,
   getHotkeyHints,
   choiceIndexFromKey,
   shouldTriggerChoiceFromKeydown,
+  shouldTriggerChoice,
   shouldTriggerAlignSubmitFromKeydown,
   shouldTriggerBackOnTrackInMode
 } = require("./overlay-utils");
@@ -209,6 +211,16 @@ test("shouldTriggerDetailsToggleFromKeydown: triggers only when safe", () => {
   assert.equal(shouldTriggerDetailsToggleFromKeydown({ key: "?", isComposing: false, altKey: true }, null), false);
 });
 
+test("shouldTriggerDetailsToggle: requires a short dwell after show", () => {
+  const event = { key: "?", isComposing: false, target: { tagName: "DIV" } };
+
+  // Within the dwell window → do not trigger.
+  assert.equal(shouldTriggerDetailsToggle(event, null, 1000, 1200), false);
+
+  // After the dwell window → ok.
+  assert.equal(shouldTriggerDetailsToggle(event, null, 1000, 2000), true);
+});
+
 test("shouldTriggerSnooze: requires a short dwell after show", () => {
   const event = { key: "Escape", isComposing: false, target: { tagName: "DIV" } };
 
@@ -300,6 +312,16 @@ test("shouldTriggerChoiceFromKeydown: triggers only when safe", () => {
   // Avoid auto-repeat and modifier keys.
   assert.equal(shouldTriggerChoiceFromKeydown({ key: "3", isComposing: false, repeat: true }, null), false);
   assert.equal(shouldTriggerChoiceFromKeydown({ key: "4", isComposing: false, ctrlKey: true }, null), false);
+});
+
+test("shouldTriggerChoice: requires a short dwell after show", () => {
+  const event = { key: "1", isComposing: false, target: { tagName: "DIV" } };
+
+  // Within the dwell window → do not trigger.
+  assert.equal(shouldTriggerChoice(event, null, 1000, 1200), false);
+
+  // After the dwell window → ok.
+  assert.equal(shouldTriggerChoice(event, null, 1000, 2000), true);
 });
 
 test("shouldTriggerAlignSubmitFromKeydown: triggers only when safe", () => {

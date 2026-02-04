@@ -354,10 +354,11 @@ window.addEventListener("keydown", (event) => {
 
   // "?" toggles extra context (why/next action) when available.
   // When the snooze panel is open, avoid toggling details (it isn't actionable in that state).
-  const shouldToggleDetails = window.overlayUtils?.shouldTriggerDetailsToggleFromKeydown;
+  const shouldToggleDetails =
+    window.overlayUtils?.shouldTriggerDetailsToggle || window.overlayUtils?.shouldTriggerDetailsToggleFromKeydown;
   if (
     typeof shouldToggleDetails === "function" &&
-    shouldToggleDetails(event, activeElement) &&
+    shouldToggleDetails(event, activeElement, shownAt) &&
     detailsBtn &&
     !detailsBtn.hidden &&
     snooze.classList.contains("hidden")
@@ -370,10 +371,11 @@ window.addEventListener("keydown", (event) => {
 
   // Option B actionable overlay: allow quick 1-9 choice selection (when not typing).
   if (mode === "align" && snooze.classList.contains("hidden")) {
-    const shouldTriggerChoice = window.overlayUtils?.shouldTriggerChoiceFromKeydown;
+    const shouldTriggerChoice =
+      window.overlayUtils?.shouldTriggerChoice || window.overlayUtils?.shouldTriggerChoiceFromKeydown;
     if (
       typeof shouldTriggerChoice === "function" &&
-      shouldTriggerChoice(event, activeElement) &&
+      shouldTriggerChoice(event, activeElement, shownAt) &&
       Array.isArray(currentPayload?.choices)
     ) {
       const index = window.overlayUtils?.choiceIndexFromKey?.(event.key);

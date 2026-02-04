@@ -104,6 +104,15 @@
     return true;
   }
 
+  function shouldTriggerDetailsToggle(event, activeElement, shownAtMs, nowMs = Date.now()) {
+    const safeKeydown = shouldTriggerDetailsToggleFromKeydown(event, activeElement);
+    if (!safeKeydown) return false;
+
+    const dwellMs = typeof shownAtMs === "number" ? nowMs - shownAtMs : null;
+    if (dwellMs != null && dwellMs >= 0 && dwellMs < 450) return false;
+
+    return true;
+  }
 
   // Avoid accidental confirmation when the overlay steals focus mid-typing.
   // If the overlay has *just* shown, require a short dwell before a hotkey triggers.
@@ -194,6 +203,16 @@
     return true;
   }
 
+  function shouldTriggerChoice(event, activeElement, shownAtMs, nowMs = Date.now()) {
+    const safeKeydown = shouldTriggerChoiceFromKeydown(event, activeElement);
+    if (!safeKeydown) return false;
+
+    const dwellMs = typeof shownAtMs === "number" ? nowMs - shownAtMs : null;
+    if (dwellMs != null && dwellMs >= 0 && dwellMs < 450) return false;
+
+    return true;
+  }
+
   function shouldTriggerAlignSubmitFromKeydown(event) {
     if (!event) return false;
 
@@ -221,9 +240,11 @@
     shouldTriggerSnoozeFromKeydown,
     shouldTriggerSnooze,
     shouldTriggerDetailsToggleFromKeydown,
+    shouldTriggerDetailsToggle,
     getHotkeyHints,
     choiceIndexFromKey,
     shouldTriggerChoiceFromKeydown,
+    shouldTriggerChoice,
     shouldTriggerAlignSubmitFromKeydown
   };
 });
