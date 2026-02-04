@@ -182,6 +182,9 @@ if (window.overlayAPI?.onPause) {
   });
 }
 
+// Test/screenshot harness: allow a deterministic runner to show the overlay without IPC.
+window.__overlayOnShow = showOverlay;
+
 window.addEventListener("keydown", (event) => {
   if (event.key === "Enter") {
     const sinceShownMs = shownAt ? Date.now() - shownAt : null;
