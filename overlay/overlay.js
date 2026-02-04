@@ -1,6 +1,7 @@
 const overlay = document.getElementById("overlay");
 const eventLabel = document.getElementById("eventLabel");
 const blockName = document.getElementById("blockName");
+const eventLabel = document.getElementById("eventLabel");
 const headline = document.getElementById("headline");
 const humanLine = document.getElementById("humanLine");
 const diagnosis = document.getElementById("diagnosis");
@@ -62,6 +63,15 @@ function resetAlignInput() {
   alignInput.classList.add("hidden");
 }
 
+function labelForEventType(eventType) {
+  if (eventType === "DRIFT_PERSIST") return "DRIFT (AGAIN)";
+  if (eventType === "DRIFT_START") return "DRIFT";
+  if (eventType === "OFF_SCHEDULE") return "OFF-SCHEDULE";
+  if (eventType === "HABIT_ESCALATE") return "HABIT";
+  if (eventType === "RECOVER_TRIGGER") return "RECOVER";
+  return "DRIFT";
+}
+
 function showOverlay(payload) {
   overlay.classList.remove("hidden");
   resetSnooze();
@@ -74,6 +84,12 @@ function showOverlay(payload) {
   } else {
     overlay.dataset.mode = "";
   }
+  const eventType = payload.source_event_type || payload.event_type || "";
+  overlay.dataset.eventType = eventType;
+  if (eventLabel) {
+    eventLabel.textContent = labelForEventType(eventType);
+  }
+
   setText(blockName, payload.block_name || "");
   setText(headline, payload.headline || "Reset.");
   setText(humanLine, payload.human_line || "");
