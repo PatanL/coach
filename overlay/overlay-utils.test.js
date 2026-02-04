@@ -30,10 +30,37 @@ test("isTextInputTarget: recognizes common typing targets", () => {
     true
   );
 
+  // Role check should be case-insensitive.
+  assert.equal(
+    isTextInputTarget({
+      tagName: "DIV",
+      getAttribute: (name) => (name === "role" ? "TextBox" : null)
+    }),
+    true
+  );
+
   assert.equal(
     isTextInputTarget({
       tagName: "DIV",
       getAttribute: (name) => (name === "contenteditable" ? "true" : null)
+    }),
+    true
+  );
+
+  // contenteditable without a value still means editable.
+  assert.equal(
+    isTextInputTarget({
+      tagName: "DIV",
+      getAttribute: (name) => (name === "contenteditable" ? "" : null)
+    }),
+    true
+  );
+
+  // contenteditable supports non-boolean values like plaintext-only.
+  assert.equal(
+    isTextInputTarget({
+      tagName: "DIV",
+      getAttribute: (name) => (name === "contenteditable" ? "plaintext-only" : null)
     }),
     true
   );
