@@ -255,11 +255,33 @@ test("getHotkeyHints: switches hints based on mode/focus", () => {
   });
 
   assert.deepEqual(
-    getHotkeyHints({ mode: "align", activeElement: { tagName: "DIV" }, snoozeOpen: false, detailsAvailable: true }),
+    getHotkeyHints({
+      mode: "align",
+      activeElement: { tagName: "DIV" },
+      snoozeOpen: false,
+      detailsAvailable: true,
+      detailsOpen: false
+    }),
     {
       enterHint: "Enter: Activate",
       quickHint: "1-9: Choose",
       detailsHint: "?: Details",
+      escHint: "Esc: Snooze"
+    }
+  );
+
+  assert.deepEqual(
+    getHotkeyHints({
+      mode: "align",
+      activeElement: { tagName: "DIV" },
+      snoozeOpen: false,
+      detailsAvailable: true,
+      detailsOpen: true
+    }),
+    {
+      enterHint: "Enter: Activate",
+      quickHint: "1-9: Choose",
+      detailsHint: "?: Hide details",
       escHint: "Esc: Snooze"
     }
   );

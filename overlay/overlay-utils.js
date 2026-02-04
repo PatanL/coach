@@ -143,7 +143,7 @@
     return shouldTriggerBackOnTrack(event, activeElement, shownAtMs, nowMs);
   }
 
-  function getHotkeyHints({ mode, activeElement, snoozeOpen, detailsAvailable } = {}) {
+  function getHotkeyHints({ mode, activeElement, snoozeOpen, detailsAvailable, detailsOpen } = {}) {
     const isTyping = isTextInputTarget(activeElement);
 
     // Prefer context-specific hints when the overlay is asking for input.
@@ -169,7 +169,9 @@
     const quickHint = mode === "align" && !snoozeOpen && !isTyping ? "1-9: Choose" : null;
 
     // Only show the details hint when it's actionable and won't interrupt typing.
-    const detailsHint = detailsAvailable && !snoozeOpen && !isTyping ? "?: Details" : null;
+    // If details are already expanded, hint that '?' will hide them.
+    const detailsHint =
+      detailsAvailable && !snoozeOpen && !isTyping ? (detailsOpen ? "?: Hide details" : "?: Details") : null;
 
     if (snoozeOpen) {
       return { enterHint, quickHint: null, detailsHint: null, escHint: "Esc: Close snooze" };

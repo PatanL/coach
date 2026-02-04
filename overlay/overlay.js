@@ -68,7 +68,8 @@ function updateHotkeyHints() {
     mode,
     activeElement: document.activeElement,
     snoozeOpen,
-    detailsAvailable: Boolean(detailsBtn && !detailsBtn.hidden)
+    detailsAvailable: Boolean(detailsBtn && !detailsBtn.hidden),
+    detailsOpen
   });
 
   enterHint.textContent = enterText;
