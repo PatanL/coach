@@ -63,6 +63,8 @@ function resetAlignInput() {
 }
 
 function showOverlay(payload) {
+  overlay.dataset.eventType = payload?.source_event_type || "";
+  overlay.dataset.styleId = payload?.style_id || "";
   overlay.classList.remove("hidden");
   resetSnooze();
   resetAlignInput();
