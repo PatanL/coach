@@ -246,6 +246,14 @@ test("getHotkeyHints: switches hints based on mode/focus", () => {
     escHint: "Esc: Snooze"
   });
 
+  // When focus is on a control, Enter should be described as activating that control.
+  assert.deepEqual(getHotkeyHints({ mode: "", activeElement: { tagName: "BUTTON" }, snoozeOpen: false }), {
+    enterHint: "Enter: Activate",
+    quickHint: null,
+    detailsHint: null,
+    escHint: "Esc: Snooze"
+  });
+
   assert.deepEqual(
     getHotkeyHints({ mode: "align", activeElement: { tagName: "DIV" }, snoozeOpen: false, detailsAvailable: true }),
     {
