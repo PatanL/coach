@@ -26,6 +26,8 @@ let tray = null;
 let currentPayload = null;
 let lastCmdId = null;
 
+const SCREENSHOT_MODE = process.env.OVERLAY_SCREENSHOT === "1";
+
 const OVERLAY_SIZE = { width: 640, height: 360 };
 const BANNER_SIZE = { width: 360, height: 140 };
 
@@ -49,7 +51,8 @@ function createOverlayWindow() {
     width: OVERLAY_SIZE.width,
     height: OVERLAY_SIZE.height,
     frame: false,
-    transparent: true,
+    transparent: SCREENSHOT_MODE ? false : true,
+    backgroundColor: SCREENSHOT_MODE ? "#06080a" : undefined,
     alwaysOnTop: true,
     skipTaskbar: true,
     resizable: false,
@@ -216,10 +219,75 @@ ipcMain.on("overlay:action", (event, action) => {
   }
 });
 
-app.whenReady().then(() => {
+async function runScreenshots() {
+  const outDir = path.join(__dirname, "screenshots");
+  if (!fs.existsSync(outDir)) fs.mkdirSync(outDir, { recursive: true });
+
+  const scenarios = [
+    {
+      name: "drift-start",
+      payload: {
+        ts: new Date().toISOString(),
+        cmd_id: "screenshot-cmd-1",
+        source_event_id: "screenshot-event-1",
+        event_type: "DRIFT_START",
+        source: "runner",
+        level: "B",
+        style_id: "calm",
+        headline: "Reset.",
+        human_line: "You drifted. Let's snap back.",
+        diagnosis: "",
+        next_action: "Pick the smallest next step.",
+        block_id: "block-1",
+        block_name: "Deep Work"
+      }
+    },
+    {
+      name: "drift-persist",
+      payload: {
+        ts: new Date().toISOString(),
+        cmd_id: "screenshot-cmd-2",
+        source_event_id: "screenshot-event-2",
+        event_type: "DRIFT_PERSIST",
+        source: "runner",
+        level: "B",
+        style_id: "calm",
+        headline: "Pattern break.",
+        human_line: "Still drifting — do one concrete action now.",
+        diagnosis: "",
+        next_action: "Click Recover or Snooze (with a reason).",
+        block_id: "block-1",
+        block_name: "Deep Work"
+      }
+    }
+  ];
+
+  for (const scenario of scenarios) {
+    positionOverlay(scenario.payload.level);
+    overlayWindow.show();
+    overlayWindow.webContents.send("overlay:show", scenario.payload);
+    await new Promise((r) => setTimeout(r, 350));
+    const image = await overlayWindow.webContents.capturePage();
+    const outPath = path.join(outDir, `${scenario.name}.png`);
+    fs.writeFileSync(outPath, image.toPNG());
+  }
+
+  app.quit();
+}
+
+app.whenReady().then(async () => {
   ensureFile(OVERLAY_PATH);
   ensureFile(ACTIONS_PATH);
   createOverlayWindow();
+
+  if (SCREENSHOT_MODE) {
+    // Wait for the renderer to finish loading CSS/layout.
+    overlayWindow.webContents.once("did-finish-load", () => {
+      runScreenshots().catch(() => app.quit());
+    });
+    return;
+  }
+
   registerShortcuts();
   createTray();
   watchOverlayCommands();

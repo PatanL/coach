@@ -7,6 +7,14 @@ html, body {
   height: 100%;
 }
 
+/* Deterministic screenshots: disable animation/transition when the screenshot runner sets this flag. */
+html[data-screenshot="1"] *,
+html[data-screenshot="1"] *::before,
+html[data-screenshot="1"] *::after {
+  animation: none !important;
+  transition: none !important;
+}
+
 #overlay {
   width: 100vw;
   height: 100vh;
@@ -16,11 +24,56 @@ html, body {
   background: rgba(6, 8, 10, 0.45);
 }
 
+@keyframes patternBreakPulse {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+    filter: saturate(1) contrast(1);
+  }
+  20% {
+    transform: translate3d(0, -2px, 0) scale(1.01);
+    filter: saturate(1.6) contrast(1.25);
+  }
+  40% {
+    transform: translate3d(0, 1px, 0) scale(1.01);
+  }
+  60% {
+    transform: translate3d(0, -1px, 0) scale(1.005);
+  }
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+    filter: saturate(1) contrast(1);
+  }
+}
+
+#overlay.pattern-break {
+  background: radial-gradient(circle at 50% 35%, rgba(241, 108, 91, 0.22), rgba(6, 8, 10, 0.6));
+}
+
+#overlay.pattern-break .card {
+  border: 2px solid rgba(255, 122, 105, 0.9);
+  box-shadow: 0 26px 100px rgba(241, 108, 91, 0.28), 0 20px 60px rgba(0, 0, 0, 0.55);
+  background: linear-gradient(140deg, rgba(36, 18, 18, 0.92), rgba(10, 12, 15, 0.96));
+}
+
+#overlay.pattern-break .card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(255, 122, 105, 0.18), rgba(255, 122, 105, 0.0) 40%),
+    repeating-linear-gradient(115deg, rgba(255, 122, 105, 0.10) 0px, rgba(255, 122, 105, 0.10) 8px, rgba(255, 122, 105, 0.0) 8px, rgba(255, 122, 105, 0.0) 20px);
+  opacity: 0.85;
+  pointer-events: none;
+  mix-blend-mode: screen;
+}
+
 .hidden {
   display: none;
 }
 
 .card {
+  position: relative;
+  overflow: hidden;
   width: 560px;
   padding: 28px 30px;
   border-radius: 18px;
@@ -77,6 +130,20 @@ html, body {
 .label {
   color: #f16c5b;
   font-weight: 700;
+}
+
+#overlay.pattern-break .label,
+#overlay[data-style-id="pattern_break"] .label {
+  color: #ffb3aa;
+  text-shadow: 0 0 18px rgba(241, 108, 91, 0.55);
+  animation: patternBreakLabelPulse 900ms ease-in-out 0s 3;
+}
+
+@keyframes patternBreakLabelPulse {
+  0% { transform: translateY(0); letter-spacing: 0.12em; }
+  30% { transform: translateY(-1px); letter-spacing: 0.16em; }
+  60% { transform: translateY(0); letter-spacing: 0.12em; }
+  100% { transform: translateY(0); letter-spacing: 0.12em; }
 }
 
 .block {
@@ -173,6 +240,15 @@ button.primary:hover {
   background: #ff7a69;
 }
 
+button:focus-visible {
+  outline: 2px solid rgba(246, 244, 239, 0.85);
+  outline-offset: 2px;
+}
+
+#overlay.pattern-break button:focus-visible {
+  outline-color: rgba(255, 122, 105, 0.95);
+}
+
 .snooze {
   margin-bottom: 12px;
 }
@@ -202,4 +278,12 @@ button.primary:hover {
   justify-content: space-between;
   font-size: 11px;
   color: rgba(246, 244, 239, 0.5);
+}
+
+/* DRIFT_PERSIST visual pattern-break: unmistakable, but still readable.
+   Keep this definition single-source to avoid accidental overrides. */
+@media (prefers-reduced-motion: no-preference) {
+  #overlay.pattern-break .card {
+    animation: patternBreakPulse 900ms ease-out 1;
+  }
 }

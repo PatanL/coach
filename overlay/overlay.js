@@ -1,5 +1,6 @@
 const overlay = document.getElementById("overlay");
 const blockName = document.getElementById("blockName");
+const eventLabel = document.getElementById("eventLabel");
 const headline = document.getElementById("headline");
 const humanLine = document.getElementById("humanLine");
 const diagnosis = document.getElementById("diagnosis");
@@ -8,6 +9,7 @@ const snooze = document.getElementById("snoozeReason");
 const miniPlan = document.getElementById("miniPlan");
 const choiceButtons = document.getElementById("choiceButtons");
 const alignInput = document.getElementById("alignInput");
+const primaryHotkey = document.getElementById("primaryHotkey");
 const alignText = document.getElementById("alignText");
 const alignSubmit = document.getElementById("alignSubmit");
 
@@ -20,6 +22,7 @@ let shownAt = null;
 let currentPayload = null;
 
 function setText(el, value) {
+  if (!el) return;
   el.textContent = value || "";
 }
 
@@ -40,29 +43,56 @@ function resetAlignInput() {
   alignInput.classList.add("hidden");
 }
 
+function isPatternBreak(payload) {
+  if (!payload) return false;
+  if (payload.style_id === "pattern_break") return true;
+  return window.overlayUtils?.isPatternBreakEvent?.(payload.event_type) || false;
+}
+
 function showOverlay(payload) {
   overlay.classList.remove("hidden");
   resetSnooze();
   resetAlignInput();
-  if (payload.choices && Array.isArray(payload.choices)) {
+
+  overlay.dataset.styleId = payload?.style_id || "";
+  overlay.dataset.eventType = payload?.event_type || "";
+
+  const patternBreak = isPatternBreak(payload);
+  overlay.classList.toggle("pattern-break", Boolean(patternBreak));
+  setText(eventLabel, patternBreak ? "DRIFT (PERSIST)" : "DRIFT");
+
+  // Pattern-break should feel different and more "do an action now".
+  backBtn.classList.toggle("primary", !patternBreak);
+  recoverBtn.classList.toggle("primary", Boolean(patternBreak));
+
+  const enterAction =
+    window.overlayUtils?.primaryEnterAction?.(payload?.event_type) || (patternBreak ? "recover" : "back_on_track");
+  setText(
+    primaryHotkey,
+    enterAction === "recover" ? "Enter: Recover schedule (after 0.4s)" : "Enter: Back on track (after 0.4s)"
+  );
+
+  if (payload?.choices && Array.isArray(payload.choices)) {
     overlay.dataset.mode = "align";
   } else {
     overlay.dataset.mode = "";
   }
-  setText(blockName, payload.block_name || "");
-  setText(headline, payload.headline || "Reset.");
-  setText(humanLine, payload.human_line || "");
-  setText(diagnosis, payload.diagnosis || "");
-  setText(nextAction, payload.next_action || "");
 
-  if (payload.level === "C") {
+  updatePrimaryLabel(payload);
+  setText(blockName, payload?.block_name || "");
+  setText(headline, payload?.headline || "Reset.");
+  setText(humanLine, payload?.human_line || "");
+  setText(diagnosis, payload?.diagnosis || "");
+  setText(nextAction, payload?.next_action || "");
+
+  if (payload?.level === "C") {
     miniPlan.classList.remove("hidden");
-    setText(miniPlan, payload.mini_plan || "");
+    setText(miniPlan, payload?.mini_plan || "");
   } else {
     miniPlan.classList.add("hidden");
   }
 
-  if (payload.choices && Array.isArray(payload.choices)) {
+  if (payload?.choices && Array.isArray(payload.choices)) {
     choiceButtons.innerHTML = "";
     payload.choices.forEach((choice) => {
       const button = document.createElement("button");
@@ -79,9 +109,22 @@ function showOverlay(payload) {
     alignInput.classList.add("hidden");
   }
 
-  overlay.dataset.level = payload.level || "B";
+  overlay.dataset.level = payload?.level || "B";
   currentPayload = payload;
   shownAt = Date.now();
+
+  // Keyboard-first recovery: put focus on the most relevant control.
+  // Skip in deterministic screenshot mode to avoid focus-ring changes in assets.
+  const screenshotMode = document.documentElement?.dataset?.screenshot === "1";
+  if (!screenshotMode) {
+    const focusEl = payload?.choices
+      ? alignText
+      : enterAction === "recover"
+        ? recoverBtn
+        : backBtn;
+    // Wait a tick so the overlay is visible before focusing.
+    setTimeout(() => focusEl?.focus?.(), 0);
+  }
 }
 
 function sendAction(action) {
@@ -127,20 +170,30 @@ snooze.addEventListener("click", (event) => {
   }
 });
 
-window.overlayAPI.onShow((payload) => {
-  showOverlay(payload);
-});
+if (window.overlayAPI?.onShow) {
+  window.overlayAPI.onShow((payload) => {
+    showOverlay(payload);
+  });
+}
 
-window.overlayAPI.onPause(() => {
-  sendAction({ action: "pause_15" });
-});
+if (window.overlayAPI?.onPause) {
+  window.overlayAPI.onPause(() => {
+    sendAction({ action: "pause_15" });
+  });
+}
 
 window.addEventListener("keydown", (event) => {
-  // Don't treat Enter as "Back on track" while the user is typing.
   if (event.key === "Enter") {
-    const isTypingTarget = window.overlayUtils?.isTextInputTarget?.(event.target);
-    if (!isTypingTarget) {
-      sendAction({ action: "back_on_track" });
+    const sinceShownMs = shownAt ? Date.now() - shownAt : null;
+    const shouldTrigger = window.overlayUtils?.shouldTriggerBackOnTrack?.({
+      eventTarget: event.target,
+      activeElement: document.activeElement,
+      sinceShownMs,
+      minDelayMs: 400
+    });
+    if (shouldTrigger) {
+      const enterAction = window.overlayUtils?.primaryEnterAction?.(currentPayload?.event_type) || "back_on_track";
+      sendAction({ action: enterAction });
     }
   }
   if (event.key === "Escape") {

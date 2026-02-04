@@ -1268,15 +1268,20 @@ def main() -> int:
 
             overlay = response.get("overlay")
             if isinstance(overlay, dict):
-                if event.get("type") in ["DRIFT_START", "DRIFT_PERSIST"]:
+                event_type = event.get("type")
+                if event_type in ["DRIFT_START", "DRIFT_PERSIST"]:
                     overlay = dict(overlay)
                     overlay["level"] = "B"
+                    if event_type == "DRIFT_PERSIST":
+                        # Deterministic visual pattern-break in the overlay to interrupt autopilot.
+                        overlay["style_id"] = "pattern_break"
                 cmd_id = ensure_uuid()
                 source_event_id = event.get("event_id")
                 overlay_payload = {
                     "ts": dt.datetime.now().isoformat(),
                     "cmd_id": cmd_id,
                     "source_event_id": source_event_id,
+                    "event_type": event_type,
                     "source": "runner",
                     **overlay,
                 }

@@ -4,13 +4,19 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Coach Overlay</title>
+    <script>
+      // Deterministic render for screenshot automation (disables animations/transitions via CSS).
+      if (new URLSearchParams(location.search).has("screenshot")) {
+        document.documentElement.dataset.screenshot = "1";
+      }
+    </script>
     <link rel="stylesheet" href="overlay.css" />
   </head>
   <body>
     <div id="overlay" class="layer-b hidden" data-level="B">
       <div class="card">
         <div class="header">
-          <span class="label">DRIFT</span>
+          <span id="eventLabel" class="label">DRIFT</span>
           <span id="blockName" class="block">Block</span>
         </div>
         <div id="headline" class="headline">Reset.</div>
@@ -39,12 +45,29 @@
         </div>
         <div id="miniPlan" class="mini-plan hidden"></div>
         <div class="footer">
-          <span>Enter: Back on track</span>
+          <span id="primaryHotkey">Enter: Back on track (after 0.4s)</span>
           <span>Esc: Snooze</span>
           <span>Cmd/Ctrl+Shift+P: Pause 15</span>
         </div>
       </div>
     </div>
+    <script>
+      // In production, overlayAPI is injected by Electron preload.
+      // For local deterministic screenshot rendering, provide a tiny stub.
+      if (!window.overlayAPI) {
+        window.__overlayOnShow = null;
+        window.__overlayOnPause = null;
+        window.overlayAPI = {
+          onShow: (cb) => {
+            window.__overlayOnShow = cb;
+          },
+          onPause: (cb) => {
+            window.__overlayOnPause = cb;
+          },
+          sendAction: () => {}
+        };
+      }
+    </script>
     <script src="overlay-utils.js"></script>
     <script src="overlay.js"></script>
   </body>
