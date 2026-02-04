@@ -187,11 +187,14 @@ function showOverlay(payload) {
     choiceButtons.classList.add("hidden");
     alignInput.classList.add("hidden");
 
-    // When not in align mode, keep focus on the primary action.
+    // When not in align mode, avoid focusing a button by default.
+    // This prevents an immediate Enter keypress (e.g. from the underlying app) from
+    // activating the focused control via the browser's default button semantics.
+    // Keyboard users can still hit Enter via the global hotkey, or Tab to a control.
     try {
-      backBtn.focus({ preventScroll: true });
+      overlay.focus({ preventScroll: true });
     } catch {
-      backBtn.focus();
+      overlay.focus();
     }
   }
 
