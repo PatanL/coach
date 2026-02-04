@@ -203,3 +203,23 @@ button.primary:hover {
   font-size: 11px;
   color: rgba(246, 244, 239, 0.5);
 }
+
+/* Visual pattern-break: persistent drift gets a distinct "hazard stripe" treatment. */
+#overlay[data-event-type="DRIFT_PERSIST"] .card {
+  border: 2px solid rgba(241, 108, 91, 0.9);
+  background:
+    repeating-linear-gradient(
+      135deg,
+      rgba(241, 108, 91, 0.18) 0px,
+      rgba(241, 108, 91, 0.18) 10px,
+      rgba(19, 22, 26, 0.92) 10px,
+      rgba(19, 22, 26, 0.92) 20px
+    );
+}
+
+#overlay[data-event-type="DRIFT_PERSIST"] .label {
+  color: #140e0b;
+  background: #f16c5b;
+  padding: 4px 8px;
+  border-radius: 999px;
+}
