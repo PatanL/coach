@@ -74,6 +74,35 @@ html, body {
   margin-bottom: 14px;
 }
 
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.details-toggle {
+  padding: 0;
+  border-radius: 8px;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: rgba(246, 244, 239, 0.72);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  line-height: 1;
+  height: 26px;
+  padding: 0 10px;
+}
+
+.details-toggle:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.details-toggle:focus {
+  outline: 2px solid rgba(241, 108, 91, 0.7);
+  outline-offset: 2px;
+}
+
 .label {
   color: #f16c5b;
   font-weight: 700;
