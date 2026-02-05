@@ -1,4 +1,5 @@
 const overlay = document.getElementById("overlay");
+const eventLabel = document.getElementById("eventLabel");
 const blockName = document.getElementById("blockName");
 const eventLabel = document.getElementById("eventLabel");
 const headline = document.getElementById("headline");
@@ -63,6 +64,19 @@ function showOverlay(payload) {
   overlay.dataset.eventType = eventType;
   if (eventLabel) {
     eventLabel.textContent = labelForEventType(eventType);
+  }
+
+  overlay.dataset.eventType = payload.source_event_type || "";
+
+  const eventType = payload.source_event_type || "";
+  if (eventType === "DRIFT_PERSIST") {
+    setText(eventLabel, "DRIFT PERSIST");
+  } else if (eventType === "DRIFT_START") {
+    setText(eventLabel, "DRIFT");
+  } else if (eventType) {
+    setText(eventLabel, eventType.replaceAll("_", " "));
+  } else {
+    setText(eventLabel, "DRIFT");
   }
 
   setText(blockName, payload.block_name || "");
