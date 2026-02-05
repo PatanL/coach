@@ -22,17 +22,22 @@ html, body {
   box-shadow: 0 24px 70px rgba(241, 108, 91, 0.12), 0 20px 60px rgba(0, 0, 0, 0.45);
 }
 
-/* DRIFT_PERSIST = deliberate pattern-break so it can't fade into the background. */
+/* Visual pattern-break when drift persists: deliberate + unmistakable, but deterministic (no animation). */
+#overlay[data-event-type="DRIFT_PERSIST"] {
+  background: rgba(30, 6, 6, 0.62);
+}
+
 #overlay[data-event-type="DRIFT_PERSIST"] .card {
   border-color: rgba(255, 122, 105, 0.9);
+  box-shadow: 0 26px 70px rgba(0, 0, 0, 0.55);
   background:
     linear-gradient(140deg, rgba(19, 22, 26, 0.9), rgba(10, 12, 15, 0.96)),
     repeating-linear-gradient(
-      45deg,
-      rgba(255, 122, 105, 0.16) 0,
+      135deg,
+      rgba(255, 122, 105, 0.16) 0px,
       rgba(255, 122, 105, 0.16) 10px,
       rgba(0, 0, 0, 0) 10px,
-      rgba(0, 0, 0, 0) 20px
+      rgba(0, 0, 0, 0) 22px
     );
 }
 

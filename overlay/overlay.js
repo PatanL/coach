@@ -21,6 +21,7 @@ let shownAt = null;
 let currentPayload = null;
 
 function setText(el, value) {
+  if (!el) return;
   el.textContent = value || "";
 }
 
@@ -41,23 +42,31 @@ function resetAlignInput() {
   alignInput.classList.add("hidden");
 }
 
+function formatDriftLabel(payload) {
+  const type = payload?.event_type || "";
+  if (type === "DRIFT_PERSIST") return "DRIFT (PERSIST)";
+  if (type === "OFF_SCHEDULE") return "OFF-SCHEDULE";
+  if (type === "HABIT_ESCALATE") return "HABIT";
+  if (type === "STUCK") return "STUCK";
+  return "DRIFT";
+}
+
 function showOverlay(payload) {
   overlay.classList.remove("hidden");
   resetSnooze();
   resetAlignInput();
+
+  overlay.dataset.styleId = payload.style_id || "";
+  overlay.dataset.eventType = payload.event_type || "";
+
   if (payload.choices && Array.isArray(payload.choices)) {
     overlay.dataset.mode = "align";
   } else {
     overlay.dataset.mode = "";
   }
 
-  overlay.dataset.styleId = payload.style_id || "";
-  overlay.dataset.eventType = payload.event_type || "";
-
-  if (driftLabel) {
-    driftLabel.textContent = payload.event_type === "DRIFT_PERSIST" ? "DRIFT (PERSIST)" : "DRIFT";
-  }
-
+  updatePrimaryLabel(payload);
+  setText(driftLabel, formatDriftLabel(payload));
   setText(blockName, payload.block_name || "");
   setText(headline, payload.headline || "Reset.");
   setText(humanLine, payload.human_line || "");
@@ -77,7 +86,11 @@ function showOverlay(payload) {
       const button = document.createElement("button");
       button.textContent = choice;
       button.addEventListener("click", () => {
-        sendAction({ action: "align_choice", value: choice, question_id: currentPayload?.question_id || null });
+        sendAction({
+          action: "align_choice",
+          value: choice,
+          question_id: currentPayload?.question_id || null
+        });
       });
       choiceButtons.appendChild(button);
     });
@@ -112,7 +125,11 @@ recoverBtn.addEventListener("click", () => sendAction({ action: "recover" }));
 alignSubmit.addEventListener("click", () => {
   const value = alignText.value.trim();
   if (!value) return;
-  sendAction({ action: "align_choice", value, question_id: currentPayload?.question_id || null });
+  sendAction({
+    action: "align_choice",
+    value,
+    question_id: currentPayload?.question_id || null
+  });
   alignText.value = "";
 });
 
@@ -139,6 +156,10 @@ snooze.addEventListener("click", (event) => {
 window.overlayAPI.onShow((payload) => {
   showOverlay(payload);
 });
+
+// Test-only hook used by `npm run screenshot`.
+// Safe to leave in production: it's only callable from within the overlay page.
+window.overlayAPI.__testShow = (payload) => showOverlay(payload);
 
 window.overlayAPI.onPause(() => {
   sendAction({ action: "pause_15" });
