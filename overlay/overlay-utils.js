@@ -24,7 +24,14 @@
     return tag === "input" || tag === "textarea" || tag === "select";
   }
 
+  // For global hotkeys, `event.target` is not always the element the user is typing into.
+  // Prefer `document.activeElement` when provided.
+  function isTypingContext({ eventTarget, activeElement } = {}) {
+    return isTextInputTarget(activeElement || eventTarget);
+  }
+
   return {
-    isTextInputTarget
+    isTextInputTarget,
+    isTypingContext
   };
 });

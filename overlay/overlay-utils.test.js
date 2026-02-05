@@ -1,7 +1,7 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
 
-const { isTextInputTarget } = require("./overlay-utils");
+const { isTextInputTarget, isTypingContext } = require("./overlay-utils");
 
 test("isTextInputTarget: recognizes common typing targets", () => {
   assert.equal(isTextInputTarget({ tagName: "INPUT" }), true);
@@ -32,4 +32,19 @@ test("isTextInputTarget: ignores non-input targets", () => {
   assert.equal(isTextInputTarget({ tagName: "BUTTON" }), false);
   assert.equal(isTextInputTarget({ tagName: "DIV" }), false);
   assert.equal(isTextInputTarget(null), false);
+});
+
+test("isTypingContext: prefers activeElement over eventTarget", () => {
+  assert.equal(
+    isTypingContext({
+      eventTarget: { tagName: "DIV" },
+      activeElement: { tagName: "INPUT" }
+    }),
+    true
+  );
+});
+
+test("isTypingContext: falls back to eventTarget when no activeElement", () => {
+  assert.equal(isTypingContext({ eventTarget: { tagName: "TEXTAREA" } }), true);
+  assert.equal(isTypingContext({ eventTarget: { tagName: "DIV" } }), false);
 });
