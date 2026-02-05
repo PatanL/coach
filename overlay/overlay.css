@@ -39,6 +39,7 @@ body[data-screenshot="true"] *::after {
 
 /* Visual pattern-break for DRIFT_PERSIST: higher contrast + unmistakable frame */
 #overlay[data-event-type="DRIFT_PERSIST"] .card {
+  position: relative;
   border: 1px solid rgba(241, 108, 91, 0.55);
   box-shadow: 0 28px 90px rgba(0, 0, 0, 0.6);
   background:
@@ -50,6 +51,19 @@ body[data-screenshot="true"] *::after {
       rgba(10, 12, 15, 0.96) 20px
     ),
     linear-gradient(140deg, rgba(19, 22, 26, 0.92), rgba(10, 12, 15, 0.96));
+}
+
+/* Extra “frame” so DRIFT_PERSIST feels unmistakably different at a glance. */
+#overlay[data-event-type="DRIFT_PERSIST"] .card::before {
+  content: "";
+  position: absolute;
+  inset: -10px;
+  border-radius: 22px;
+  pointer-events: none;
+  border: 2px solid rgba(241, 108, 91, 0.28);
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.35) inset,
+    0 0 0 1px rgba(241, 108, 91, 0.08);
 }
 
 #overlay[data-event-type="DRIFT_PERSIST"] .label {
