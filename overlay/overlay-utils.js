@@ -12,7 +12,24 @@
     return tag === "input" || tag === "textarea" || tag === "select";
   }
 
+  /**
+   * Determines whether the overlay should treat Enter as an implicit "Back on track".
+   *
+   * Safety rules:
+   * - Never while typing in a text input.
+   * - Never in align mode (choices / freeform answer use Enter for submit).
+   * - Never while the snooze reason picker is open.
+   */
+  function shouldImplicitEnterTriggerBackOnTrack({ target, overlayHidden, mode, snoozeVisible }) {
+    if (overlayHidden) return false;
+    if (mode === "align") return false;
+    if (snoozeVisible) return false;
+    if (isTextInputTarget(target)) return false;
+    return true;
+  }
+
   return {
-    isTextInputTarget
+    isTextInputTarget,
+    shouldImplicitEnterTriggerBackOnTrack
   };
 });

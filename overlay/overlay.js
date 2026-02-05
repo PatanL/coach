@@ -98,6 +98,16 @@ function showOverlay(payload) {
   overlay.dataset.level = payload.level || "B";
   currentPayload = payload;
   shownAt = Date.now();
+
+  // Put focus on the primary action to reduce accidental "Enter" keypresses
+  // triggering something unintended somewhere else.
+  requestAnimationFrame(() => {
+    try {
+      backBtn?.focus?.();
+    } catch {
+      // no-op
+    }
+  });
 }
 
 function sendAction(action) {
@@ -152,19 +162,24 @@ window.overlayAPI.onPause(() => {
 });
 
 window.addEventListener("keydown", (event) => {
-  // Don't treat Enter as "Back on track" while the user is typing.
   if (event.key === "Enter") {
-    const isTypingTarget = window.overlayUtils?.isTextInputTarget?.(event.target);
-    if (!isTypingTarget) {
+    const shouldTrigger = window.overlayUtils?.shouldImplicitEnterTriggerBackOnTrack?.({
+      target: event.target,
+      overlayHidden: overlay.classList.contains("hidden"),
+      mode: overlay.dataset.mode || "",
+      snoozeVisible: !snooze.classList.contains("hidden")
+    });
+
+    if (shouldTrigger) {
       sendAction({ action: "back_on_track" });
     }
   }
 
-  // Avoid popping the snooze UI while the user is typing (pattern: Esc closes dialogs / clears input).
+  // Esc should never interrupt typing. Outside typing, toggle the snooze panel.
   if (event.key === "Escape") {
     const isTypingTarget = window.overlayUtils?.isTextInputTarget?.(event.target);
     if (!isTypingTarget) {
-      snooze.classList.remove("hidden");
+      snooze.classList.toggle("hidden");
     }
   }
 });
