@@ -81,6 +81,8 @@ function showOverlay(payload) {
   }
 
   overlay.dataset.level = payload.level || "B";
+  // Used by CSS for deterministic visual pattern-breaks (e.g., DRIFT_PERSIST).
+  overlay.dataset.eventType = payload.event_type || payload.source_event_type || "";
   currentPayload = payload;
   shownAt = Date.now();
 }
