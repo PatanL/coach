@@ -21,6 +21,8 @@ html, body {
 }
 
 .card {
+  position: relative;
+  overflow: hidden;
   width: 560px;
   padding: 28px 30px;
   border-radius: 18px;
@@ -28,6 +30,32 @@ html, body {
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
   border: 1px solid rgba(255, 255, 255, 0.08);
   backdrop-filter: blur(8px);
+}
+
+/* Visual pattern-break: DRIFT_PERSIST should feel unmistakably different. */
+#overlay[data-event-type="DRIFT_PERSIST"] .card {
+  border-color: rgba(255, 45, 85, 0.55);
+  box-shadow: 0 22px 70px rgba(255, 45, 85, 0.18), 0 20px 60px rgba(0, 0, 0, 0.45);
+}
+
+#overlay[data-event-type="DRIFT_PERSIST"] .card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 10px;
+  background: repeating-linear-gradient(
+    45deg,
+    rgba(255, 45, 85, 0.95) 0px,
+    rgba(255, 45, 85, 0.95) 10px,
+    rgba(15, 16, 18, 0.95) 10px,
+    rgba(15, 16, 18, 0.95) 20px
+  );
+}
+
+#overlay[data-event-type="DRIFT_PERSIST"] .label {
+  color: rgba(255, 45, 85, 0.95);
 }
 
 #overlay[data-level="A"] .card {

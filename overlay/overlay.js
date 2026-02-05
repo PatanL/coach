@@ -1,5 +1,6 @@
 const overlay = document.getElementById("overlay");
 const blockName = document.getElementById("blockName");
+const driftLabel = document.getElementById("driftLabel");
 const headline = document.getElementById("headline");
 const humanLine = document.getElementById("humanLine");
 const diagnosis = document.getElementById("diagnosis");
@@ -31,6 +32,14 @@ function updatePrimaryLabel(payload) {
   backBtn.textContent = "Back on track";
 }
 
+function labelForEventType(eventType) {
+  if (window.overlayUtils?.labelForEventType) {
+    return window.overlayUtils.labelForEventType(eventType);
+  }
+  const t = String(eventType || "").toUpperCase();
+  return t ? t.replaceAll("_", " ") : "DRIFT";
+}
+
 function resetSnooze() {
   snooze.classList.add("hidden");
 }
@@ -49,7 +58,10 @@ function showOverlay(payload) {
   } else {
     overlay.dataset.mode = "";
   }
+  const eventType = String(payload.event_type || payload.source_event_type || "").toUpperCase();
+
   setText(blockName, payload.block_name || "");
+  setText(driftLabel, labelForEventType(eventType));
   setText(headline, payload.headline || "Reset.");
   setText(humanLine, payload.human_line || "");
   setText(diagnosis, payload.diagnosis || "");
@@ -81,7 +93,7 @@ function showOverlay(payload) {
 
   overlay.dataset.level = payload.level || "B";
   // Used by CSS for deterministic visual pattern-breaks (e.g., DRIFT_PERSIST).
-  overlay.dataset.eventType = payload.event_type || payload.source_event_type || "";
+  overlay.dataset.eventType = eventType;
   currentPayload = payload;
   shownAt = Date.now();
 }

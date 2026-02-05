@@ -1,7 +1,7 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
 
-const { isTextInputTarget, isTypingContext } = require("./overlay-utils");
+const { isTextInputTarget, isTypingContext, labelForEventType } = require("./overlay-utils");
 
 test("isTextInputTarget: recognizes common typing targets", () => {
   assert.equal(isTextInputTarget({ tagName: "INPUT" }), true);
@@ -47,4 +47,12 @@ test("isTypingContext: prefers activeElement over eventTarget", () => {
 test("isTypingContext: falls back to eventTarget when no activeElement", () => {
   assert.equal(isTypingContext({ eventTarget: { tagName: "TEXTAREA" } }), true);
   assert.equal(isTypingContext({ eventTarget: { tagName: "DIV" } }), false);
+});
+
+test("labelForEventType: formats event types for the overlay label", () => {
+  assert.equal(labelForEventType("DRIFT_PERSIST"), "DRIFT PERSISTS");
+  assert.equal(labelForEventType("drift_start"), "DRIFT");
+  assert.equal(labelForEventType("RECOVER_SCHEDULE"), "RECOVER SCHEDULE");
+  assert.equal(labelForEventType(""), "DRIFT");
+  assert.equal(labelForEventType(null), "DRIFT");
 });

@@ -30,8 +30,16 @@
     return isTextInputTarget(activeElement || eventTarget);
   }
 
+  function labelForEventType(eventType) {
+    const t = String(eventType || "").toUpperCase();
+    if (t === "DRIFT_PERSIST") return "DRIFT PERSISTS";
+    if (t === "DRIFT_START") return "DRIFT";
+    return t ? t.replaceAll("_", " ") : "DRIFT";
+  }
+
   return {
     isTextInputTarget,
-    isTypingContext
+    isTypingContext,
+    labelForEventType
   };
 });
