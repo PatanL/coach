@@ -24,10 +24,30 @@
     return tag === "input" || tag === "textarea" || tag === "select";
   }
 
+  function isInteractiveControlTarget(target) {
+    if (!target) return false;
+
+    const tag = String(target.tagName || "").toLowerCase();
+    if (tag === "button") return true;
+    if (tag === "a") return true;
+
+    if (typeof target.getAttribute === "function") {
+      const role = target.getAttribute("role");
+      if (role && String(role).toLowerCase() === "button") return true;
+    }
+
+    return false;
+  }
+
   // For global hotkeys, `event.target` is not always the element the user is typing into.
   // Prefer `document.activeElement` when provided.
   function isTypingContext({ eventTarget, activeElement } = {}) {
     return isTextInputTarget(activeElement || eventTarget);
+  }
+
+  function isHotkeySafeContext({ eventTarget, activeElement } = {}) {
+    const el = activeElement || eventTarget;
+    return !isTextInputTarget(el) && !isInteractiveControlTarget(el);
   }
 
   function labelForEventType(eventType) {
@@ -39,7 +59,9 @@
 
   return {
     isTextInputTarget,
+    isInteractiveControlTarget,
     isTypingContext,
+    isHotkeySafeContext,
     labelForEventType
   };
 });

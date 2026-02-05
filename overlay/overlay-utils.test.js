@@ -1,7 +1,13 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
 
-const { isTextInputTarget, isTypingContext, labelForEventType } = require("./overlay-utils");
+const {
+  isTextInputTarget,
+  isInteractiveControlTarget,
+  isTypingContext,
+  isHotkeySafeContext,
+  labelForEventType
+} = require("./overlay-utils");
 
 test("isTextInputTarget: recognizes common typing targets", () => {
   assert.equal(isTextInputTarget({ tagName: "INPUT" }), true);
@@ -34,6 +40,24 @@ test("isTextInputTarget: ignores non-input targets", () => {
   assert.equal(isTextInputTarget(null), false);
 });
 
+test("isInteractiveControlTarget: recognizes common controls", () => {
+  assert.equal(isInteractiveControlTarget({ tagName: "button" }), true);
+  assert.equal(isInteractiveControlTarget({ tagName: "A" }), true);
+  assert.equal(
+    isInteractiveControlTarget({
+      tagName: "DIV",
+      getAttribute: (name) => (name === "role" ? "button" : null)
+    }),
+    true
+  );
+});
+
+test("isInteractiveControlTarget: ignores non-controls", () => {
+  assert.equal(isInteractiveControlTarget({ tagName: "INPUT" }), false);
+  assert.equal(isInteractiveControlTarget({ tagName: "DIV" }), false);
+  assert.equal(isInteractiveControlTarget(null), false);
+});
+
 test("isTypingContext: prefers activeElement over eventTarget", () => {
   assert.equal(
     isTypingContext({
@@ -47,6 +71,16 @@ test("isTypingContext: prefers activeElement over eventTarget", () => {
 test("isTypingContext: falls back to eventTarget when no activeElement", () => {
   assert.equal(isTypingContext({ eventTarget: { tagName: "TEXTAREA" } }), true);
   assert.equal(isTypingContext({ eventTarget: { tagName: "DIV" } }), false);
+});
+
+test("isHotkeySafeContext: false when typing or focused on a control", () => {
+  assert.equal(isHotkeySafeContext({ activeElement: { tagName: "INPUT" } }), false);
+  assert.equal(isHotkeySafeContext({ activeElement: { tagName: "BUTTON" } }), false);
+  assert.equal(isHotkeySafeContext({ eventTarget: { tagName: "A" } }), false);
+});
+
+test("isHotkeySafeContext: true for generic non-typing targets", () => {
+  assert.equal(isHotkeySafeContext({ activeElement: { tagName: "DIV" } }), true);
 });
 
 test("labelForEventType: formats event types for the overlay label", () => {

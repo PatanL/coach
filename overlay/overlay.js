@@ -155,19 +155,25 @@ window.addEventListener("keydown", (event) => {
     activeElement: document.activeElement
   });
 
+  const hotkeySafeTarget =
+    window.overlayUtils?.isHotkeySafeContext?.({
+      eventTarget: event.target,
+      activeElement: document.activeElement
+    }) ?? !isTypingTarget;
+
   // Avoid accidental hotkeys from keypresses that were in-flight during overlay show.
   const msSinceShow = shownAt ? Date.now() - shownAt : Infinity;
   const hotkeysArmed = msSinceShow > 350;
 
   // Don't treat Enter as "Back on track" while the user is typing.
   if (event.key === "Enter") {
-    if (hotkeysArmed && !isTypingTarget) {
+    if (hotkeysArmed && hotkeySafeTarget) {
       sendAction({ action: "back_on_track" });
     }
   }
 
   // Don't pop the snooze UI while the user is typing (Escape is commonly used to cancel input).
   if (event.key === "Escape") {
-    if (hotkeysArmed && !isTypingTarget) snooze.classList.remove("hidden");
+    if (hotkeysArmed && hotkeySafeTarget) snooze.classList.remove("hidden");
   }
 });
