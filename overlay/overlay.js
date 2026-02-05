@@ -145,10 +145,14 @@ window.overlayAPI.onPause(() => {
 });
 
 window.addEventListener("keydown", (event) => {
-  // Don't treat Enter as "Back on track" while the user is typing.
+  // Don't treat Enter as "Back on track" while the user is typing or interacting with a control.
   if (event.key === "Enter") {
+    if (event.defaultPrevented) return;
+
     const isTypingTarget = window.overlayUtils?.isTextInputTarget?.(event.target);
-    if (!isTypingTarget) {
+    const isInteractiveTarget = window.overlayUtils?.isInteractiveControlTarget?.(event.target);
+
+    if (!isTypingTarget && !isInteractiveTarget) {
       sendAction({ action: "back_on_track" });
     }
   }
