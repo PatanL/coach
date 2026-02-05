@@ -49,6 +49,7 @@ function showOverlay(payload) {
   } else {
     overlay.dataset.mode = "";
   }
+  overlay.dataset.eventType = payload.event_type || "";
   setText(blockName, payload.block_name || "");
   setText(headline, payload.headline || "Reset.");
   setText(humanLine, payload.human_line || "");

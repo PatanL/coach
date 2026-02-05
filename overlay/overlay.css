@@ -203,3 +203,51 @@ button.primary:hover {
   font-size: 11px;
   color: rgba(246, 244, 239, 0.5);
 }
+
+/* Visual pattern-break for persistent drift: make it feel different on purpose.
+   Deterministic, CSS-only, and respects reduced-motion. */
+#overlay[data-event-type="DRIFT_PERSIST"] .card {
+  border-color: rgba(241, 108, 91, 0.55);
+  box-shadow:
+    0 20px 60px rgba(0, 0, 0, 0.45),
+    0 0 0 2px rgba(241, 108, 91, 0.18),
+    0 0 28px rgba(241, 108, 91, 0.28);
+  animation: driftPersistPulse 700ms ease-out 1;
+}
+
+#overlay[data-event-type="DRIFT_PERSIST"] .label {
+  color: #ff7a69;
+}
+
+@keyframes driftPersistPulse {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  12% {
+    transform: translate3d(-6px, 0, 0);
+  }
+  24% {
+    transform: translate3d(6px, 0, 0);
+  }
+  36% {
+    transform: translate3d(-4px, 0, 0);
+  }
+  48% {
+    transform: translate3d(4px, 0, 0);
+  }
+  60% {
+    transform: translate3d(-2px, 0, 0);
+  }
+  72% {
+    transform: translate3d(2px, 0, 0);
+  }
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #overlay[data-event-type="DRIFT_PERSIST"] .card {
+    animation: none;
+  }
+}
