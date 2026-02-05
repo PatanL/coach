@@ -1,6 +1,5 @@
 const overlay = document.getElementById("overlay");
 const eventLabel = document.getElementById("eventLabel");
-const eventLabel = document.getElementById("eventLabel");
 const blockName = document.getElementById("blockName");
 const headline = document.getElementById("headline");
 const humanLine = document.getElementById("humanLine");
@@ -64,10 +63,6 @@ function showOverlay(payload) {
   const eventType = payload.source_event_type || payload.event_type || "";
   overlay.dataset.eventType = eventType;
   setText(eventLabel, labelForEventType(eventType));
-
-  const eventType = payload.source_event_type || payload.event_type || "";
-  overlay.dataset.eventType = eventType;
-  setText(eventLabel, eventType ? eventType.replace(/_/g, " ") : "");
   setText(blockName, payload.block_name || "");
   updatePrimaryLabel(payload);
   setText(headline, payload.headline || "Reset.");
