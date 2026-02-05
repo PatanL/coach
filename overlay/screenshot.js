@@ -60,7 +60,8 @@ app.whenReady().then(async () => {
       event_type: "DRIFT_START",
       headline: "Drift detected",
     });
-    await sleep(250);
+    // Allow any initial render/settling before capture.
+    await sleep(900);
     await capture(win, "drift-start.png");
 
     // DRIFT_PERSIST (pattern-break)
@@ -69,7 +70,8 @@ app.whenReady().then(async () => {
       event_type: "DRIFT_PERSIST",
       headline: "Drift persists",
     });
-    await sleep(250);
+    // Wait for the pulse/shake animation to finish to keep screenshots deterministic.
+    await sleep(900);
     await capture(win, "drift-persist.png");
   } catch (err) {
     console.error("screenshot:error", err);
