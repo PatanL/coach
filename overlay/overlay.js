@@ -175,11 +175,14 @@ window.addEventListener("keydown", (event) => {
     }
   }
 
-  // Esc should never interrupt typing. Outside typing, toggle the snooze panel.
+  // Esc should never interrupt typing (or align mode). Outside typing, toggle the snooze panel.
   if (event.key === "Escape") {
-    const isTypingTarget = window.overlayUtils?.isTextInputTarget?.(event.target);
-    if (!isTypingTarget) {
-      snooze.classList.toggle("hidden");
-    }
+    const shouldToggle = window.overlayUtils?.shouldEscapeToggleSnooze?.({
+      target: event.target,
+      overlayHidden: overlay.classList.contains("hidden"),
+      mode: overlay.dataset.mode || ""
+    });
+
+    if (shouldToggle) snooze.classList.toggle("hidden");
   }
 });

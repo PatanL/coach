@@ -1,7 +1,11 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
 
-const { isTextInputTarget, shouldImplicitEnterTriggerBackOnTrack } = require("./overlay-utils");
+const {
+  isTextInputTarget,
+  shouldImplicitEnterTriggerBackOnTrack,
+  shouldEscapeToggleSnooze
+} = require("./overlay-utils");
 
 test("isTextInputTarget: recognizes common typing targets", () => {
   assert.equal(isTextInputTarget({ tagName: "INPUT" }), true);
@@ -59,6 +63,50 @@ test("shouldImplicitEnterTriggerBackOnTrack: allows enter for non-typing, normal
       overlayHidden: false,
       mode: "",
       snoozeVisible: false
+    }),
+    true
+  );
+});
+
+test("shouldEscapeToggleSnooze: blocks escape while typing", () => {
+  assert.equal(
+    shouldEscapeToggleSnooze({
+      target: { tagName: "TEXTAREA" },
+      overlayHidden: false,
+      mode: ""
+    }),
+    false
+  );
+});
+
+test("shouldEscapeToggleSnooze: blocks escape when overlay is hidden", () => {
+  assert.equal(
+    shouldEscapeToggleSnooze({
+      target: { tagName: "DIV" },
+      overlayHidden: true,
+      mode: ""
+    }),
+    false
+  );
+});
+
+test("shouldEscapeToggleSnooze: blocks escape in align mode", () => {
+  assert.equal(
+    shouldEscapeToggleSnooze({
+      target: { tagName: "DIV" },
+      overlayHidden: false,
+      mode: "align"
+    }),
+    false
+  );
+});
+
+test("shouldEscapeToggleSnooze: allows escape in normal mode", () => {
+  assert.equal(
+    shouldEscapeToggleSnooze({
+      target: { tagName: "DIV" },
+      overlayHidden: false,
+      mode: ""
     }),
     true
   );
