@@ -32,7 +32,22 @@ html, body {
 
 #overlay[data-event-type="DRIFT_PERSIST"] .card {
   border: 1px solid rgba(241, 108, 91, 0.55);
-  background: linear-gradient(140deg, rgba(28, 14, 14, 0.94), rgba(10, 12, 15, 0.96));
+
+  /* Visual pattern-break for persistent drift: high-contrast static "alarm stripe".
+     (No animation so screenshots stay deterministic.) */
+  background-image:
+    repeating-linear-gradient(
+      135deg,
+      rgba(255, 122, 105, 0.95) 0px,
+      rgba(255, 122, 105, 0.95) 10px,
+      rgba(8, 10, 12, 0.92) 10px,
+      rgba(8, 10, 12, 0.92) 20px
+    ),
+    linear-gradient(140deg, rgba(28, 14, 14, 0.94), rgba(10, 12, 15, 0.96));
+  background-size: 100% 10px, auto;
+  background-repeat: no-repeat;
+  background-position: top;
+
   box-shadow: 0 28px 82px rgba(241, 108, 91, 0.22);
 }
 
