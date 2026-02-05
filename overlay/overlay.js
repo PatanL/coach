@@ -76,6 +76,11 @@ function showOverlay(payload) {
   updateEventLabel(payload);
   updatePrimaryLabel(payload);
 
+  // For persistent drift, make recovery the obvious default (visual pattern-break).
+  const isPersist = overlay.dataset.eventType === "DRIFT_PERSIST";
+  backBtn.classList.toggle("primary", !isPersist);
+  recoverBtn.classList.toggle("primary", isPersist);
+
   setText(blockName, payload.block_name || "");
   setText(headline, payload.headline || "Reset.");
   setText(humanLine, payload.human_line || "");
@@ -163,11 +168,15 @@ window.overlayAPI.onPause(() => {
 });
 
 window.addEventListener("keydown", (event) => {
-  // Don't treat Enter as "Back on track" while the user is typing.
+  // Don't treat Enter as a global action while the user is typing.
   if (event.key === "Enter") {
     const isTypingTarget = window.overlayUtils?.isTextInputTarget?.(event.target);
     if (!isTypingTarget) {
-      sendAction({ action: "back_on_track" });
+      const action = window.overlayUtils?.getEnterAction?.({
+        eventType: overlay?.dataset?.eventType,
+        mode: overlay?.dataset?.mode
+      });
+      if (action) sendAction({ action });
     }
   }
   if (event.key === "Escape") {
