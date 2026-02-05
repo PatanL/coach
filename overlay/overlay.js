@@ -1,7 +1,6 @@
 const overlay = document.getElementById("overlay");
 const eventLabel = document.getElementById("eventLabel");
 const blockName = document.getElementById("blockName");
-const eventLabel = document.getElementById("eventLabel");
 const headline = document.getElementById("headline");
 const humanLine = document.getElementById("humanLine");
 const diagnosis = document.getElementById("diagnosis");
@@ -22,6 +21,7 @@ let shownAt = null;
 let currentPayload = null;
 
 function setText(el, value) {
+  if (!el) return;
   el.textContent = value || "";
 }
 
@@ -62,24 +62,10 @@ function showOverlay(payload) {
   }
   const eventType = payload.source_event_type || payload.event_type || "";
   overlay.dataset.eventType = eventType;
-  if (eventLabel) {
-    eventLabel.textContent = labelForEventType(eventType);
-  }
-
-  overlay.dataset.eventType = payload.source_event_type || "";
-
-  const eventType = payload.source_event_type || "";
-  if (eventType === "DRIFT_PERSIST") {
-    setText(eventLabel, "DRIFT PERSIST");
-  } else if (eventType === "DRIFT_START") {
-    setText(eventLabel, "DRIFT");
-  } else if (eventType) {
-    setText(eventLabel, eventType.replaceAll("_", " "));
-  } else {
-    setText(eventLabel, "DRIFT");
-  }
+  setText(eventLabel, labelForEventType(eventType));
 
   setText(blockName, payload.block_name || "");
+  updatePrimaryLabel(payload);
   setText(headline, payload.headline || "Reset.");
   setText(humanLine, payload.human_line || "");
   setText(diagnosis, payload.diagnosis || "");
