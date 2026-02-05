@@ -30,6 +30,16 @@ html, body {
   backdrop-filter: blur(8px);
 }
 
+#overlay[data-event-type="DRIFT_PERSIST"] .card {
+  border: 1px solid rgba(241, 108, 91, 0.55);
+  background: linear-gradient(140deg, rgba(28, 14, 14, 0.94), rgba(10, 12, 15, 0.96));
+  box-shadow: 0 28px 82px rgba(241, 108, 91, 0.22);
+}
+
+#overlay[data-event-type="DRIFT_PERSIST"] .label {
+  color: #ff7a69;
+}
+
 #overlay[data-level="A"] .card {
   width: 320px;
   padding: 18px 20px;
