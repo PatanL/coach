@@ -72,6 +72,7 @@ test("isButtonLikeTarget: recognizes common click controls", () => {
   assert.equal(isButtonLikeTarget({ tagName: "BUTTON" }), true);
   assert.equal(isButtonLikeTarget({ tagName: "a" }), true);
   assert.equal(isButtonLikeTarget({ tagName: "DIV", getAttribute: () => "button" }), true);
+  assert.equal(isButtonLikeTarget({ tagName: "DIV", getAttribute: () => "BUTTON" }), true);
   assert.equal(isButtonLikeTarget({ tagName: "DIV", getAttribute: () => "" }), false);
   assert.equal(isButtonLikeTarget(null), false);
 });
