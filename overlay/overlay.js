@@ -137,14 +137,17 @@ window.overlayAPI.onPause(() => {
 });
 
 window.addEventListener("keydown", (event) => {
+  const isTypingTarget = window.overlayUtils?.isTextInputTarget?.(event.target);
+
   // Don't treat Enter as "Back on track" while the user is typing.
   if (event.key === "Enter") {
-    const isTypingTarget = window.overlayUtils?.isTextInputTarget?.(event.target);
     if (!isTypingTarget) {
       sendAction({ action: "back_on_track" });
     }
   }
+
+  // Don't pop the snooze UI while the user is typing (Escape is commonly used to cancel input).
   if (event.key === "Escape") {
-    snooze.classList.remove("hidden");
+    if (!isTypingTarget) snooze.classList.remove("hidden");
   }
 });

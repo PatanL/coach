@@ -7,8 +7,20 @@
 })(typeof globalThis !== "undefined" ? globalThis : this, function () {
   function isTextInputTarget(target) {
     if (!target) return false;
+
     const tag = String(target.tagName || "").toLowerCase();
+
+    // contentEditable can show up as boolean or string attribute depending on context.
     if (target.isContentEditable) return true;
+    if (typeof target.getAttribute === "function") {
+      const ce = target.getAttribute("contenteditable");
+      if (ce && String(ce).toLowerCase() !== "false") return true;
+
+      // Some UI libs implement text entry via ARIA roles.
+      const role = target.getAttribute("role");
+      if (role && String(role).toLowerCase() === "textbox") return true;
+    }
+
     return tag === "input" || tag === "textarea" || tag === "select";
   }
 
