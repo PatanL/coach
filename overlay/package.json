@@ -6,7 +6,8 @@
   "scripts": {
     "start": "electron .",
     "test": "node --test",
-    "lint": "echo \"(no lint configured)\""
+    "lint": "echo \"(no lint configured)\"",
+    "screenshot": "node scripts/screenshot.js"
   },
   "devDependencies": {
     "electron": "^30.0.0"

@@ -203,3 +203,19 @@ button.primary:hover {
   font-size: 11px;
   color: rgba(246, 244, 239, 0.5);
 }
+
+/* Visual pattern-break for DRIFT_PERSIST */
+#overlay[data-event-type="DRIFT_PERSIST"] {
+  background: rgba(40, 10, 8, 0.62);
+}
+
+#overlay[data-event-type="DRIFT_PERSIST"] .card {
+  border-color: rgba(241, 108, 91, 0.55);
+  box-shadow:
+    0 20px 60px rgba(0, 0, 0, 0.45),
+    0 0 0 3px rgba(241, 108, 91, 0.18);
+}
+
+#overlay[data-event-type="DRIFT_PERSIST"] .label {
+  color: #ffb4aa;
+}

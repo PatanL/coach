@@ -1,5 +1,6 @@
 const overlay = document.getElementById("overlay");
 const blockName = document.getElementById("blockName");
+const driftLabel = document.getElementById("driftLabel");
 const headline = document.getElementById("headline");
 const humanLine = document.getElementById("humanLine");
 const diagnosis = document.getElementById("diagnosis");
@@ -42,6 +43,13 @@ function resetAlignInput() {
 
 function showOverlay(payload) {
   overlay.classList.remove("hidden");
+  const eventType = payload?.event_type || "";
+  overlay.dataset.eventType = eventType;
+  if (eventType === "DRIFT_PERSIST") {
+    driftLabel.textContent = "DRIFT PERSIST";
+  } else {
+    driftLabel.textContent = "DRIFT";
+  }
   resetSnooze();
   resetAlignInput();
   if (payload.choices && Array.isArray(payload.choices)) {
