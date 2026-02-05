@@ -40,8 +40,27 @@
     return tag === "button" || tag === "a";
   }
 
+  function shouldTriggerBackOnTrackOnEnter({ eventType, nowMs, lastEnterMs }) {
+    const type = String(eventType || "");
+    const now = Number.isFinite(nowMs) ? nowMs : Date.now();
+    const last = Number.isFinite(lastEnterMs) ? lastEnterMs : 0;
+
+    // For DRIFT_PERSIST, require a deliberate double-press to avoid accidental recovery.
+    // This creates a small visual+interaction pattern-break without adding motion.
+    if (type === "DRIFT_PERSIST") {
+      const windowMs = 1200;
+      if (last && now - last <= windowMs) {
+        return { trigger: true, nextLastEnterMs: 0 };
+      }
+      return { trigger: false, nextLastEnterMs: now };
+    }
+
+    return { trigger: true, nextLastEnterMs: 0 };
+  }
+
   return {
     isTextInputTarget,
-    isInteractiveControlTarget
+    isInteractiveControlTarget,
+    shouldTriggerBackOnTrackOnEnter
   };
 });

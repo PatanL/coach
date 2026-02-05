@@ -1,7 +1,7 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
 
-const { isTextInputTarget, isInteractiveControlTarget } = require("./overlay-utils");
+const { isTextInputTarget, isInteractiveControlTarget, shouldTriggerBackOnTrackOnEnter } = require("./overlay-utils");
 
 test("isTextInputTarget: recognizes common typing targets", () => {
   assert.equal(isTextInputTarget({ tagName: "INPUT" }), true);
@@ -62,4 +62,24 @@ test("isInteractiveControlTarget: recognizes buttons + links (including nested t
 test("isInteractiveControlTarget: ignores plain elements", () => {
   assert.equal(isInteractiveControlTarget({ tagName: "DIV" }), false);
   assert.equal(isInteractiveControlTarget(null), false);
+});
+
+test("shouldTriggerBackOnTrackOnEnter: triggers immediately for non-persist drift", () => {
+  const res = shouldTriggerBackOnTrackOnEnter({ eventType: "DRIFT_START", nowMs: 1000, lastEnterMs: 0 });
+  assert.deepEqual(res, { trigger: true, nextLastEnterMs: 0 });
+});
+
+test("shouldTriggerBackOnTrackOnEnter: requires double-enter for DRIFT_PERSIST", () => {
+
+  // First press arms the confirmation window.
+  const first = shouldTriggerBackOnTrackOnEnter({ eventType: "DRIFT_PERSIST", nowMs: 1000, lastEnterMs: 0 });
+  assert.deepEqual(first, { trigger: false, nextLastEnterMs: 1000 });
+
+  // Second press within the window triggers.
+  const second = shouldTriggerBackOnTrackOnEnter({ eventType: "DRIFT_PERSIST", nowMs: 1800, lastEnterMs: first.nextLastEnterMs });
+  assert.deepEqual(second, { trigger: true, nextLastEnterMs: 0 });
+
+  // Too slow: re-arm.
+  const slow = shouldTriggerBackOnTrackOnEnter({ eventType: "DRIFT_PERSIST", nowMs: 2500, lastEnterMs: 1000 });
+  assert.deepEqual(slow, { trigger: false, nextLastEnterMs: 2500 });
 });

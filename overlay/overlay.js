@@ -12,6 +12,8 @@ const alignInput = document.getElementById("alignInput");
 const alignText = document.getElementById("alignText");
 const alignSubmit = document.getElementById("alignSubmit");
 
+const enterHint = document.getElementById("enterHint");
+
 const backBtn = document.getElementById("backBtn");
 const stuckBtn = document.getElementById("stuckBtn");
 const recoverBtn = document.getElementById("recoverBtn");
@@ -19,6 +21,7 @@ const snoozeBtn = document.getElementById("snoozeBtn");
 
 let shownAt = null;
 let currentPayload = null;
+let lastGlobalEnterAtMs = 0;
 
 function setText(el, value) {
   if (!el) return;
@@ -56,6 +59,9 @@ function showOverlay(payload) {
   resetSnooze();
   resetAlignInput();
 
+  // Reset per-show hotkey state.
+  lastGlobalEnterAtMs = 0;
+
   overlay.dataset.styleId = payload.style_id || "";
   overlay.dataset.eventType = payload.event_type || "";
 
@@ -67,6 +73,11 @@ function showOverlay(payload) {
 
   updatePrimaryLabel(payload);
   setText(driftLabel, formatDriftLabel(payload));
+
+  if (enterHint) {
+    const isPersist = payload?.event_type === "DRIFT_PERSIST";
+    enterHint.textContent = isPersist ? "Enter x2: Back on track" : "Enter: Back on track";
+  }
   setText(blockName, payload.block_name || "");
   setText(headline, payload.headline || "Reset.");
   setText(humanLine, payload.human_line || "");
@@ -174,7 +185,19 @@ window.addEventListener("keydown", (event) => {
     const isInteractiveTarget = window.overlayUtils?.isInteractiveControlTarget?.(event.target);
 
     if (!isTypingTarget && !isInteractiveTarget) {
-      sendAction({ action: "back_on_track" });
+      const gate = window.overlayUtils?.shouldTriggerBackOnTrackOnEnter
+        ? window.overlayUtils.shouldTriggerBackOnTrackOnEnter({
+            eventType: currentPayload?.event_type,
+            nowMs: Date.now(),
+            lastEnterMs: lastGlobalEnterAtMs
+          })
+        : { trigger: true, nextLastEnterMs: 0 };
+
+      lastGlobalEnterAtMs = gate.nextLastEnterMs;
+
+      if (gate.trigger) {
+        sendAction({ action: "back_on_track" });
+      }
     }
   }
   if (event.key === "Escape") {
