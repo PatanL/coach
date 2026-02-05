@@ -22,7 +22,15 @@
     return false;
   }
 
+  // Returns true when it's safe for the overlay to interpret global hotkeys
+  // (e.g. Enter => back_on_track, Escape => snooze menu) without stealing input.
+  function shouldHandleGlobalHotkey(eventOrTarget) {
+    const target = eventOrTarget?.target || eventOrTarget;
+    return !isTextInputTarget(target);
+  }
+
   return {
-    isTextInputTarget
+    isTextInputTarget,
+    shouldHandleGlobalHotkey
   };
 });
