@@ -8,12 +8,20 @@ function ensureDir(dir) {
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
 }
 
-async function captureScenario(win, { name, payload }) {
+async function captureScenario(win, { name, payload, blurActiveElement = false }) {
   // Mark screenshot mode to disable animations.
   await win.webContents.executeJavaScript("document.body.dataset.screenshot='true';", true);
   win.webContents.send("overlay:show", payload);
   // Let layout settle deterministically.
   await new Promise((r) => setTimeout(r, 250));
+
+  if (blurActiveElement) {
+    await win.webContents.executeJavaScript(
+      "document.activeElement && document.activeElement.blur && document.activeElement.blur();",
+      true
+    );
+  }
+
   const image = await win.capturePage();
   const outPath = path.join(OUT_DIR, name);
   fs.writeFileSync(outPath, image.toPNG());
@@ -70,6 +78,22 @@ async function main() {
         human_line: "Same drift again — let’s interrupt it cleanly.",
         next_action: "Stand up, breathe once, then open the next 5-minute step.",
       },
+    })
+  );
+
+  outputs.push(
+    await captureScenario(win, {
+      name: "align_mode_level_b.png",
+      blurActiveElement: true,
+      payload: {
+        ...basePayload,
+        source_event_type: "DRIFT_START",
+        headline: "Quick check.",
+        human_line: "Name the next action that aligns with your block.",
+        next_action: "Pick one choice or type your own.",
+        question_id: "q-123",
+        choices: ["Close tab", "Open task", "Stand up"]
+      }
     })
   );
 
