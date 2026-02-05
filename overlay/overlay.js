@@ -166,6 +166,9 @@ window.addEventListener("keydown", (event) => {
     }
   }
   if (event.key === "Escape") {
-    snooze.classList.remove("hidden");
+    const isTypingTarget = window.overlayUtils?.isTextInputTarget?.(event.target);
+    if (!isTypingTarget) {
+      snooze.classList.remove("hidden");
+    }
   }
 });

@@ -7,9 +7,19 @@
 })(typeof globalThis !== "undefined" ? globalThis : this, function () {
   function isTextInputTarget(target) {
     if (!target) return false;
-    const tag = String(target.tagName || "").toLowerCase();
+
+    // In real DOM events, `isContentEditable` is true for descendants of a
+    // contenteditable region too. (So this catches the common "typing" cases.)
     if (target.isContentEditable) return true;
-    return tag === "input" || tag === "textarea" || tag === "select";
+
+    const tag = String(target.tagName || "").toLowerCase();
+    if (tag === "input" || tag === "textarea" || tag === "select") return true;
+
+    // Support for ARIA textbox widgets (common in rich editors).
+    const role = String(target.getAttribute?.("role") || target.role || "").toLowerCase();
+    if (role === "textbox") return true;
+
+    return false;
   }
 
   return {
