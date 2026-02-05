@@ -210,10 +210,35 @@ button.primary:hover {
 }
 
 #overlay[data-event-type="DRIFT_PERSIST"] .card {
+  position: relative;
+  overflow: hidden;
   border-color: rgba(241, 108, 91, 0.55);
   box-shadow:
     0 20px 60px rgba(0, 0, 0, 0.45),
     0 0 0 3px rgba(241, 108, 91, 0.18);
+}
+
+/* Deterministic, non-animated “pattern break” texture. */
+#overlay[data-event-type="DRIFT_PERSIST"] .card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-linear-gradient(
+      135deg,
+      rgba(241, 108, 91, 0.18) 0px,
+      rgba(241, 108, 91, 0.18) 10px,
+      rgba(0, 0, 0, 0) 10px,
+      rgba(0, 0, 0, 0) 22px
+    );
+  opacity: 0.55;
+  pointer-events: none;
+  z-index: 0;
+}
+
+#overlay[data-event-type="DRIFT_PERSIST"] .card > * {
+  position: relative;
+  z-index: 1;
 }
 
 #overlay[data-event-type="DRIFT_PERSIST"] .label {
