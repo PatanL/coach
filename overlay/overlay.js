@@ -90,6 +90,19 @@ function showOverlay(payload) {
     eventLabel.textContent = labelForEventType(eventType);
   }
 
+  overlay.dataset.eventType = payload.source_event_type || "";
+
+  const eventType = payload.source_event_type || "";
+  if (eventType === "DRIFT_PERSIST") {
+    setText(eventLabel, "DRIFT PERSIST");
+  } else if (eventType === "DRIFT_START") {
+    setText(eventLabel, "DRIFT");
+  } else if (eventType) {
+    setText(eventLabel, eventType.replaceAll("_", " "));
+  } else {
+    setText(eventLabel, "DRIFT");
+  }
+
   setText(blockName, payload.block_name || "");
   setText(headline, payload.headline || "Reset.");
   setText(humanLine, payload.human_line || "");
