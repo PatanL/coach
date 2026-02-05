@@ -1,5 +1,6 @@
 const overlay = document.getElementById("overlay");
 const blockName = document.getElementById("blockName");
+const eventLabel = document.getElementById("eventLabel");
 const headline = document.getElementById("headline");
 const humanLine = document.getElementById("humanLine");
 const diagnosis = document.getElementById("diagnosis");
@@ -40,6 +41,16 @@ function resetAlignInput() {
   alignInput.classList.add("hidden");
 }
 
+function formatEventLabel(eventType) {
+  if (!eventType) return "COACH";
+  if (eventType === "DRIFT_PERSIST") return "DRIFT — PERSIST";
+  if (eventType === "DRIFT_START") return "DRIFT";
+  if (eventType === "OFF_SCHEDULE") return "OFF SCHEDULE";
+  if (eventType.startsWith("HABIT")) return "HABIT";
+  if (eventType === "ALIGN_REQUIRED") return "ALIGN";
+  return eventType.replace(/_/g, " ");
+}
+
 function showOverlay(payload) {
   overlay.classList.remove("hidden");
   resetSnooze();
@@ -49,6 +60,12 @@ function showOverlay(payload) {
   } else {
     overlay.dataset.mode = "";
   }
+
+  overlay.dataset.eventType = payload.source_event_type || "";
+  if (eventLabel) {
+    eventLabel.textContent = formatEventLabel(payload.source_event_type);
+  }
+
   setText(blockName, payload.block_name || "");
   setText(headline, payload.headline || "Reset.");
   setText(humanLine, payload.human_line || "");
@@ -83,6 +100,11 @@ function showOverlay(payload) {
   currentPayload = payload;
   shownAt = Date.now();
 }
+
+// For deterministic screenshot generation (see overlay/screenshot.js).
+window.__overlayScreenshotShow = (payload) => {
+  showOverlay(payload);
+};
 
 function sendAction(action) {
   const timeToAction = shownAt ? Date.now() - shownAt : 0;
