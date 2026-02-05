@@ -1277,6 +1277,7 @@ def main() -> int:
                     "ts": dt.datetime.now().isoformat(),
                     "cmd_id": cmd_id,
                     "source_event_id": source_event_id,
+                    "event_type": event.get("type"),
                     "source": "runner",
                     **overlay,
                 }

@@ -8,6 +8,16 @@ test("isTextInputTarget: recognizes common typing targets", () => {
   assert.equal(isTextInputTarget({ tagName: "textarea" }), true);
   assert.equal(isTextInputTarget({ tagName: "Select" }), true);
   assert.equal(isTextInputTarget({ tagName: "DIV", isContentEditable: true }), true);
+
+  assert.equal(
+    isTextInputTarget({
+      tagName: "SPAN",
+      closest: (selector) => (selector.includes("contenteditable") ? { tagName: "DIV" } : null)
+    }),
+    true
+  );
+
+  assert.equal(isTextInputTarget({ tagName: "DIV", getAttribute: (key) => (key === "role" ? "textbox" : null) }), true);
 });
 
 test("isTextInputTarget: ignores non-input targets", () => {

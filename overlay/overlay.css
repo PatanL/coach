@@ -16,6 +16,38 @@ html, body {
   background: rgba(6, 8, 10, 0.45);
 }
 
+/* Alarm = strong attention grab. */
+#overlay[data-style-id="alarm"] .card {
+  border-color: rgba(241, 108, 91, 0.45);
+  box-shadow: 0 24px 70px rgba(241, 108, 91, 0.12), 0 20px 60px rgba(0, 0, 0, 0.45);
+}
+
+/* DRIFT_PERSIST = deliberate pattern-break so it can't fade into the background. */
+#overlay[data-event-type="DRIFT_PERSIST"] .card {
+  border-color: rgba(255, 122, 105, 0.9);
+  background:
+    linear-gradient(140deg, rgba(19, 22, 26, 0.9), rgba(10, 12, 15, 0.96)),
+    repeating-linear-gradient(
+      45deg,
+      rgba(255, 122, 105, 0.16) 0,
+      rgba(255, 122, 105, 0.16) 10px,
+      rgba(0, 0, 0, 0) 10px,
+      rgba(0, 0, 0, 0) 20px
+    );
+}
+
+#overlay[data-event-type="DRIFT_PERSIST"] .label {
+  color: #ff7a69;
+}
+
+/* Keep screenshots deterministic by disabling motion when requested. */
+body.screenshot *,
+body.screenshot *::before,
+body.screenshot *::after {
+  animation: none !important;
+  transition: none !important;
+}
+
 .hidden {
   display: none;
 }
