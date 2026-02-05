@@ -122,11 +122,15 @@ function showOverlay(payload) {
   currentPayload = payload;
   shownAt = Date.now();
 
-  // Put focus on the primary action to reduce accidental "Enter" keypresses
+  // Put focus on an overlay element to reduce accidental "Enter" keypresses
   // triggering something unintended somewhere else.
   requestAnimationFrame(() => {
     try {
-      backBtn?.focus?.();
+      if (overlay.dataset.mode === "align") {
+        alignText?.focus?.();
+      } else {
+        backBtn?.focus?.();
+      }
     } catch {
       // no-op
     }
