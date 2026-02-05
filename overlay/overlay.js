@@ -25,9 +25,13 @@ function setText(el, value) {
   el.textContent = value || "";
 }
 
-function updatePrimaryLabel(payload) {
+function updatePrimaryLabel(payload, eventType) {
   if (payload?.block_id && String(payload.block_id).includes("habit")) {
     backBtn.textContent = "Habit completed";
+    return;
+  }
+  if (eventType === "DRIFT_PERSIST") {
+    backBtn.textContent = "Do the next 5 min";
     return;
   }
   backBtn.textContent = "Back on track";
@@ -64,7 +68,7 @@ function showOverlay(payload) {
   overlay.dataset.eventType = eventType;
   setText(eventLabel, labelForEventType(eventType));
   setText(blockName, payload.block_name || "");
-  updatePrimaryLabel(payload);
+  updatePrimaryLabel(payload, eventType);
   setText(headline, payload.headline || "Reset.");
   setText(humanLine, payload.human_line || "");
   setText(diagnosis, payload.diagnosis || "");
