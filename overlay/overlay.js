@@ -159,7 +159,12 @@ window.addEventListener("keydown", (event) => {
       sendAction({ action: "back_on_track" });
     }
   }
+
+  // Avoid popping the snooze UI while the user is typing (pattern: Esc closes dialogs / clears input).
   if (event.key === "Escape") {
-    snooze.classList.remove("hidden");
+    const isTypingTarget = window.overlayUtils?.isTextInputTarget?.(event.target);
+    if (!isTypingTarget) {
+      snooze.classList.remove("hidden");
+    }
   }
 });
