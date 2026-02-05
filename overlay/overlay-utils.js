@@ -33,6 +33,9 @@
       if (controlAncestor) return true;
     }
 
+    const role = String(target.getAttribute?.("role") || "").toLowerCase();
+    if (role === "button") return true;
+
     const tag = String(target.tagName || "").toLowerCase();
     return tag === "button" || tag === "a";
   }

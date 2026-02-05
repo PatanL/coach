@@ -39,10 +39,21 @@ test("isTextInputTarget: ignores non-input targets", () => {
 test("isInteractiveControlTarget: recognizes buttons + links (including nested targets)", () => {
   assert.equal(isInteractiveControlTarget({ tagName: "BUTTON" }), true);
   assert.equal(isInteractiveControlTarget({ tagName: "a" }), true);
+
+  // Nested target inside a <button>.
   assert.equal(
     isInteractiveControlTarget({
       tagName: "SPAN",
       closest: (selector) => (selector.includes("button") ? { tagName: "BUTTON" } : null)
+    }),
+    true
+  );
+
+  // Direct role=button target (no closest available).
+  assert.equal(
+    isInteractiveControlTarget({
+      tagName: "DIV",
+      getAttribute: (key) => (key === "role" ? "button" : null)
     }),
     true
   );
