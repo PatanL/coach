@@ -1,6 +1,6 @@
 const overlay = document.getElementById("overlay");
-const blockName = document.getElementById("blockName");
 const eventLabel = document.getElementById("eventLabel");
+const blockName = document.getElementById("blockName");
 const headline = document.getElementById("headline");
 const humanLine = document.getElementById("humanLine");
 const diagnosis = document.getElementById("diagnosis");

@@ -2,82 +2,92 @@ const { app, BrowserWindow } = require("electron");
 const path = require("path");
 const fs = require("fs");
 
-const OUT_DIR = path.join(__dirname, "..", "screenshots");
+const OVERLAY_ROOT = path.join(__dirname, "..");
+const OUT_DIR = path.join(OVERLAY_ROOT, "screenshots");
 
 function ensureDir(dir) {
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
 }
 
-async function captureScenario(win, payload, outName) {
-  // Disable animations/transitions via ?screenshot flag + CSS.
-  await win.loadFile(path.join(__dirname, "..", "overlay.html"), {
-    search: "?screenshot=1"
-  });
-
-  await win.webContents.executeJavaScript(
-    `(() => {
-      document.documentElement.dataset.screenshot = "1";
-      if (typeof window.__overlayOnShow === "function") {
-        window.__overlayOnShow(${JSON.stringify(payload)});
-      }
-    })()`
-  );
-
-  // Give layout a moment to settle.
-  await new Promise((r) => setTimeout(r, 150));
-
-  const image = await win.webContents.capturePage();
-  const outPath = path.join(OUT_DIR, outName);
-  fs.writeFileSync(outPath, image.toPNG());
-  return outPath;
-}
-
-app.whenReady().then(async () => {
-  ensureDir(OUT_DIR);
-
+async function renderAndCapture({ name, payload, size }) {
   const win = new BrowserWindow({
-    width: 640,
-    height: 360,
+    width: size.width,
+    height: size.height,
     show: false,
-    transparent: true,
+    backgroundColor: "#00000000",
     webPreferences: {
       contextIsolation: true,
       nodeIntegration: false
     }
   });
 
-  const basePayload = {
+  const filePath = path.join(OVERLAY_ROOT, "overlay.html");
+  await win.loadFile(filePath, { query: { screenshot: "1" } });
+
+  // Ensure deterministic viewport sizing.
+  win.setContentSize(size.width, size.height);
+
+  // Wait a tick so styles apply.
+  await new Promise((r) => setTimeout(r, 50));
+
+  // Render the overlay via the test harness hook.
+  const js = `window.__overlayOnShow && window.__overlayOnShow(${JSON.stringify(payload)});`;
+  await win.webContents.executeJavaScript(js, true);
+
+  // Give layout a moment.
+  await new Promise((r) => setTimeout(r, 50));
+
+  const image = await win.webContents.capturePage();
+  const outPath = path.join(OUT_DIR, name);
+  fs.writeFileSync(outPath, image.toPNG());
+
+  win.close();
+  return outPath;
+}
+
+app.whenReady().then(async () => {
+  ensureDir(OUT_DIR);
+
+  const base = {
+    ts: "2026-02-06T03:30:00.000Z",
+    cmd_id: "cmd_screenshot",
+    source_event_id: "evt_screenshot",
+    source: "runner",
     level: "B",
-    style_id: "strict",
+    block_id: "block_screenshot",
+    block_name: "Research",
     headline: "Reset.",
-    human_line: "You drifted off the current block.",
-    diagnosis: "Resume the scheduled task.",
-    next_action: "Return to the planned work block now.",
-    block_id: "block-123",
-    block_name: "Deep Work"
+    human_line: "You’re drifting—let’s interrupt autopilot.",
+    diagnosis: "Quick correction beats a long spiral.",
+    next_action: "Recover the schedule, then do 5 minutes of the next step."
   };
 
-  const outputs = [];
-  outputs.push(
-    await captureScenario(
-      win,
-      { ...basePayload, event_type: "DRIFT_START", style_id: "strict" },
-      "drift_start.png"
-    )
-  );
+  try {
+    const outputs = [];
 
-  outputs.push(
-    await captureScenario(
-      win,
-      { ...basePayload, event_type: "DRIFT_PERSIST", style_id: "pattern_break", headline: "Still off track" },
-      "drift_persist_pattern_break.png"
-    )
-  );
+    outputs.push(
+      await renderAndCapture({
+        name: "drift_start.png",
+        payload: { ...base, event_type: "DRIFT_START", style_id: "calm" },
+        size: { width: 640, height: 360 }
+      })
+    );
 
-  // Print paths for CI logs / local sanity.
-  // eslint-disable-next-line no-console
-  console.log(outputs.map((p) => `wrote ${p}`).join("\n"));
+    outputs.push(
+      await renderAndCapture({
+        name: "drift_persist_pattern_break.png",
+        payload: { ...base, event_type: "DRIFT_PERSIST", style_id: "pattern_break" },
+        size: { width: 640, height: 360 }
+      })
+    );
 
-  await win.close();
-  app.quit();
+    // eslint-disable-next-line no-console
+    console.log("wrote screenshots:\n" + outputs.map((p) => "- " + p).join("\n"));
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.error("screenshot failed", err);
+    process.exitCode = 1;
+  } finally {
+    app.quit();
+  }
 });
