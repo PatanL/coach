@@ -67,6 +67,26 @@ html[data-screenshot="1"] *::after {
   mix-blend-mode: screen;
 }
 
+/* Extra static pattern-break marker so DRIFT_PERSIST reads instantly even with reduced motion
+   (and in deterministic screenshot mode where animations are disabled). */
+#overlay.pattern-break .card::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 7px;
+  background: repeating-linear-gradient(
+    90deg,
+    rgba(255, 122, 105, 0.95) 0px,
+    rgba(255, 122, 105, 0.95) 10px,
+    rgba(255, 255, 255, 0.0) 10px,
+    rgba(255, 255, 255, 0.0) 18px
+  );
+  opacity: 0.9;
+  pointer-events: none;
+}
+
 .hidden {
   display: none;
 }
