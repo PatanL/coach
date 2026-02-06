@@ -7,7 +7,8 @@ const {
   isTypingContext,
   primaryEnterAction,
   shouldTriggerBackOnTrack,
-  isButtonLikeTarget
+  isButtonLikeTarget,
+  initialFocusDelayMs
 } = require("./overlay-utils");
 
 test("isTextInputTarget: recognizes common typing targets", () => {
@@ -88,4 +89,10 @@ test("shouldTriggerBackOnTrack: does not double-fire when a button is focused", 
     shouldTriggerBackOnTrack({ eventTarget: { tagName: "DIV" }, activeElement: { tagName: "BUTTON" }, sinceShownMs: 1000 }),
     false
   );
+});
+
+test("initialFocusDelayMs: delay action-button focus to match the Enter safety window", () => {
+  assert.equal(initialFocusDelayMs({ hasChoices: true, minDelayMs: 400 }), 0);
+  assert.equal(initialFocusDelayMs({ hasChoices: false, minDelayMs: 400 }), 400);
+  assert.equal(initialFocusDelayMs({ hasChoices: false, minDelayMs: 250 }), 250);
 });

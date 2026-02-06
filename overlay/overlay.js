@@ -117,13 +117,19 @@ function showOverlay(payload) {
   // Skip in deterministic screenshot mode to avoid focus-ring changes in assets.
   const screenshotMode = document.documentElement?.dataset?.screenshot === "1";
   if (!screenshotMode) {
-    const focusEl = payload?.choices
+    const hasChoices = Boolean(payload?.choices);
+    const focusEl = hasChoices
       ? alignText
       : enterAction === "recover"
         ? recoverBtn
         : backBtn;
-    // Wait a tick so the overlay is visible before focusing.
-    setTimeout(() => focusEl?.focus?.(), 0);
+
+    // Avoid the "held Enter" problem: if we focus a button immediately, the browser can
+    // treat the held key as an immediate click, bypassing our safety window.
+    const focusDelayMs =
+      window.overlayUtils?.initialFocusDelayMs?.({ hasChoices, minDelayMs: 400 }) ?? (hasChoices ? 0 : 400);
+
+    setTimeout(() => focusEl?.focus?.(), focusDelayMs);
   }
 }
 

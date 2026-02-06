@@ -54,12 +54,23 @@
     return true;
   }
 
+  // When showing the overlay, we want keyboard-first recovery (focus something useful),
+  // but we *also* want to avoid the "held Enter" problem where focusing a button causes
+  // an immediate click before the safety window has elapsed.
+  //
+  // Rule: if we're about to focus an action button, delay that focus to match minDelayMs.
+  // If we're focusing an input (align mode), do it immediately.
+  function initialFocusDelayMs({ hasChoices, minDelayMs = 400 }) {
+    return hasChoices ? 0 : minDelayMs;
+  }
+
   return {
     isTextInputTarget,
     isPatternBreakEvent,
     isTypingContext,
     primaryEnterAction,
     shouldTriggerBackOnTrack,
+    initialFocusDelayMs,
     isButtonLikeTarget
   };
 });
