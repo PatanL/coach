@@ -59,7 +59,8 @@ function showOverlay(payload) {
 
   const patternBreak = isPatternBreak(payload);
   overlay.classList.toggle("pattern-break", Boolean(patternBreak));
-  setText(eventLabel, patternBreak ? "DRIFT (PERSIST)" : "DRIFT");
+  // Visual pattern-break needs to be instantly legible in peripheral vision.
+  setText(eventLabel, patternBreak ? "PATTERN BREAK" : "DRIFT");
 
   // Pattern-break should feel different and more "do an action now".
   backBtn.classList.toggle("primary", !patternBreak);
