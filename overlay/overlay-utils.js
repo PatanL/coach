@@ -8,6 +8,16 @@
   function isTextInputTarget(target) {
     if (!target) return false;
     const tag = String(target.tagName || "").toLowerCase();
+
+    const role = String(
+      (typeof target.getAttribute === "function" ? target.getAttribute("role") : target.role) ||
+        ""
+    ).toLowerCase();
+
+    // ARIA-first controls (e.g., custom comboboxes) should be treated as typing targets
+    // so global hotkeys can't accidentally fire while the user is interacting with them.
+    if (role === "textbox" || role === "combobox" || role === "searchbox") return true;
+
     if (target.isContentEditable) return true;
     return tag === "input" || tag === "textarea" || tag === "select";
   }
