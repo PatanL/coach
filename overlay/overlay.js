@@ -81,6 +81,15 @@ function showOverlay(payload) {
   backBtn.classList.toggle("primary", !isPersist);
   recoverBtn.classList.toggle("primary", isPersist);
 
+  const eventType = payload.event_type || payload.eventType || "";
+  if (eventType) {
+    overlay.dataset.eventType = eventType;
+    setText(eventLabel, eventType);
+  } else {
+    delete overlay.dataset.eventType;
+    setText(eventLabel, "DRIFT");
+  }
+
   setText(blockName, payload.block_name || "");
   setText(headline, payload.headline || "Reset.");
   setText(humanLine, payload.human_line || "");
