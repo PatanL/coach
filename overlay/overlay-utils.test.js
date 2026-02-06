@@ -1,7 +1,7 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
 
-const { isTextInputTarget, getEnterAction } = require("./overlay-utils");
+const { isTextInputTarget, isInteractiveTarget, getEnterAction } = require("./overlay-utils");
 
 test("isTextInputTarget: recognizes common typing targets", () => {
   assert.equal(isTextInputTarget({ tagName: "INPUT" }), true);
@@ -14,6 +14,14 @@ test("isTextInputTarget: ignores non-input targets", () => {
   assert.equal(isTextInputTarget({ tagName: "BUTTON" }), false);
   assert.equal(isTextInputTarget({ tagName: "DIV" }), false);
   assert.equal(isTextInputTarget(null), false);
+});
+
+test("isInteractiveTarget: recognizes controls with their own Enter semantics", () => {
+  assert.equal(isInteractiveTarget({ tagName: "BUTTON" }), true);
+  assert.equal(isInteractiveTarget({ tagName: "a" }), true);
+  assert.equal(isInteractiveTarget({ tagName: "INPUT" }), true);
+  assert.equal(isInteractiveTarget({ tagName: "DIV" }), false);
+  assert.equal(isInteractiveTarget(null), false);
 });
 
 test("getEnterAction: defaults to back_on_track", () => {

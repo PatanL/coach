@@ -170,8 +170,8 @@ window.overlayAPI.onPause(() => {
 window.addEventListener("keydown", (event) => {
   // Don't treat Enter as a global action while the user is typing.
   if (event.key === "Enter") {
-    const isTypingTarget = window.overlayUtils?.isTextInputTarget?.(event.target);
-    if (!isTypingTarget) {
+    const isInteractiveTarget = window.overlayUtils?.isInteractiveTarget?.(event.target);
+    if (!isInteractiveTarget) {
       const action = window.overlayUtils?.getEnterAction?.({
         eventType: overlay?.dataset?.eventType,
         mode: overlay?.dataset?.mode

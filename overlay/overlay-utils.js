@@ -12,6 +12,17 @@
     return tag === "input" || tag === "textarea" || tag === "select";
   }
 
+  // We should NOT treat Enter as a global default action when the user is already
+  // interacting with a control that has its own Enter semantics (e.g. <button>).
+  function isInteractiveTarget(target) {
+    if (!target) return false;
+    const tag = String(target.tagName || "").toLowerCase();
+    if (tag === "button" || tag === "a") return true;
+    // If it's a text input, it's also interactive.
+    if (isTextInputTarget(target)) return true;
+    return false;
+  }
+
   // Map the global Enter key to a safe "default" action.
   // Returns null when Enter should do nothing.
   function getEnterAction({ eventType, mode } = {}) {
@@ -30,6 +41,7 @@
 
   return {
     isTextInputTarget,
+    isInteractiveTarget,
     getEnterAction
   };
 });
