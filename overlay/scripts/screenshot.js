@@ -35,6 +35,26 @@ const PAYLOADS = [
     },
   },
   {
+    name: "overlay_align_choices.png",
+    payload: {
+      ts: "2026-02-06T05:30:00.000Z",
+      cmd_id: "99999999-9999-9999-9999-999999999999",
+      source_event_id: "88888888-8888-8888-8888-888888888888",
+      source_event_type: "DRIFT_START",
+      source: "screenshot",
+      level: "B",
+      style_id: "strict",
+      headline: "Quick alignment",
+      human_line: "Which action will you take next?",
+      diagnosis: "Pick one option or type a custom answer.",
+      next_action: "Choose the smallest next step.",
+      question_id: "q-0001",
+      choices: ["Close tab", "Resume task", "Take 2-min reset", "Snooze 5"],
+      block_id: "block-123",
+      block_name: "Deep work",
+    },
+  },
+  {
     name: "overlay_drift_persist_pattern-break.png",
     payload: {
       ts: "2026-02-06T05:30:00.000Z",
