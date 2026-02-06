@@ -12,7 +12,18 @@
     return tag === "input" || tag === "textarea" || tag === "select";
   }
 
+  // Used to suppress global hotkeys when the user is interacting with controls.
+  function isInteractiveTarget(target) {
+    if (!target) return false;
+    const tag = String(target.tagName || "").toLowerCase();
+    if (isTextInputTarget(target)) return true;
+    if (tag === "button" || tag === "a") return true;
+    const role = String(target.getAttribute?.("role") || "").toLowerCase();
+    return role === "button" || role === "link";
+  }
+
   return {
-    isTextInputTarget
+    isTextInputTarget,
+    isInteractiveTarget
   };
 });
