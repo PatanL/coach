@@ -1,5 +1,6 @@
 const overlay = document.getElementById("overlay");
 const blockName = document.getElementById("blockName");
+const eventLabel = document.getElementById("eventLabel");
 const headline = document.getElementById("headline");
 const humanLine = document.getElementById("humanLine");
 const diagnosis = document.getElementById("diagnosis");
@@ -49,6 +50,15 @@ function showOverlay(payload) {
   } else {
     overlay.dataset.mode = "";
   }
+  overlay.dataset.eventType = payload.source_event_type || "";
+  if (payload.source_event_type === "DRIFT_PERSIST") {
+    setText(eventLabel, "DRIFT — PERSIST");
+  } else if (payload.source_event_type === "DRIFT_START") {
+    setText(eventLabel, "DRIFT");
+  } else {
+    setText(eventLabel, payload.label || "DRIFT");
+  }
+
   setText(blockName, payload.block_name || "");
   setText(headline, payload.headline || "Reset.");
   setText(humanLine, payload.human_line || "");
