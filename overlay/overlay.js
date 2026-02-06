@@ -163,12 +163,11 @@ window.overlayAPI.onPause(() => {
 });
 
 window.addEventListener("keydown", (event) => {
-  // Don't treat Enter as "Back on track" while the user is typing or interacting with a control.
+  // Enter is a global "Back on track" hotkey only when the user isn't typing or interacting
+  // with a control (e.g. focused button/link).
   if (event.key === "Enter") {
     const ignoreEnter = window.overlayUtils?.shouldIgnoreGlobalEnter?.(event.target);
-    if (!ignoreEnter) {
-      sendAction({ action: "back_on_track" });
-    }
+    if (!ignoreEnter) sendAction({ action: "back_on_track" });
   }
   if (event.key === "Escape") {
     snooze.classList.remove("hidden");

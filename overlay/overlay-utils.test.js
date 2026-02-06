@@ -16,14 +16,17 @@ test("isTextInputTarget: ignores non-input targets", () => {
   assert.equal(isTextInputTarget(null), false);
 });
 
-test("isInteractiveTarget: recognizes common clickable targets", () => {
+test("isInteractiveTarget: recognizes common interactive targets", () => {
   assert.equal(isInteractiveTarget({ tagName: "BUTTON" }), true);
   assert.equal(isInteractiveTarget({ tagName: "a" }), true);
-  assert.equal(isInteractiveTarget({ tagName: "DIV", getAttribute: (k) => (k === "role" ? "button" : null) }), true);
+  assert.equal(isInteractiveTarget({ tagName: "INPUT" }), true);
+  assert.equal(
+    isInteractiveTarget({ tagName: "DIV", getAttribute: (k) => (k === "role" ? "button" : null) }),
+    true
+  );
 });
 
 test("isInteractiveTarget: ignores non-interactive targets", () => {
-  assert.equal(isInteractiveTarget({ tagName: "INPUT" }), false);
   assert.equal(isInteractiveTarget({ tagName: "DIV" }), false);
   assert.equal(isInteractiveTarget(null), false);
 });
@@ -38,11 +41,7 @@ test("shouldIgnoreGlobalEnter: child of button/link should still block global En
   const button = { tagName: "BUTTON" };
   const spanInsideButton = {
     tagName: "SPAN",
-    closest: (selector) => {
-      // Return the button for any closest() selector query.
-      // We don't parse selectors here; we just validate that shouldIgnoreGlobalEnter uses closest.
-      return selector ? button : null;
-    }
+    closest: () => button
   };
   assert.equal(shouldIgnoreGlobalEnter(spanInsideButton), true);
 });
