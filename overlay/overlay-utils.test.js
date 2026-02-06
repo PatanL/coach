@@ -20,6 +20,18 @@ test("isInteractiveTarget: recognizes controls with their own Enter semantics", 
   assert.equal(isInteractiveTarget({ tagName: "BUTTON" }), true);
   assert.equal(isInteractiveTarget({ tagName: "a" }), true);
   assert.equal(isInteractiveTarget({ tagName: "INPUT" }), true);
+
+  // Custom interactive patterns.
+  assert.equal(isInteractiveTarget({ tagName: "DIV", role: "button" }), true);
+  assert.equal(isInteractiveTarget({ tagName: "SPAN", role: "link" }), true);
+  assert.equal(
+    isInteractiveTarget({
+      tagName: "DIV",
+      getAttribute: (name) => (name === "role" ? "button" : null)
+    }),
+    true
+  );
+
   assert.equal(isInteractiveTarget({ tagName: "DIV" }), false);
   assert.equal(isInteractiveTarget(null), false);
 });

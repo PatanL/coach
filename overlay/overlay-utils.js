@@ -16,10 +16,21 @@
   // interacting with a control that has its own Enter semantics (e.g. <button>).
   function isInteractiveTarget(target) {
     if (!target) return false;
+
     const tag = String(target.tagName || "").toLowerCase();
+
+    // Native interactive controls.
     if (tag === "button" || tag === "a") return true;
+
+    // Common pattern in custom UIs: <div role="button"> / <span role="link">.
+    const role =
+      (typeof target.getAttribute === "function" && target.getAttribute("role")) ||
+      target.role;
+    if (role === "button" || role === "link") return true;
+
     // If it's a text input, it's also interactive.
     if (isTextInputTarget(target)) return true;
+
     return false;
   }
 
