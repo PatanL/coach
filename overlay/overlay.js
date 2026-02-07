@@ -1,4 +1,5 @@
 const overlay = document.getElementById("overlay");
+const eventLabel = document.getElementById("eventLabel");
 const blockName = document.getElementById("blockName");
 const headline = document.getElementById("headline");
 const humanLine = document.getElementById("humanLine");
@@ -31,6 +32,27 @@ function updatePrimaryLabel(payload) {
   backBtn.textContent = "Back on track";
 }
 
+function updateEventLabel(payload) {
+  // Prefer the originating event type when available (used for visual pattern-breaks like DRIFT_PERSIST).
+  const raw = payload?.source_event_type || payload?.event_type || payload?.type || "";
+  const eventType = String(raw).toUpperCase();
+  overlay.dataset.eventType = eventType;
+
+  if (!eventType) {
+    setText(eventLabel, "DRIFT");
+    return;
+  }
+  if (eventType === "DRIFT_PERSIST") {
+    setText(eventLabel, "DRIFT — PERSIST");
+    return;
+  }
+  if (eventType.startsWith("DRIFT")) {
+    setText(eventLabel, "DRIFT");
+    return;
+  }
+  setText(eventLabel, eventType.replaceAll("_", " "));
+}
+
 function resetSnooze() {
   snooze.classList.add("hidden");
 }
@@ -44,6 +66,9 @@ function showOverlay(payload) {
   overlay.classList.remove("hidden");
   resetSnooze();
   resetAlignInput();
+  updateEventLabel(payload);
+  updatePrimaryLabel(payload);
+
   if (payload.choices && Array.isArray(payload.choices)) {
     overlay.dataset.mode = "align";
   } else {
@@ -136,10 +161,10 @@ window.overlayAPI.onPause(() => {
 });
 
 window.addEventListener("keydown", (event) => {
-  // Don't treat Enter as "Back on track" while the user is typing.
+  // Don't treat Enter as "Back on track" while the user is typing or interacting with a control.
   if (event.key === "Enter") {
-    const isTypingTarget = window.overlayUtils?.isTextInputTarget?.(event.target);
-    if (!isTypingTarget) {
+    const ignoreEnter = window.overlayUtils?.shouldIgnoreGlobalEnter?.(event.target);
+    if (!ignoreEnter) {
       sendAction({ action: "back_on_track" });
     }
   }
