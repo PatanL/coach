@@ -1,4 +1,15 @@
 const overlay = document.getElementById("overlay");
+
+// Deterministic screenshot mode: disable animations/transitions when overlay.html is loaded
+// with ?screenshot=1 (used by `npm --prefix overlay run screenshot`).
+try {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get("screenshot") === "1") {
+    overlay.dataset.screenshot = "1";
+  }
+} catch {
+  // Ignore (e.g. older environments without URLSearchParams)
+}
 const eventLabel = document.getElementById("eventLabel");
 const blockName = document.getElementById("blockName");
 const headline = document.getElementById("headline");

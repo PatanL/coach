@@ -32,7 +32,7 @@ async function main() {
     throw new Error(`overlay.html not found at ${htmlPath}`);
   }
 
-  await win.loadFile(htmlPath);
+  await win.loadFile(htmlPath, { query: { screenshot: "1" } });
 
   async function capture(name, payload) {
     // Give the DOM a moment to settle, then render the payload.
@@ -68,6 +68,15 @@ async function main() {
     screenshot: true,
     event_type: "DRIFT_PERSIST",
     headline: "Interrupt the loop."
+  });
+
+  // Extra deterministic snapshot explicitly used for PR diffs when tweaking the DRIFT_PERSIST pattern-break.
+  await capture("drift_persist_pattern_break.png", {
+    ...common,
+    screenshot: true,
+    event_type: "DRIFT_PERSIST",
+    headline: "Interrupt the loop.",
+    human_line: "This is the moment to break the loop."
   });
 
   win.destroy();
