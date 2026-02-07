@@ -1,5 +1,6 @@
 const overlay = document.getElementById("overlay");
 const eventLabel = document.getElementById("eventLabel");
+const eventLabel = document.getElementById("eventLabel");
 const blockName = document.getElementById("blockName");
 const headline = document.getElementById("headline");
 const humanLine = document.getElementById("humanLine");
@@ -32,6 +33,24 @@ function updatePrimaryLabel(payload) {
   backBtn.textContent = "Back on track";
 }
 
+function updateEventLabel(payload) {
+  const eventType = String(payload?.event_type || payload?.type || "").toUpperCase();
+  overlay.dataset.eventType = eventType;
+  if (!eventType) {
+    setText(eventLabel, "DRIFT");
+    return;
+  }
+  if (eventType === "DRIFT_PERSIST") {
+    setText(eventLabel, "DRIFT (PERSIST)");
+    return;
+  }
+  if (eventType.startsWith("DRIFT")) {
+    setText(eventLabel, "DRIFT");
+    return;
+  }
+  setText(eventLabel, eventType.replaceAll("_", " "));
+}
+
 function resetSnooze() {
   snooze.classList.add("hidden");
 }
@@ -45,6 +64,8 @@ function showOverlay(payload) {
   overlay.classList.remove("hidden");
   resetSnooze();
   resetAlignInput();
+  updateEventLabel(payload);
+  updatePrimaryLabel(payload);
 
   const eventType = payload?.source_event_type || "";
   overlay.dataset.eventType = eventType;
