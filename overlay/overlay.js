@@ -112,6 +112,16 @@ function showOverlay(payload) {
   overlay.dataset.level = payload.level || "B";
   currentPayload = payload;
   shownAt = Date.now();
+
+  // Recovery UX: on persistent drift, nudge the user toward an explicit recovery action.
+  // Also prevents the "global Enter" handler from accidentally marking back_on_track immediately.
+  if (overlay.dataset.eventType === "DRIFT_PERSIST" && overlay.dataset.mode !== "align") {
+    try {
+      recoverBtn?.focus?.({ preventScroll: true });
+    } catch {
+      recoverBtn?.focus?.();
+    }
+  }
 }
 
 function sendAction(action) {
