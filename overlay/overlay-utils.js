@@ -22,8 +22,22 @@
     return role === "button" || role === "link";
   }
 
+  function findHotkeyRelevantTarget(target) {
+    if (!target) return null;
+    // If event.target is a child (e.g. <span> inside <button>), walk up to the nearest
+    // element that should "own" the keyboard interaction.
+    if (typeof target.closest === "function") {
+      const hit = target.closest(
+        'input,textarea,select,[contenteditable="true"],button,a,[role="button"],[role="link"]'
+      );
+      if (hit) return hit;
+    }
+    return target;
+  }
+
   function shouldIgnoreGlobalEnter(target) {
-    return isTextInputTarget(target) || isInteractiveTarget(target);
+    const t = findHotkeyRelevantTarget(target);
+    return isTextInputTarget(t) || isInteractiveTarget(t);
   }
 
   return {

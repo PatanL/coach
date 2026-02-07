@@ -33,3 +33,16 @@ test("shouldIgnoreGlobalEnter: typing or clicking should block global Enter acti
   assert.equal(shouldIgnoreGlobalEnter({ tagName: "BUTTON" }), true);
   assert.equal(shouldIgnoreGlobalEnter({ tagName: "DIV" }), false);
 });
+
+test("shouldIgnoreGlobalEnter: child of button/link should still block global Enter", () => {
+  const button = { tagName: "BUTTON" };
+  const spanInsideButton = {
+    tagName: "SPAN",
+    closest: (selector) => {
+      // Return the button for any closest() selector query.
+      // We don't parse selectors here; we just validate that shouldIgnoreGlobalEnter uses closest.
+      return selector ? button : null;
+    }
+  };
+  assert.equal(shouldIgnoreGlobalEnter(spanInsideButton), true);
+});
