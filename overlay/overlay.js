@@ -1,6 +1,5 @@
 const overlay = document.getElementById("overlay");
 const eventLabel = document.getElementById("eventLabel");
-const eventLabel = document.getElementById("eventLabel");
 const blockName = document.getElementById("blockName");
 const headline = document.getElementById("headline");
 const humanLine = document.getElementById("humanLine");
@@ -34,14 +33,17 @@ function updatePrimaryLabel(payload) {
 }
 
 function updateEventLabel(payload) {
-  const eventType = String(payload?.event_type || payload?.type || "").toUpperCase();
+  // Prefer the originating event type when available (used for visual pattern-breaks like DRIFT_PERSIST).
+  const raw = payload?.source_event_type || payload?.event_type || payload?.type || "";
+  const eventType = String(raw).toUpperCase();
   overlay.dataset.eventType = eventType;
+
   if (!eventType) {
     setText(eventLabel, "DRIFT");
     return;
   }
   if (eventType === "DRIFT_PERSIST") {
-    setText(eventLabel, "DRIFT (PERSIST)");
+    setText(eventLabel, "DRIFT — PERSIST");
     return;
   }
   if (eventType.startsWith("DRIFT")) {
@@ -67,15 +69,6 @@ function showOverlay(payload) {
   updateEventLabel(payload);
   updatePrimaryLabel(payload);
 
-  const eventType = payload?.source_event_type || "";
-  overlay.dataset.eventType = eventType;
-  if (eventType === "DRIFT_PERSIST") {
-    setText(eventLabel, "DRIFT — PERSIST");
-  } else if (eventType) {
-    setText(eventLabel, String(eventType).replace(/_/g, " "));
-  } else {
-    setText(eventLabel, "DRIFT");
-  }
   if (payload.choices && Array.isArray(payload.choices)) {
     overlay.dataset.mode = "align";
   } else {
@@ -112,7 +105,6 @@ function showOverlay(payload) {
   }
 
   overlay.dataset.level = payload.level || "B";
-  overlay.dataset.eventType = payload.source_event_type || payload.event_type || "";
   currentPayload = payload;
   shownAt = Date.now();
 }
