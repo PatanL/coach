@@ -220,18 +220,13 @@ button.primary:hover {
   }
 }
 
-#overlay[data-event-type="DRIFT_PERSIST"] .card {
-  border-color: rgba(241, 108, 91, 0.35);
-  background: linear-gradient(140deg, rgba(26, 16, 16, 0.93), rgba(10, 12, 15, 0.96));
-  animation: driftPersistPulse 1.15s ease-in-out 0s 3;
-}
-
 /* Visual pattern-break: DRIFT_PERSIST should feel unmistakably different. */
 #overlay[data-event-type="DRIFT_PERSIST"] {
   background: rgba(10, 4, 10, 0.55);
 }
 
 #overlay[data-event-type="DRIFT_PERSIST"] .card {
+  animation: driftPersistPulse 1.15s ease-in-out 0s 3;
   border: 2px solid rgba(255, 73, 167, 0.85);
   box-shadow:
     0 24px 70px rgba(0, 0, 0, 0.55),
