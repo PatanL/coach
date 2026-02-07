@@ -91,6 +91,7 @@ function showOverlay(payload) {
   }
 
   overlay.dataset.level = payload.level || "B";
+  overlay.dataset.eventType = payload.source_event_type || payload.event_type || "";
   currentPayload = payload;
   shownAt = Date.now();
 }
