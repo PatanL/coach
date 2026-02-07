@@ -7,6 +7,7 @@ const label = document.querySelector(".label");
 const patternBreakBanner = document.getElementById("patternBreakBanner");
 const diagnosis = document.getElementById("diagnosis");
 const nextAction = document.getElementById("nextAction");
+const label = document.querySelector(".label");
 const snooze = document.getElementById("snoozeReason");
 const miniPlan = document.getElementById("miniPlan");
 const choiceButtons = document.getElementById("choiceButtons");
@@ -73,6 +74,12 @@ function showOverlay(payload) {
   overlay.classList.remove("hidden");
   resetSnooze();
   resetAlignInput();
+
+  const eventType = payload?.event_type || "";
+  overlay.dataset.eventType = eventType;
+  if (label) {
+    label.textContent = eventType === "DRIFT_PERSIST" ? "DRIFT • PERSIST" : "DRIFT";
+  }
 
   overlay.dataset.eventType = payload?.event_type || "";
   if (eventLabel) {

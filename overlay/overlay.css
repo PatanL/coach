@@ -82,6 +82,21 @@ html, body {
   backdrop-filter: blur(8px);
 }
 
+/* Visual pattern-break for repeated drift. No animation (for deterministic screenshots). */
+#overlay[data-event-type="DRIFT_PERSIST"] .card {
+  border: 2px solid rgba(241, 108, 91, 0.85);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.58), 0 0 0 6px rgba(241, 108, 91, 0.12);
+  background:
+    repeating-linear-gradient(
+      135deg,
+      rgba(241, 108, 91, 0.12) 0px,
+      rgba(241, 108, 91, 0.12) 10px,
+      rgba(0, 0, 0, 0) 10px,
+      rgba(0, 0, 0, 0) 22px
+    ),
+    linear-gradient(140deg, rgba(19, 22, 26, 0.92), rgba(10, 12, 15, 0.96));
+}
+
 /* Strong visual pattern-break for repeated drift events. */
 #overlay[data-event-type="DRIFT_PERSIST"] .card {
   border: 1px solid rgba(255, 122, 105, 0.55);
