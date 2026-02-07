@@ -79,10 +79,10 @@ function showOverlay(payload) {
   resetAlignInput();
 
   // Deterministic screenshots: allow the screenshot runner to disable animations/transitions.
+  // Keep the dataset value consistent with the CSS selector (#overlay[data-screenshot="1"]).
+  // Also, don't delete an existing screenshot flag that may have been set by ?screenshot=1.
   if (payload?.screenshot) {
-    overlay.dataset.screenshot = "true";
-  } else {
-    delete overlay.dataset.screenshot;
+    overlay.dataset.screenshot = "1";
   }
 
   updateEventLabel(payload);
