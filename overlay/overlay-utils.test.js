@@ -31,6 +31,7 @@ test("isInteractiveTarget: ignores non-interactive targets", () => {
 test("shouldIgnoreGlobalEnter: typing or clicking should block global Enter action", () => {
   assert.equal(shouldIgnoreGlobalEnter({ tagName: "INPUT" }), true);
   assert.equal(shouldIgnoreGlobalEnter({ tagName: "BUTTON" }), true);
+  assert.equal(shouldIgnoreGlobalEnter({ tagName: "DIV", isContentEditable: true }), true);
   assert.equal(shouldIgnoreGlobalEnter({ tagName: "DIV" }), false);
 });
 
@@ -45,6 +46,13 @@ test("shouldIgnoreGlobalEnter: child of button/link should still block global En
     }
   };
   assert.equal(shouldIgnoreGlobalEnter(spanInsideButton), true);
+
+  const link = { tagName: "A" };
+  const spanInsideLink = {
+    tagName: "SPAN",
+    closest: (selector) => (selector ? link : null)
+  };
+  assert.equal(shouldIgnoreGlobalEnter(spanInsideLink), true);
 });
 
 test("getGlobalEnterAction: DRIFT_PERSIST prefers recovery action", () => {

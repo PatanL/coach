@@ -83,6 +83,19 @@ function resetAlignInput() {
   alignInput.classList.add("hidden");
 }
 
+function focusPreferredControl() {
+  const mode = overlay.dataset.mode || "";
+  if (mode === "align" && !alignInput.classList.contains("hidden")) {
+    // If we're asking for alignment input, put the cursor there immediately.
+    alignText.focus({ preventScroll: true });
+    return;
+  }
+
+  const action = window.overlayUtils?.getGlobalEnterAction?.(overlay.dataset.eventType) || "back_on_track";
+  const btn = action === "recover" ? recoverBtn : backBtn;
+  btn?.focus?.({ preventScroll: true });
+}
+
 function showOverlay(payload) {
   overlay.classList.remove("hidden");
   resetSnooze();
@@ -128,6 +141,7 @@ function showOverlay(payload) {
   }
 
   overlay.dataset.level = payload.level || "B";
+  focusPreferredControl();
   currentPayload = payload;
   shownAt = Date.now();
 }
