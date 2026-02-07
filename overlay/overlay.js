@@ -2,6 +2,7 @@ const overlay = document.getElementById("overlay");
 const blockName = document.getElementById("blockName");
 const headline = document.getElementById("headline");
 const humanLine = document.getElementById("humanLine");
+const label = document.querySelector(".label");
 const diagnosis = document.getElementById("diagnosis");
 const nextAction = document.getElementById("nextAction");
 const snooze = document.getElementById("snoozeReason");
@@ -31,6 +32,24 @@ function updatePrimaryLabel(payload) {
   backBtn.textContent = "Back on track";
 }
 
+function updatePatternBreak(payload) {
+  const eventType = payload?.event_type || "";
+  overlay.dataset.eventType = eventType;
+  if (label) {
+    label.textContent = eventType ? String(eventType).replace(/_/g, " ") : "DRIFT";
+  }
+
+  // Default emphasis: Back on track is the primary action.
+  backBtn.classList.add("primary");
+  recoverBtn.classList.remove("primary");
+
+  // Pattern-break: on DRIFT_PERSIST, emphasize taking a short recovery step.
+  if (eventType === "DRIFT_PERSIST") {
+    backBtn.classList.remove("primary");
+    recoverBtn.classList.add("primary");
+  }
+}
+
 function resetSnooze() {
   snooze.classList.add("hidden");
 }
@@ -49,6 +68,9 @@ function showOverlay(payload) {
   } else {
     overlay.dataset.mode = "";
   }
+  updatePrimaryLabel(payload);
+  updatePatternBreak(payload);
+
   setText(blockName, payload.block_name || "");
   setText(headline, payload.headline || "Reset.");
   setText(humanLine, payload.human_line || "");

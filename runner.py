@@ -1121,6 +1121,7 @@ def main() -> int:
                 "cmd_id": ensure_uuid(),
                 "source_event_id": None,
                 "source": "runner",
+                "event_type": "ALIGN_REQUIRED",
                 "level": "B",
                 "style_id": "calm",
                 "headline": "ALIGN REQUIRED",
@@ -1160,6 +1161,7 @@ def main() -> int:
                     "cmd_id": ensure_uuid(),
                     "source_event_id": event.get("event_id"),
                     "source": "runner",
+                    "event_type": event.get("type"),
                     "level": "B",
                     "style_id": "strict",
                     "headline": "Off schedule",
@@ -1179,6 +1181,7 @@ def main() -> int:
                     "cmd_id": ensure_uuid(),
                     "source_event_id": event.get("event_id"),
                     "source": "runner",
+                    "event_type": event.get("type"),
                     "level": "A",
                     "style_id": "calm",
                     "headline": event.get("habit_kind", "Habit"),
@@ -1197,6 +1200,7 @@ def main() -> int:
                     "cmd_id": ensure_uuid(),
                     "source_event_id": event.get("event_id"),
                     "source": "runner",
+                    "event_type": event.get("type"),
                     "level": "B",
                     "style_id": "strict",
                     "headline": "Habit overdue",
@@ -1268,8 +1272,9 @@ def main() -> int:
 
             overlay = response.get("overlay")
             if isinstance(overlay, dict):
+                overlay = dict(overlay)
+                overlay["event_type"] = event.get("type")
                 if event.get("type") in ["DRIFT_START", "DRIFT_PERSIST"]:
-                    overlay = dict(overlay)
                     overlay["level"] = "B"
                 cmd_id = ensure_uuid()
                 source_event_id = event.get("event_id")

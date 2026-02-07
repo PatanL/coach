@@ -16,6 +16,41 @@ html, body {
   background: rgba(6, 8, 10, 0.45);
 }
 
+/* Visual pattern-break for repeat drift */
+#overlay[data-event-type="DRIFT_PERSIST"] {
+  background: rgba(0, 0, 0, 0.68);
+}
+
+#overlay[data-event-type="DRIFT_PERSIST"] .card {
+  border: 2px solid rgba(241, 108, 91, 0.85);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.62);
+  position: relative;
+  overflow: hidden;
+}
+
+#overlay[data-event-type="DRIFT_PERSIST"] .card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    135deg,
+    rgba(241, 108, 91, 0.12) 0px,
+    rgba(241, 108, 91, 0.12) 10px,
+    rgba(0, 0, 0, 0) 10px,
+    rgba(0, 0, 0, 0) 22px
+  );
+  pointer-events: none;
+  mix-blend-mode: screen;
+}
+
+#overlay[data-event-type="DRIFT_PERSIST"] .header {
+  color: rgba(246, 244, 239, 0.78);
+}
+
+#overlay[data-event-type="DRIFT_PERSIST"] .label {
+  color: #ff7a69;
+}
+
 .hidden {
   display: none;
 }
