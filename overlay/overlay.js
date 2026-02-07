@@ -3,6 +3,7 @@ const eventLabel = document.getElementById("eventLabel");
 const blockName = document.getElementById("blockName");
 const headline = document.getElementById("headline");
 const humanLine = document.getElementById("humanLine");
+const patternBreak = document.getElementById("patternBreak");
 const diagnosis = document.getElementById("diagnosis");
 const nextAction = document.getElementById("nextAction");
 const snooze = document.getElementById("snoozeReason");
@@ -38,12 +39,16 @@ function updateEventLabel(payload) {
   const eventType = String(raw).toUpperCase();
   overlay.dataset.eventType = eventType;
 
+  // Reset pattern-break banner each render.
+  patternBreak.classList.add("hidden");
+
   if (!eventType) {
     setText(eventLabel, "DRIFT");
     return;
   }
   if (eventType === "DRIFT_PERSIST") {
     setText(eventLabel, "DRIFT — PERSIST");
+    patternBreak.classList.remove("hidden");
     return;
   }
   if (eventType.startsWith("DRIFT")) {
