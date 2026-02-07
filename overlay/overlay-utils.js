@@ -12,7 +12,18 @@
     return tag === "input" || tag === "textarea" || tag === "select";
   }
 
+  function getEventVariant(eventType) {
+    const type = String(eventType || "");
+    const isPersist = type === "DRIFT_PERSIST";
+    return {
+      eventType: type,
+      label: isPersist ? "DRIFT — AGAIN" : "DRIFT",
+      patternBreak: isPersist,
+    };
+  }
+
   return {
-    isTextInputTarget
+    isTextInputTarget,
+    getEventVariant,
   };
 });

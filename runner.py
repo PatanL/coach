@@ -827,6 +827,7 @@ def main() -> int:
                             "ts": dt.datetime.now().isoformat(),
                             "cmd_id": ensure_uuid(),
                             "source_event_id": None,
+                            "source_event_type": None,
                             "source": "runner",
                             **overlay,
                         }
@@ -835,6 +836,7 @@ def main() -> int:
                             "ts": dt.datetime.now().isoformat(),
                             "cmd_id": ensure_uuid(),
                             "source_event_id": None,
+                            "source_event_type": None,
                             "source": "runner",
                             "level": "B",
                             "style_id": "calm",
@@ -1277,6 +1279,7 @@ def main() -> int:
                     "ts": dt.datetime.now().isoformat(),
                     "cmd_id": cmd_id,
                     "source_event_id": source_event_id,
+                    "source_event_type": event.get("type"),
                     "source": "runner",
                     **overlay,
                 }

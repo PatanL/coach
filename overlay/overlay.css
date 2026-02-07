@@ -203,3 +203,26 @@ button.primary:hover {
   font-size: 11px;
   color: rgba(246, 244, 239, 0.5);
 }
+
+/* Visual pattern-break for repeat drift: static (screenshot-friendly), high contrast. */
+#overlay.pattern-break {
+  background: rgba(6, 8, 10, 0.62);
+}
+
+#overlay.pattern-break .card {
+  border: 2px solid rgba(241, 108, 91, 0.75);
+  box-shadow: 0 22px 80px rgba(241, 108, 91, 0.18), 0 20px 60px rgba(0, 0, 0, 0.5);
+  background:
+    repeating-linear-gradient(
+      -45deg,
+      rgba(241, 108, 91, 0.12) 0px,
+      rgba(241, 108, 91, 0.12) 10px,
+      rgba(0, 0, 0, 0) 10px,
+      rgba(0, 0, 0, 0) 20px
+    ),
+    linear-gradient(140deg, rgba(19, 22, 26, 0.94), rgba(10, 12, 15, 0.97));
+}
+
+#overlay.pattern-break .label {
+  color: #ff7a69;
+}

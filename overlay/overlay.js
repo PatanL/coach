@@ -1,5 +1,6 @@
 const overlay = document.getElementById("overlay");
 const blockName = document.getElementById("blockName");
+const eventLabel = document.getElementById("eventLabel");
 const headline = document.getElementById("headline");
 const humanLine = document.getElementById("humanLine");
 const diagnosis = document.getElementById("diagnosis");
@@ -31,6 +32,18 @@ function updatePrimaryLabel(payload) {
   backBtn.textContent = "Back on track";
 }
 
+function updateEventVariant(payload) {
+  const eventType = payload?.source_event_type || "";
+  const variant = (globalThis.overlayUtils && globalThis.overlayUtils.getEventVariant)
+    ? globalThis.overlayUtils.getEventVariant(eventType)
+    : { eventType: String(eventType || ""), label: "DRIFT", patternBreak: eventType === "DRIFT_PERSIST" };
+
+  overlay.dataset.eventType = variant.eventType;
+  overlay.classList.toggle("pattern-break", variant.patternBreak);
+
+  if (eventLabel) eventLabel.textContent = variant.label;
+}
+
 function resetSnooze() {
   snooze.classList.add("hidden");
 }
@@ -44,6 +57,8 @@ function showOverlay(payload) {
   overlay.classList.remove("hidden");
   resetSnooze();
   resetAlignInput();
+  updateEventVariant(payload);
+  updatePrimaryLabel(payload);
   if (payload.choices && Array.isArray(payload.choices)) {
     overlay.dataset.mode = "align";
   } else {
