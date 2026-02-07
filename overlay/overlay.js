@@ -1,4 +1,5 @@
 const overlay = document.getElementById("overlay");
+const eventLabel = document.getElementById("eventLabel");
 const blockName = document.getElementById("blockName");
 const headline = document.getElementById("headline");
 const humanLine = document.getElementById("humanLine");
@@ -44,6 +45,16 @@ function showOverlay(payload) {
   overlay.classList.remove("hidden");
   resetSnooze();
   resetAlignInput();
+
+  const eventType = payload?.source_event_type || "";
+  overlay.dataset.eventType = eventType;
+  if (eventType === "DRIFT_PERSIST") {
+    setText(eventLabel, "DRIFT — PERSIST");
+  } else if (eventType) {
+    setText(eventLabel, String(eventType).replace(/_/g, " "));
+  } else {
+    setText(eventLabel, "DRIFT");
+  }
   if (payload.choices && Array.isArray(payload.choices)) {
     overlay.dataset.mode = "align";
   } else {

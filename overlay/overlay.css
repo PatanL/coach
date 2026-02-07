@@ -203,3 +203,29 @@ button.primary:hover {
   font-size: 11px;
   color: rgba(246, 244, 239, 0.5);
 }
+
+/* Visual pattern-break: DRIFT_PERSIST should feel unmistakably different. */
+#overlay[data-event-type="DRIFT_PERSIST"] {
+  background: rgba(10, 4, 10, 0.55);
+}
+
+#overlay[data-event-type="DRIFT_PERSIST"] .card {
+  border: 2px solid rgba(255, 73, 167, 0.85);
+  box-shadow:
+    0 24px 70px rgba(0, 0, 0, 0.55),
+    0 0 0 3px rgba(255, 206, 61, 0.18);
+  background:
+    repeating-linear-gradient(
+      135deg,
+      rgba(255, 206, 61, 0.11) 0px,
+      rgba(255, 206, 61, 0.11) 8px,
+      rgba(19, 22, 26, 0.92) 8px,
+      rgba(19, 22, 26, 0.92) 18px
+    ),
+    linear-gradient(140deg, rgba(19, 22, 26, 0.92), rgba(10, 12, 15, 0.96));
+}
+
+#overlay[data-event-type="DRIFT_PERSIST"] .label {
+  color: #ff49a7;
+  text-shadow: 0 0 10px rgba(255, 73, 167, 0.35);
+}
