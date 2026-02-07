@@ -66,6 +66,14 @@ function showOverlay(payload) {
   overlay.classList.remove("hidden");
   resetSnooze();
   resetAlignInput();
+
+  // Deterministic screenshots: allow the screenshot runner to disable animations/transitions.
+  if (payload?.screenshot) {
+    overlay.dataset.screenshot = "true";
+  } else {
+    delete overlay.dataset.screenshot;
+  }
+
   updateEventLabel(payload);
   updatePrimaryLabel(payload);
 
