@@ -40,9 +40,16 @@
     return isTextInputTarget(t) || isInteractiveTarget(t);
   }
 
+  function getGlobalEnterAction(eventType) {
+    const type = String(eventType || "").toUpperCase();
+    if (type === "DRIFT_PERSIST") return "recover";
+    return "back_on_track";
+  }
+
   return {
     isTextInputTarget,
     isInteractiveTarget,
-    shouldIgnoreGlobalEnter
+    shouldIgnoreGlobalEnter,
+    getGlobalEnterAction
   };
 });
