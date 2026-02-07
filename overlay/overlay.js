@@ -158,14 +158,14 @@ window.overlayAPI.onPause(() => {
 });
 
 window.addEventListener("keydown", (event) => {
-  // Don't treat Enter as "Back on track" while the user is typing.
-  if (event.key === "Enter") {
-    const isTypingTarget = window.overlayUtils?.isTextInputTarget?.(event.target);
-    if (!isTypingTarget) {
-      sendAction({ action: "back_on_track" });
-    }
+  const ignore = window.overlayUtils?.shouldIgnoreGlobalHotkeys?.(event);
+
+  // Global hotkeys should never fire while the user is typing or interacting with a control.
+  if (event.key === "Enter" && !ignore) {
+    sendAction({ action: "back_on_track" });
   }
-  if (event.key === "Escape") {
+
+  if (event.key === "Escape" && !ignore) {
     snooze.classList.remove("hidden");
   }
 });
