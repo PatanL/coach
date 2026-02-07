@@ -71,6 +71,10 @@ function showOverlay(payload) {
   overlay.classList.remove("hidden");
   resetSnooze();
   resetAlignInput();
+
+  // When generating screenshots, disable animations/transitions so output is deterministic.
+  overlay.dataset.screenshot = payload?.screenshot ? "1" : "";
+
   updateEventLabel(payload);
   updatePrimaryLabel(payload);
 
