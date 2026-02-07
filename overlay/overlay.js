@@ -1,4 +1,5 @@
 const overlay = document.getElementById("overlay");
+const eventLabel = document.getElementById("eventLabel");
 const blockName = document.getElementById("blockName");
 const headline = document.getElementById("headline");
 const humanLine = document.getElementById("humanLine");
@@ -72,6 +73,15 @@ function showOverlay(payload) {
   overlay.classList.remove("hidden");
   resetSnooze();
   resetAlignInput();
+
+  overlay.dataset.eventType = payload?.event_type || "";
+  if (eventLabel) {
+    const t = payload?.event_type;
+    if (t === "DRIFT_PERSIST") eventLabel.textContent = "DRIFT PERSIST";
+    else if (t === "DRIFT_START") eventLabel.textContent = "DRIFT";
+    else if (typeof t === "string" && t) eventLabel.textContent = t.replace(/_/g, " ");
+    else eventLabel.textContent = "DRIFT";
+  }
   if (payload.choices && Array.isArray(payload.choices)) {
     overlay.dataset.mode = "align";
   } else {

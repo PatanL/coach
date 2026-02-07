@@ -1283,6 +1283,7 @@ def main() -> int:
                     "cmd_id": cmd_id,
                     "source_event_id": source_event_id,
                     "source": "runner",
+                    "event_type": event.get("type"),
                     **overlay,
                 }
                 append_overlay_cmd(overlay_cmd_log, overlay_payload)

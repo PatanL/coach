@@ -82,6 +82,24 @@ html, body {
   backdrop-filter: blur(8px);
 }
 
+/* Strong visual pattern-break for repeated drift events. */
+#overlay[data-event-type="DRIFT_PERSIST"] .card {
+  border: 1px solid rgba(255, 122, 105, 0.55);
+  background:
+    repeating-linear-gradient(
+      135deg,
+      rgba(255, 122, 105, 0.16) 0px,
+      rgba(255, 122, 105, 0.16) 10px,
+      rgba(0, 0, 0, 0) 10px,
+      rgba(0, 0, 0, 0) 20px
+    ),
+    linear-gradient(140deg, rgba(19, 22, 26, 0.92), rgba(10, 12, 15, 0.96));
+}
+
+#overlay[data-event-type="DRIFT_PERSIST"] .label {
+  color: #ff7a69;
+}
+
 #overlay[data-level="A"] .card {
   width: 320px;
   padding: 18px 20px;
