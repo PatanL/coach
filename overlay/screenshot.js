@@ -59,11 +59,21 @@ async function main() {
 
   await capture("drift_start.png", {
     ...common,
+    screenshot: true,
     event_type: "DRIFT_START"
   });
 
   await capture("drift_persist.png", {
     ...common,
+    screenshot: true,
+    event_type: "DRIFT_PERSIST",
+    headline: "Interrupt the loop."
+  });
+
+  // Explicit pattern-break render (same event type, separate golden file).
+  await capture("drift_persist_pattern_break.png", {
+    ...common,
+    screenshot: true,
     event_type: "DRIFT_PERSIST",
     headline: "Interrupt the loop."
   });

@@ -110,6 +110,22 @@ html, body {
   margin-bottom: 8px;
 }
 
+.pattern-break {
+  display: inline-flex;
+  align-self: flex-start;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  font-weight: 800;
+  padding: 6px 10px;
+  border-radius: 999px;
+  margin-bottom: 10px;
+  color: rgba(18, 10, 12, 0.92);
+  background: linear-gradient(90deg, rgba(255, 206, 61, 0.98), rgba(255, 73, 167, 0.94));
+  box-shadow:
+    0 10px 28px rgba(0, 0, 0, 0.35),
+    0 0 0 2px rgba(255, 206, 61, 0.2);
+}
+
 .human-line {
   font-size: 16px;
   line-height: 1.4;
@@ -193,6 +209,16 @@ button.primary:hover {
   background: #ff7a69;
 }
 
+/* Deterministic focus ring (helps keyboard recovery flows + stable screenshots). */
+button:focus-visible {
+  outline: 2px solid rgba(255, 206, 61, 0.85);
+  outline-offset: 2px;
+}
+
+#overlay[data-event-type="DRIFT_PERSIST"] button:focus-visible {
+  outline-color: rgba(255, 73, 167, 0.9);
+}
+
 .snooze {
   margin-bottom: 12px;
 }
@@ -265,4 +291,11 @@ button.primary:hover {
 #overlay[data-event-type="DRIFT_PERSIST"] .label {
   color: #ff49a7;
   text-shadow: 0 0 10px rgba(255, 73, 167, 0.35);
+}
+
+/* Deterministic screenshots: freeze motion/hover effects. */
+#overlay[data-screenshot="1"],
+#overlay[data-screenshot="1"] * {
+  animation: none !important;
+  transition: none !important;
 }

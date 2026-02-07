@@ -3,6 +3,7 @@ const eventLabel = document.getElementById("eventLabel");
 const blockName = document.getElementById("blockName");
 const headline = document.getElementById("headline");
 const humanLine = document.getElementById("humanLine");
+const patternBreak = document.getElementById("patternBreak");
 const diagnosis = document.getElementById("diagnosis");
 const nextAction = document.getElementById("nextAction");
 const snooze = document.getElementById("snoozeReason");
@@ -38,12 +39,16 @@ function updateEventLabel(payload) {
   const eventType = String(raw).toUpperCase();
   overlay.dataset.eventType = eventType;
 
+  // Reset pattern-break banner each render.
+  patternBreak.classList.add("hidden");
+
   if (!eventType) {
     setText(eventLabel, "DRIFT");
     return;
   }
   if (eventType === "DRIFT_PERSIST") {
     setText(eventLabel, "DRIFT — PERSIST");
+    patternBreak.classList.remove("hidden");
     return;
   }
   if (eventType.startsWith("DRIFT")) {
@@ -66,6 +71,10 @@ function showOverlay(payload) {
   overlay.classList.remove("hidden");
   resetSnooze();
   resetAlignInput();
+
+  // When generating screenshots, disable animations/transitions so output is deterministic.
+  overlay.dataset.screenshot = payload?.screenshot ? "1" : "";
+
   updateEventLabel(payload);
   updatePrimaryLabel(payload);
 
@@ -107,6 +116,16 @@ function showOverlay(payload) {
   overlay.dataset.level = payload.level || "B";
   currentPayload = payload;
   shownAt = Date.now();
+
+  // Recovery UX: on persistent drift, nudge the user toward an explicit recovery action.
+  // Also prevents the "global Enter" handler from accidentally marking back_on_track immediately.
+  if (overlay.dataset.eventType === "DRIFT_PERSIST" && overlay.dataset.mode !== "align") {
+    try {
+      recoverBtn?.focus?.({ preventScroll: true });
+    } catch {
+      recoverBtn?.focus?.();
+    }
+  }
 }
 
 function sendAction(action) {
