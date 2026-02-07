@@ -3,6 +3,7 @@ const blockName = document.getElementById("blockName");
 const headline = document.getElementById("headline");
 const humanLine = document.getElementById("humanLine");
 const label = document.querySelector(".label");
+const patternBreakBanner = document.getElementById("patternBreakBanner");
 const diagnosis = document.getElementById("diagnosis");
 const nextAction = document.getElementById("nextAction");
 const snooze = document.getElementById("snoozeReason");
@@ -43,10 +44,18 @@ function updatePatternBreak(payload) {
   backBtn.classList.add("primary");
   recoverBtn.classList.remove("primary");
 
-  // Pattern-break: on DRIFT_PERSIST, emphasize taking a short recovery step.
+  if (patternBreakBanner) {
+    patternBreakBanner.classList.add("hidden");
+  }
+
+  // Pattern-break: on DRIFT_PERSIST, force a noticeable visual + action hierarchy shift.
   if (eventType === "DRIFT_PERSIST") {
     backBtn.classList.remove("primary");
     recoverBtn.classList.add("primary");
+
+    if (patternBreakBanner) {
+      patternBreakBanner.classList.remove("hidden");
+    }
   }
 }
 

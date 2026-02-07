@@ -55,6 +55,23 @@ html, body {
   display: none;
 }
 
+.pattern-break-banner {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  font-size: 13px;
+  line-height: 1.25;
+  letter-spacing: 0.02em;
+  background: rgba(255, 122, 105, 0.14);
+  border: 1px solid rgba(255, 122, 105, 0.35);
+  color: rgba(246, 244, 239, 0.92);
+}
+
+#overlay[data-event-type="DRIFT_PERSIST"] .pattern-break-banner {
+  background: rgba(255, 122, 105, 0.18);
+  border-color: rgba(255, 122, 105, 0.5);
+}
+
 .card {
   width: 560px;
   padding: 28px 30px;
