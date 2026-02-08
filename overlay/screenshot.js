@@ -34,6 +34,15 @@ async function main() {
 
   await win.loadFile(htmlPath);
 
+  // Make screenshots deterministic: disable CSS animations/transitions in the renderer.
+  await win.webContents.executeJavaScript(`
+    (function () {
+      const overlay = document.getElementById('overlay');
+      if (overlay) overlay.dataset.screenshot = 'true';
+      document.documentElement.dataset.screenshot = 'true';
+    })();
+  `);
+
   async function capture(name, payload) {
     // Give the DOM a moment to settle, then render the payload.
     await new Promise((r) => setTimeout(r, 50));
