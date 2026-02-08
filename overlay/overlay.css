@@ -16,6 +16,13 @@ html, body {
   background: rgba(6, 8, 10, 0.45);
 }
 
+/* Screenshot runner: disable animations/transitions for deterministic pixel output. */
+#overlay[data-screenshot="true"],
+#overlay[data-screenshot="true"] * {
+  animation: none !important;
+  transition: none !important;
+}
+
 .hidden {
   display: none;
 }
@@ -39,15 +46,6 @@ html, body {
 
 #overlay[data-event-type="DRIFT_PERSIST"] .label {
   color: #ffb24a;
-}
-
-@keyframes driftPersistPulse {
-  0% { transform: translateX(0); }
-  18% { transform: translateX(-6px); }
-  36% { transform: translateX(6px); }
-  54% { transform: translateX(-4px); }
-  72% { transform: translateX(4px); }
-  100% { transform: translateX(0); }
 }
 
 #overlay[data-level="A"] .card {
@@ -222,6 +220,13 @@ button.primary:hover {
   justify-content: space-between;
   font-size: 11px;
   color: rgba(246, 244, 239, 0.5);
+}
+
+/* Deterministic screenshots: freeze animations/transitions to avoid nondeterministic frames. */
+#overlay[data-screenshot="1"],
+#overlay[data-screenshot="1"] * {
+  animation: none !important;
+  transition: none !important;
 }
 
 /* Visual pattern-break for persistent drift: subtle but unmistakable */

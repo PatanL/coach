@@ -1,4 +1,15 @@
 const overlay = document.getElementById("overlay");
+
+// Deterministic screenshot mode: disable animations/transitions when overlay.html is loaded
+// with ?screenshot=1 (used by `npm --prefix overlay run screenshot`).
+try {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get("screenshot") === "1") {
+    overlay.dataset.screenshot = "1";
+  }
+} catch {
+  // Ignore (e.g. older environments without URLSearchParams)
+}
 const eventLabel = document.getElementById("eventLabel");
 const blockName = document.getElementById("blockName");
 const headline = document.getElementById("headline");
@@ -66,6 +77,14 @@ function showOverlay(payload) {
   overlay.classList.remove("hidden");
   resetSnooze();
   resetAlignInput();
+
+  // Deterministic screenshots: allow the screenshot runner to disable animations/transitions.
+  // Keep the dataset value consistent with the CSS selector (#overlay[data-screenshot="1"]).
+  // Also, don't delete an existing screenshot flag that may have been set by ?screenshot=1.
+  if (payload?.screenshot) {
+    overlay.dataset.screenshot = "1";
+  }
+
   updateEventLabel(payload);
   updatePrimaryLabel(payload);
 
