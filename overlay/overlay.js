@@ -160,7 +160,14 @@ window.overlayAPI.onPause(() => {
   sendAction({ action: "pause_15" });
 });
 
+function isOverlayActive() {
+  return !overlay.classList.contains("hidden");
+}
+
 window.addEventListener("keydown", (event) => {
+  // Avoid accidental actions when the overlay isn't actually visible.
+  if (!isOverlayActive()) return;
+
   // Don't treat Enter as "Back on track" while the user is typing or interacting with a control.
   if (event.key === "Enter") {
     const ignoreEnter = window.overlayUtils?.shouldIgnoreGlobalEnter?.(event.target);
