@@ -259,6 +259,22 @@ button.primary:hover {
     linear-gradient(140deg, rgba(19, 22, 26, 0.92), rgba(10, 12, 15, 0.96));
 }
 
+/* Deterministic screenshots: disable animations/transitions during capture runs. */
+#overlay[data-screenshot="1"] *,
+#overlay[data-screenshot="1"] .card {
+  animation: none !important;
+  transition: none !important;
+}
+
+/* Actionable pattern-break: make the recovery action visually pop on DRIFT_PERSIST. */
+#overlay[data-event-type="DRIFT_PERSIST"] #recoverBtn.primary {
+  background: linear-gradient(135deg, rgba(255, 206, 61, 0.95), rgba(255, 73, 167, 0.85));
+  color: rgba(20, 14, 11, 0.98);
+  box-shadow:
+    0 10px 26px rgba(0, 0, 0, 0.45),
+    0 0 0 3px rgba(255, 206, 61, 0.18);
+}
+
 #overlay[data-event-type="DRIFT_PERSIST"] .label {
   color: #ff49a7;
   text-shadow: 0 0 10px rgba(255, 73, 167, 0.35);

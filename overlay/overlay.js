@@ -68,6 +68,11 @@ function showOverlay(payload) {
   overlay.classList.remove("hidden");
   resetSnooze();
   resetAlignInput();
+
+  // Screenshot mode is used by the deterministic screenshot runner.
+  // It disables animations so captures are stable across runs.
+  overlay.dataset.screenshot = payload?.screenshot ? "1" : "";
+
   updateEventLabel(payload);
   updatePrimaryLabel(payload);
 
