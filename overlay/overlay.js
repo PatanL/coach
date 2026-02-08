@@ -178,8 +178,15 @@ alignText.addEventListener("keydown", (event) => {
   }
 });
 
-snoozeBtn.addEventListener("click", () => {
+function openSnooze() {
   snooze.classList.remove("hidden");
+  // Move focus into the snooze panel so Enter doesn't accidentally trigger the global primary action.
+  const firstReason = snooze.querySelector("button[data-reason]");
+  firstReason?.focus?.({ preventScroll: true });
+}
+
+snoozeBtn.addEventListener("click", () => {
+  openSnooze();
 });
 
 snooze.addEventListener("click", (event) => {
@@ -207,6 +214,6 @@ window.addEventListener("keydown", (event) => {
     }
   }
   if (event.key === "Escape") {
-    snooze.classList.remove("hidden");
+    openSnooze();
   }
 });
