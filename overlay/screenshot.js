@@ -34,6 +34,16 @@ async function main() {
 
   await win.loadFile(htmlPath);
 
+  // Make screenshots deterministic: disable animations/transitions that can cause frame-to-frame variance.
+  // (e.g., DRIFT_PERSIST shake pulse)
+  await win.webContents.insertCSS(`
+    *, *::before, *::after {
+      animation: none !important;
+      transition: none !important;
+      caret-color: transparent !important;
+    }
+  `);
+
   async function capture(name, payload) {
     // Give the DOM a moment to settle, then render the payload.
     await new Promise((r) => setTimeout(r, 50));
