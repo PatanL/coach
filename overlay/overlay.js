@@ -12,6 +12,8 @@ const alignInput = document.getElementById("alignInput");
 const alignText = document.getElementById("alignText");
 const alignSubmit = document.getElementById("alignSubmit");
 
+const enterHint = document.getElementById("enterHint");
+
 const backBtn = document.getElementById("backBtn");
 const stuckBtn = document.getElementById("stuckBtn");
 const recoverBtn = document.getElementById("recoverBtn");
@@ -68,6 +70,19 @@ function showOverlay(payload) {
   resetAlignInput();
   updateEventLabel(payload);
   updatePrimaryLabel(payload);
+
+  // DRIFT_PERSIST is the "pattern-break" moment: lean into recovery.
+  // Put focus on Recover schedule so Enter activates recovery (and avoids accidental "Back on track").
+  const eventType = String(overlay.dataset.eventType || "").toUpperCase();
+  const isDriftPersist = eventType === "DRIFT_PERSIST";
+  recoverBtn.classList.toggle("recommended", isDriftPersist);
+  if (enterHint) {
+    enterHint.textContent = isDriftPersist ? "Enter: Recover schedule" : "Enter: Back on track";
+  }
+  if (isDriftPersist) {
+    // Ensure the DOM is painted before focusing, so the focus ring appears reliably.
+    setTimeout(() => recoverBtn?.focus?.(), 0);
+  }
 
   if (payload.choices && Array.isArray(payload.choices)) {
     overlay.dataset.mode = "align";

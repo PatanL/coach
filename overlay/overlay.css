@@ -185,6 +185,21 @@ button.primary {
   font-weight: 600;
 }
 
+button.recommended {
+  border: 1px solid rgba(255, 206, 61, 0.6);
+  background: rgba(255, 206, 61, 0.14);
+  box-shadow: 0 0 0 3px rgba(255, 206, 61, 0.12);
+}
+
+button:focus-visible {
+  outline: 2px solid rgba(246, 244, 239, 0.35);
+  outline-offset: 2px;
+}
+
+button.recommended:focus-visible {
+  outline-color: rgba(255, 206, 61, 0.95);
+}
+
 button:hover {
   background: rgba(255, 255, 255, 0.16);
 }
