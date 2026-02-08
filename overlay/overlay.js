@@ -72,9 +72,15 @@ function showOverlay(payload) {
   updatePrimaryLabel(payload);
 
   // DRIFT_PERSIST is the "pattern-break" moment: lean into recovery.
-  // Put focus on Recover schedule so Enter activates recovery (and avoids accidental "Back on track").
+  // Make Recover schedule the primary action and put focus there so Enter activates recovery.
+  // (This avoids accidental "Back on track" clicks when the user is already drifting.)
   const eventType = String(overlay.dataset.eventType || "").toUpperCase();
   const isDriftPersist = eventType === "DRIFT_PERSIST";
+
+  // Swap primary action styling for this case.
+  backBtn.classList.toggle("primary", !isDriftPersist);
+  recoverBtn.classList.toggle("primary", isDriftPersist);
+
   recoverBtn.classList.toggle("recommended", isDriftPersist);
   if (enterHint) {
     enterHint.textContent = isDriftPersist ? "Enter: Recover schedule" : "Enter: Back on track";
