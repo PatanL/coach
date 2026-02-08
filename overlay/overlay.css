@@ -16,6 +16,13 @@ html, body {
   background: rgba(6, 8, 10, 0.45);
 }
 
+/* Deterministic screenshots: freeze animations/transitions when dataset is set by screenshot.js */
+#overlay[data-screenshot="true"] *,
+#overlay[data-screenshot="true"] {
+  animation: none !important;
+  transition: none !important;
+}
+
 .hidden {
   display: none;
 }
