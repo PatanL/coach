@@ -5,9 +5,25 @@ const { isTextInputTarget, isInteractiveTarget, shouldIgnoreGlobalEnter } = requ
 
 test("isTextInputTarget: recognizes common typing targets", () => {
   assert.equal(isTextInputTarget({ tagName: "INPUT" }), true);
+  assert.equal(isTextInputTarget({ tagName: "INPUT", type: "email" }), true);
+  assert.equal(isTextInputTarget({ tagName: "INPUT", type: "number" }), true);
   assert.equal(isTextInputTarget({ tagName: "textarea" }), true);
   assert.equal(isTextInputTarget({ tagName: "Select" }), true);
   assert.equal(isTextInputTarget({ tagName: "DIV", isContentEditable: true }), true);
+  assert.equal(isTextInputTarget({ tagName: "DIV", role: "textbox" }), true);
+  assert.equal(
+    isTextInputTarget({
+      tagName: "DIV",
+      getAttribute: (name) => (name === "role" ? "textbox" : null)
+    }),
+    true
+  );
+});
+
+test("isTextInputTarget: ignores non-typing input types", () => {
+  assert.equal(isTextInputTarget({ tagName: "INPUT", type: "checkbox" }), false);
+  assert.equal(isTextInputTarget({ tagName: "INPUT", type: "button" }), false);
+  assert.equal(isTextInputTarget({ tagName: "INPUT", type: "submit" }), false);
 });
 
 test("isTextInputTarget: ignores non-input targets", () => {
