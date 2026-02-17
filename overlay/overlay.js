@@ -11,6 +11,7 @@ const choiceButtons = document.getElementById("choiceButtons");
 const alignInput = document.getElementById("alignInput");
 const alignText = document.getElementById("alignText");
 const alignSubmit = document.getElementById("alignSubmit");
+const enterHint = document.getElementById("enterHint");
 
 const backBtn = document.getElementById("backBtn");
 const stuckBtn = document.getElementById("stuckBtn");
@@ -53,6 +54,26 @@ function updateEventLabel(payload) {
   setText(eventLabel, eventType.replaceAll("_", " "));
 }
 
+function updateEnterHint() {
+  const action = window.overlayUtils?.getGlobalEnterAction?.(overlay.dataset.eventType) || "back_on_track";
+  if (action === "recover") {
+    setText(enterHint, "Enter: Recover schedule");
+  } else {
+    setText(enterHint, "Enter: Back on track");
+  }
+}
+
+function updatePrimaryActionStyling() {
+  const action = window.overlayUtils?.getGlobalEnterAction?.(overlay.dataset.eventType) || "back_on_track";
+  if (action === "recover") {
+    backBtn.classList.remove("primary");
+    recoverBtn.classList.add("primary");
+  } else {
+    recoverBtn.classList.remove("primary");
+    backBtn.classList.add("primary");
+  }
+}
+
 function resetSnooze() {
   snooze.classList.add("hidden");
 }
@@ -62,12 +83,27 @@ function resetAlignInput() {
   alignInput.classList.add("hidden");
 }
 
+function focusPreferredControl() {
+  const mode = overlay.dataset.mode || "";
+  if (mode === "align" && !alignInput.classList.contains("hidden")) {
+    // If we're asking for alignment input, put the cursor there immediately.
+    alignText.focus({ preventScroll: true });
+    return;
+  }
+
+  const action = window.overlayUtils?.getGlobalEnterAction?.(overlay.dataset.eventType) || "back_on_track";
+  const btn = action === "recover" ? recoverBtn : backBtn;
+  btn?.focus?.({ preventScroll: true });
+}
+
 function showOverlay(payload) {
   overlay.classList.remove("hidden");
   resetSnooze();
   resetAlignInput();
   updateEventLabel(payload);
   updatePrimaryLabel(payload);
+  updatePrimaryActionStyling();
+  updateEnterHint();
 
   if (payload.choices && Array.isArray(payload.choices)) {
     overlay.dataset.mode = "align";
@@ -105,6 +141,7 @@ function showOverlay(payload) {
   }
 
   overlay.dataset.level = payload.level || "B";
+  focusPreferredControl();
   currentPayload = payload;
   shownAt = Date.now();
 }
@@ -141,8 +178,15 @@ alignText.addEventListener("keydown", (event) => {
   }
 });
 
-snoozeBtn.addEventListener("click", () => {
+function openSnooze() {
   snooze.classList.remove("hidden");
+  // Move focus into the snooze panel so Enter doesn't accidentally trigger the global primary action.
+  const firstReason = snooze.querySelector("button[data-reason]");
+  firstReason?.focus?.({ preventScroll: true });
+}
+
+snoozeBtn.addEventListener("click", () => {
+  openSnooze();
 });
 
 snooze.addEventListener("click", (event) => {
@@ -161,14 +205,15 @@ window.overlayAPI.onPause(() => {
 });
 
 window.addEventListener("keydown", (event) => {
-  // Don't treat Enter as "Back on track" while the user is typing or interacting with a control.
+  // Don't treat Enter as a global overlay action while the user is typing or interacting with a control.
   if (event.key === "Enter") {
     const ignoreEnter = window.overlayUtils?.shouldIgnoreGlobalEnter?.(event.target);
     if (!ignoreEnter) {
-      sendAction({ action: "back_on_track" });
+      const action = window.overlayUtils?.getGlobalEnterAction?.(overlay.dataset.eventType) || "back_on_track";
+      sendAction({ action });
     }
   }
   if (event.key === "Escape") {
-    snooze.classList.remove("hidden");
+    openSnooze();
   }
 });
