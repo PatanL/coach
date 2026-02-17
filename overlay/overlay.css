@@ -30,25 +30,7 @@ html, body {
   backdrop-filter: blur(8px);
 }
 
-/* Visual pattern-break when drift persists: stronger edge + subtle shake pulse. */
-#overlay[data-event-type="DRIFT_PERSIST"] .card {
-  border-color: rgba(241, 108, 91, 0.55);
-  box-shadow: 0 22px 80px rgba(241, 108, 91, 0.12), 0 18px 60px rgba(0, 0, 0, 0.55);
-  animation: driftPersistPulse 900ms ease-in-out 1;
-}
 
-#overlay[data-event-type="DRIFT_PERSIST"] .label {
-  color: #ffb24a;
-}
-
-@keyframes driftPersistPulse {
-  0% { transform: translateX(0); }
-  18% { transform: translateX(-6px); }
-  36% { transform: translateX(6px); }
-  54% { transform: translateX(-4px); }
-  72% { transform: translateX(4px); }
-  100% { transform: translateX(0); }
-}
 
 #overlay[data-level="A"] .card {
   width: 320px;
@@ -185,6 +167,21 @@ button.primary {
   font-weight: 600;
 }
 
+button.recommended {
+  border: 1px solid rgba(255, 206, 61, 0.6);
+  background: rgba(255, 206, 61, 0.14);
+  box-shadow: 0 0 0 3px rgba(255, 206, 61, 0.12);
+}
+
+button:focus-visible {
+  outline: 2px solid rgba(246, 244, 239, 0.35);
+  outline-offset: 2px;
+}
+
+button.recommended:focus-visible {
+  outline-color: rgba(255, 206, 61, 0.95);
+}
+
 button:hover {
   background: rgba(255, 255, 255, 0.16);
 }
@@ -260,6 +257,22 @@ button.primary:hover {
       rgba(19, 22, 26, 0.92) 18px
     ),
     linear-gradient(140deg, rgba(19, 22, 26, 0.92), rgba(10, 12, 15, 0.96));
+}
+
+/* Deterministic screenshots: disable animations/transitions during capture runs. */
+#overlay[data-screenshot="1"] *,
+#overlay[data-screenshot="1"] .card {
+  animation: none !important;
+  transition: none !important;
+}
+
+/* Actionable pattern-break: make the recovery action visually pop on DRIFT_PERSIST. */
+#overlay[data-event-type="DRIFT_PERSIST"] #recoverBtn.primary {
+  background: linear-gradient(135deg, rgba(255, 206, 61, 0.95), rgba(255, 73, 167, 0.85));
+  color: rgba(20, 14, 11, 0.98);
+  box-shadow:
+    0 10px 26px rgba(0, 0, 0, 0.45),
+    0 0 0 3px rgba(255, 206, 61, 0.18);
 }
 
 #overlay[data-event-type="DRIFT_PERSIST"] .label {
