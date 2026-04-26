@@ -11,6 +11,7 @@ const choiceButtons = document.getElementById("choiceButtons");
 const alignInput = document.getElementById("alignInput");
 const alignText = document.getElementById("alignText");
 const alignSubmit = document.getElementById("alignSubmit");
+const enterHint = document.getElementById("enterHint");
 
 const backBtn = document.getElementById("backBtn");
 const stuckBtn = document.getElementById("stuckBtn");
@@ -53,6 +54,23 @@ function updateEventLabel(payload) {
   setText(eventLabel, eventType.replaceAll("_", " "));
 }
 
+function updatePrimaryAction(payload) {
+  const raw = payload?.source_event_type || payload?.event_type || payload?.type || "";
+  const eventType = String(raw).toUpperCase();
+
+  // For persistent drift, make the recovery path visually primary (Option B actionable overlay).
+  if (eventType === "DRIFT_PERSIST") {
+    recoverBtn.classList.add("primary");
+    backBtn.classList.remove("primary");
+    if (enterHint) setText(enterHint, "Enter: Recover schedule");
+    return;
+  }
+
+  recoverBtn.classList.remove("primary");
+  backBtn.classList.add("primary");
+  if (enterHint) setText(enterHint, "Enter: Back on track");
+}
+
 function resetSnooze() {
   snooze.classList.add("hidden");
 }
@@ -68,6 +86,7 @@ function showOverlay(payload) {
   resetAlignInput();
   updateEventLabel(payload);
   updatePrimaryLabel(payload);
+  updatePrimaryAction(payload);
 
   if (payload.choices && Array.isArray(payload.choices)) {
     overlay.dataset.mode = "align";
@@ -165,7 +184,12 @@ window.addEventListener("keydown", (event) => {
   if (event.key === "Enter") {
     const ignoreEnter = window.overlayUtils?.shouldIgnoreGlobalEnter?.(event.target);
     if (!ignoreEnter) {
-      sendAction({ action: "back_on_track" });
+      const eventType = String(overlay?.dataset?.eventType || "").toUpperCase();
+      if (eventType === "DRIFT_PERSIST") {
+        sendAction({ action: "recover" });
+      } else {
+        sendAction({ action: "back_on_track" });
+      }
     }
   }
   if (event.key === "Escape") {
