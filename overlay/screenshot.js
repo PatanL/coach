@@ -61,6 +61,9 @@ async function main() {
 
   await win.loadFile(htmlPath);
 
+  // Make screenshots deterministic by disabling animations/transitions.
+  await win.webContents.executeJavaScript('document.documentElement.dataset.screenshot = "1";');
+
   async function capture(name, payload) {
     // Give the DOM a moment to settle, then render the payload.
     await new Promise((r) => setTimeout(r, 50));
