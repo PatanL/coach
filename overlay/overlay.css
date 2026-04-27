@@ -273,3 +273,10 @@ button.primary:hover {
   color: #ff49a7;
   text-shadow: 0 0 10px rgba(255, 73, 167, 0.35);
 }
+
+@media (prefers-reduced-motion: reduce) {
+  /* Respect reduced-motion preferences: keep the pattern-break styling but remove pulse animation. */
+  #overlay[data-event-type="DRIFT_PERSIST"] .card {
+    animation: none !important;
+  }
+}
