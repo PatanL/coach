@@ -7,6 +7,15 @@ html, body {
   height: 100%;
 }
 
+/* Deterministic rendering for screenshot generation.
+   We disable animations/transitions so captures don't depend on timing. */
+html.screenshot-mode *,
+html.screenshot-mode *::before,
+html.screenshot-mode *::after {
+  animation: none !important;
+  transition: none !important;
+}
+
 #overlay {
   width: 100vw;
   height: 100vh;

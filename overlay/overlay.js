@@ -63,6 +63,12 @@ function resetAlignInput() {
 }
 
 function showOverlay(payload) {
+  // Deterministic render mode for screenshot generation.
+  // When cmd_id === "screenshot", we disable animations/transitions via CSS so
+  // captures don't depend on timing.
+  const screenshotMode = payload?.cmd_id === "screenshot";
+  document.documentElement.classList.toggle("screenshot-mode", screenshotMode);
+
   overlay.classList.remove("hidden");
   resetSnooze();
   resetAlignInput();
