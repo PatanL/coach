@@ -194,6 +194,7 @@ window.addEventListener("keydown", (event) => {
     }
   }
   if (event.key === "Escape") {
-    snooze.classList.remove("hidden");
+    // Escape toggles the snooze reason panel (pattern: show/hide without forcing it open).
+    snooze.classList.toggle("hidden");
   }
 });
