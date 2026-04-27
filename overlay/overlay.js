@@ -177,6 +177,9 @@ window.addEventListener("keydown", (event) => {
     }
   }
   if (event.key === "Escape") {
-    snooze.classList.remove("hidden");
+    const ignoreEscape = window.overlayUtils?.shouldIgnoreGlobalEscape?.(event.target);
+    if (!ignoreEscape) {
+      snooze.classList.remove("hidden");
+    }
   }
 });
