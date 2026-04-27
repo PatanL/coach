@@ -30,18 +30,14 @@ html, body {
   backdrop-filter: blur(8px);
 }
 
-/* Visual pattern-break when drift persists: stronger edge + subtle shake pulse. */
-#overlay[data-event-type="DRIFT_PERSIST"] .card {
-  border-color: rgba(241, 108, 91, 0.55);
-  box-shadow: 0 22px 80px rgba(241, 108, 91, 0.12), 0 18px 60px rgba(0, 0, 0, 0.55);
-  animation: driftPersistPulse 900ms ease-in-out 1;
-}
+/* Visual pattern-break when drift persists: subtle but unmistakable.
 
-#overlay[data-event-type="DRIFT_PERSIST"] .label {
-  color: #ffb24a;
-}
-
-@keyframes driftPersistPulse {
+   Note: keep the keyframes names distinct.
+   We intentionally do both:
+   - driftPersistShake: immediate pattern-break (horizontal shake)
+   - driftPersistPulse: follow-up halo pulse
+*/
+@keyframes driftPersistShake {
   0% { transform: translateX(0); }
   18% { transform: translateX(-6px); }
   36% { transform: translateX(6px); }
@@ -246,7 +242,9 @@ button.primary:hover {
 }
 
 #overlay[data-event-type="DRIFT_PERSIST"] .card {
-  animation: driftPersistPulse 1.15s ease-in-out 0s 3;
+  animation:
+    driftPersistShake 900ms ease-in-out 0s 1,
+    driftPersistPulse 1.15s ease-in-out 0s 3;
   border: 2px solid rgba(255, 73, 167, 0.85);
   box-shadow:
     0 24px 70px rgba(0, 0, 0, 0.55),
@@ -260,6 +258,16 @@ button.primary:hover {
       rgba(19, 22, 26, 0.92) 18px
     ),
     linear-gradient(140deg, rgba(19, 22, 26, 0.92), rgba(10, 12, 15, 0.96));
+}
+
+/* Make the recovery action feel like the "default" next step on DRIFT_PERSIST. */
+#overlay[data-event-type="DRIFT_PERSIST"] #recoverBtn {
+  border-color: rgba(255, 206, 61, 0.55);
+  box-shadow: 0 0 0 1px rgba(255, 206, 61, 0.18), 0 10px 30px rgba(0, 0, 0, 0.25);
+}
+
+#overlay[data-event-type="DRIFT_PERSIST"] #recoverBtn:hover {
+  transform: translateY(-1px);
 }
 
 #overlay[data-event-type="DRIFT_PERSIST"] .label {
