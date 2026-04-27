@@ -70,11 +70,18 @@ async function main() {
     event_type: "DRIFT_START"
   });
 
-  await capture("drift_persist.png", {
+  const driftPersistPayload = {
     ...common,
     event_type: "DRIFT_PERSIST",
     headline: "Interrupt the loop."
-  });
+  };
+
+  // DRIFT_PERSIST is the intentional visual pattern-break state.
+  // Keep a dedicated filename for reviewers + docs.
+  await capture("drift_persist_pattern_break.png", driftPersistPayload);
+
+  // Back-compat: keep the original name too.
+  await capture("drift_persist.png", driftPersistPayload);
 
   win.destroy();
   app.quit();
