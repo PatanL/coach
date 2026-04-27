@@ -2,6 +2,9 @@ const { app, BrowserWindow } = require("electron");
 const path = require("path");
 const fs = require("fs");
 
+// Deterministic screenshots across machines/monitors (avoid HiDPI DPR differences).
+app.commandLine.appendSwitch("force-device-scale-factor", "1");
+
 const OUT_DIR = path.join(__dirname, "screenshots");
 
 function ensureDir(dir) {
