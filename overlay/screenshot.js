@@ -47,6 +47,7 @@ async function main() {
   }
 
   const common = {
+    __screenshot: true,
     level: "B",
     block_name: "Deep Work",
     headline: "Reset.",

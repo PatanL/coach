@@ -97,6 +97,11 @@ function showOverlay(payload) {
   overlay.classList.remove("hidden");
   resetSnooze();
   resetAlignInput();
+
+  // Screenshot mode (used by `npm --prefix overlay run screenshot`) should be deterministic.
+  // We allow the screenshot harness to request animations be disabled.
+  overlay.dataset.screenshot = payload?.__screenshot ? "true" : "";
+
   updateEventLabel(payload);
   updatePrimaryLabel(payload);
   updatePrimaryActionStyling();
