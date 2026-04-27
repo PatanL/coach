@@ -58,6 +58,7 @@ test("shouldTriggerBackOnTrackEnter: only unmodified Enter on non-interactive ta
   assert.equal(shouldTriggerBackOnTrackEnter({ key: "Enter", target: { tagName: "DIV" }, metaKey: true }), false);
   assert.equal(shouldTriggerBackOnTrackEnter({ key: "Enter", target: { tagName: "DIV" }, ctrlKey: true }), false);
   assert.equal(shouldTriggerBackOnTrackEnter({ key: "Enter", target: { tagName: "DIV" }, altKey: true }), false);
+  assert.equal(shouldTriggerBackOnTrackEnter({ key: "Enter", target: { tagName: "DIV" }, shiftKey: true }), false);
   assert.equal(shouldTriggerBackOnTrackEnter({ key: "Enter", target: { tagName: "DIV" }, isComposing: true }), false);
   assert.equal(shouldTriggerBackOnTrackEnter({ key: "Escape", target: { tagName: "DIV" } }), false);
 });

@@ -45,7 +45,7 @@
   function shouldTriggerBackOnTrackEnter(event) {
     if (!event || event.key !== "Enter") return false;
     if (event.isComposing) return false;
-    if (event.metaKey || event.ctrlKey || event.altKey) return false;
+    if (event.metaKey || event.ctrlKey || event.altKey || event.shiftKey) return false;
     return !shouldIgnoreGlobalEnter(event.target);
   }
 
