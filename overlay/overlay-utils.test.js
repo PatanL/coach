@@ -34,6 +34,12 @@ test("shouldIgnoreGlobalEnter: typing or clicking should block global Enter acti
   assert.equal(shouldIgnoreGlobalEnter({ tagName: "DIV" }), false);
 });
 
+
+test("shouldIgnoreGlobalEnter: persistent drift disables global Enter hotkey", () => {
+  // Even if nothing is focused, persistent drift should require an explicit click.
+  assert.equal(shouldIgnoreGlobalEnter({ tagName: "DIV" }, "DRIFT_PERSIST"), true);
+  assert.equal(shouldIgnoreGlobalEnter({ tagName: "INPUT" }, "DRIFT_PERSIST"), true);
+});
 test("shouldIgnoreGlobalEnter: child of button/link should still block global Enter", () => {
   const button = { tagName: "BUTTON" };
   const spanInsideButton = {

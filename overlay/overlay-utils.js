@@ -35,7 +35,11 @@
     return target;
   }
 
-  function shouldIgnoreGlobalEnter(target) {
+  function shouldIgnoreGlobalEnter(target, eventType) {
+    // Safety: persistent drift is intentionally a higher-friction state.
+    // Disable the global Enter hotkey so the user must click a button (no accidental 'Back on track').
+    if (String(eventType || "").toUpperCase() === "DRIFT_PERSIST") return true;
+
     const t = findHotkeyRelevantTarget(target);
     return isTextInputTarget(t) || isInteractiveTarget(t);
   }
