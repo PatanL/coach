@@ -191,7 +191,8 @@ window.addEventListener("keydown", (event) => {
   if (event.key === "Enter") {
     const ignoreEnter = window.overlayUtils?.shouldIgnoreGlobalEnter?.(event.target);
     if (!ignoreEnter) {
-      sendAction({ action: "back_on_track" });
+      const action = window.overlayUtils?.getGlobalEnterAction?.(overlay?.dataset?.eventType) || "back_on_track";
+      sendAction({ action });
     }
   }
   if (event.key === "Escape") {
