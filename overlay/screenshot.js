@@ -102,6 +102,14 @@ async function main() {
     headline: "Interrupt the loop."
   });
 
+  await capture("drift_persist_align.png", {
+    ...common,
+    event_type: "DRIFT_PERSIST",
+    headline: "Interrupt the loop.",
+    question_id: "screenshot_q",
+    choices: ["Close it now", "One-minute reset", "I need to recover schedule"]
+  });
+
   win.destroy();
   app.quit();
 }

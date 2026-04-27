@@ -246,6 +246,11 @@ button.primary:hover {
   transition: none !important;
 }
 
+/* Avoid platform-specific focus rings in deterministic screenshots. */
+#overlay[data-screenshot="true"] :focus {
+  outline: none !important;
+}
+
 #overlay[data-event-type="DRIFT_PERSIST"] {
   background: rgba(10, 4, 10, 0.55);
 }

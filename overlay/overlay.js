@@ -120,6 +120,13 @@ function showOverlay(payload) {
     });
     choiceButtons.classList.remove("hidden");
     alignInput.classList.remove("hidden");
+
+    // In align mode, proactively focus the text input so Enter submits the user's answer
+    // (and doesn't accidentally trigger the global Enter action).
+    // Skip during deterministic screenshot renders to avoid focus rings in snapshots.
+    if (!payload?.screenshot) {
+      alignText.focus();
+    }
   } else {
     choiceButtons.classList.add("hidden");
     alignInput.classList.add("hidden");
