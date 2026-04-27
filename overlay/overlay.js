@@ -11,6 +11,7 @@ const choiceButtons = document.getElementById("choiceButtons");
 const alignInput = document.getElementById("alignInput");
 const alignText = document.getElementById("alignText");
 const alignSubmit = document.getElementById("alignSubmit");
+
 const enterHint = document.getElementById("enterHint");
 
 const backBtn = document.getElementById("backBtn");
@@ -39,6 +40,20 @@ function updateEventLabel(payload) {
   const eventType = String(raw).toUpperCase();
   overlay.dataset.eventType = eventType;
 
+  // UX: DRIFT_PERSIST should push a more actionable recovery path and reduce accidental "I'm fine" exits.
+  if (enterHint) {
+    enterHint.textContent = eventType === "DRIFT_PERSIST" ? "Enter: Recover schedule" : "Enter: Back on track";
+  }
+
+  // Swap primary emphasis on DRIFT_PERSIST (visual + motor pattern-break).
+  if (eventType === "DRIFT_PERSIST") {
+    backBtn.classList.remove("primary");
+    recoverBtn.classList.add("primary");
+  } else {
+    recoverBtn.classList.remove("primary");
+    backBtn.classList.add("primary");
+  }
+
   if (!eventType) {
     setText(eventLabel, "DRIFT");
     return;
@@ -54,25 +69,7 @@ function updateEventLabel(payload) {
   setText(eventLabel, eventType.replaceAll("_", " "));
 }
 
-function updateEnterHint() {
-  const action = window.overlayUtils?.getGlobalEnterAction?.(overlay.dataset.eventType) || "back_on_track";
-  if (action === "recover") {
-    setText(enterHint, "Enter: Recover schedule");
-  } else {
-    setText(enterHint, "Enter: Back on track");
-  }
-}
-
-function updatePrimaryActionStyling() {
-  const action = window.overlayUtils?.getGlobalEnterAction?.(overlay.dataset.eventType) || "back_on_track";
-  if (action === "recover") {
-    backBtn.classList.remove("primary");
-    recoverBtn.classList.add("primary");
-  } else {
-    recoverBtn.classList.remove("primary");
-    backBtn.classList.add("primary");
-  }
-}
+// (unused helper functions removed)
 
 function resetSnooze() {
   snooze.classList.add("hidden");
