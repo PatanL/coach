@@ -34,6 +34,11 @@ async function main() {
 
   await win.loadFile(htmlPath);
 
+  // Deterministic screenshots: disable animations/transitions via data-screenshot flag.
+  await win.webContents.executeJavaScript(
+    "document.getElementById('overlay')?.setAttribute('data-screenshot','1');"
+  );
+
   async function capture(name, payload) {
     // Give the DOM a moment to settle, then render the payload.
     await new Promise((r) => setTimeout(r, 50));
