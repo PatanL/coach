@@ -40,9 +40,19 @@
     return isTextInputTarget(t) || isInteractiveTarget(t);
   }
 
+  // Global Enter should be treated as a primary “Back on track” action *only* when it’s an
+  // unmodified keypress and focus isn’t on a control that should handle Enter itself.
+  function shouldTriggerBackOnTrackEnter(event) {
+    if (!event || event.key !== "Enter") return false;
+    if (event.isComposing) return false;
+    if (event.metaKey || event.ctrlKey || event.altKey || event.shiftKey) return false;
+    return !shouldIgnoreGlobalEnter(event.target);
+  }
+
   return {
     isTextInputTarget,
     isInteractiveTarget,
-    shouldIgnoreGlobalEnter
+    shouldIgnoreGlobalEnter,
+    shouldTriggerBackOnTrackEnter
   };
 });
