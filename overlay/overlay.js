@@ -65,6 +65,7 @@ function resetAlignInput() {
 
 function showOverlay(payload) {
   overlay.classList.remove("hidden");
+  overlay.dataset.screenshot = payload?.screenshot ? "true" : "";
   resetSnooze();
   resetAlignInput();
   updateEventLabel(payload);

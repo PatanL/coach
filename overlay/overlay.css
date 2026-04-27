@@ -241,6 +241,11 @@ button.primary:hover {
 }
 
 /* Visual pattern-break: DRIFT_PERSIST should feel unmistakably different. */
+#overlay[data-screenshot="true"] * {
+  animation: none !important;
+  transition: none !important;
+}
+
 #overlay[data-event-type="DRIFT_PERSIST"] {
   background: rgba(10, 4, 10, 0.55);
 }
