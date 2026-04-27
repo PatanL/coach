@@ -85,6 +85,26 @@ function resetAlignInput() {
   alignInput.classList.add("hidden");
 }
 
+function focusDefaultControl(payload) {
+  // Keep keyboard flow safe + predictable: focus the primary control.
+  // - If we're in align mode, focus the text input so typing is immediate.
+  // - Otherwise, focus the primary button so Enter activates that control (and bypasses the global Enter handler).
+  const eventType = getEventType(payload);
+  const isAlign = payload?.choices && Array.isArray(payload.choices);
+
+  const el = isAlign ? alignText : eventType === "DRIFT_PERSIST" ? recoverBtn : backBtn;
+  if (!el || typeof el.focus !== "function") return;
+
+  // Defer until after layout so focus-visible rings render consistently.
+  requestAnimationFrame(() => {
+    try {
+      el.focus({ preventScroll: true });
+    } catch {
+      el.focus();
+    }
+  });
+}
+
 function showOverlay(payload) {
   overlay.classList.remove("hidden");
   resetSnooze();
@@ -131,6 +151,8 @@ function showOverlay(payload) {
   overlay.dataset.level = payload.level || "B";
   currentPayload = payload;
   shownAt = Date.now();
+
+  focusDefaultControl(payload);
 }
 
 function sendAction(action) {
