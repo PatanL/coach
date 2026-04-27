@@ -107,6 +107,21 @@ function showOverlay(payload) {
   overlay.dataset.level = payload.level || "B";
   currentPayload = payload;
   shownAt = Date.now();
+
+  // Default focus helps prevent accidental global hotkeys (e.g. Enter) and guides the "next best" action.
+  // - If we're in align mode, put the cursor in the text box.
+  // - If DRIFT_PERSIST, bias toward recovery (pattern-break).
+  try {
+    if (payload.choices && Array.isArray(payload.choices)) {
+      alignText.focus({ preventScroll: true });
+    } else if (overlay.dataset.eventType === "DRIFT_PERSIST") {
+      recoverBtn.focus({ preventScroll: true });
+    } else {
+      backBtn.focus({ preventScroll: true });
+    }
+  } catch {
+    // Ignore focus errors (e.g. in older Electron or during screenshot render).
+  }
 }
 
 function sendAction(action) {
