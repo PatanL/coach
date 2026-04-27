@@ -105,6 +105,14 @@ function showOverlay(payload) {
   }
 
   overlay.dataset.level = payload.level || "B";
+
+  // Screenshot runs should be deterministic. Disable animations/transitions when invoked by overlay/screenshot.js.
+  if (payload?.cmd_id === "screenshot") {
+    overlay.dataset.screenshot = "1";
+  } else {
+    delete overlay.dataset.screenshot;
+  }
+
   currentPayload = payload;
   shownAt = Date.now();
 }
