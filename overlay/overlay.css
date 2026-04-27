@@ -240,6 +240,13 @@ button.primary:hover {
   }
 }
 
+/* Deterministic screenshot mode: disable motion/transition so captures don't vary by frame timing. */
+#overlay[data-screenshot="true"],
+#overlay[data-screenshot="true"] * {
+  animation: none !important;
+  transition: none !important;
+}
+
 /* Visual pattern-break: DRIFT_PERSIST should feel unmistakably different. */
 #overlay[data-event-type="DRIFT_PERSIST"] {
   background: rgba(10, 4, 10, 0.55);

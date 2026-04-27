@@ -64,6 +64,8 @@ function resetAlignInput() {
 
 function showOverlay(payload) {
   overlay.classList.remove("hidden");
+  // When rendering deterministic screenshots, disable animations/transitions via CSS.
+  overlay.dataset.screenshot = payload?.screenshot ? "true" : "";
   resetSnooze();
   resetAlignInput();
   updateEventLabel(payload);
