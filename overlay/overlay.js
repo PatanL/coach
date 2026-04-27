@@ -16,6 +16,7 @@ const backBtn = document.getElementById("backBtn");
 const stuckBtn = document.getElementById("stuckBtn");
 const recoverBtn = document.getElementById("recoverBtn");
 const snoozeBtn = document.getElementById("snoozeBtn");
+const enterHint = document.getElementById("enterHint");
 
 let shownAt = null;
 let currentPayload = null;
@@ -68,6 +69,25 @@ function showOverlay(payload) {
   resetAlignInput();
   updateEventLabel(payload);
   updatePrimaryLabel(payload);
+
+  // Default (non-persistent drift): Enter = Back on track.
+  overlay.dataset.primaryEnterAction = "back_on_track";
+  if (enterHint) enterHint.textContent = "Enter: Back on track";
+  backBtn.classList.add("primary");
+  recoverBtn.classList.remove("primary");
+
+  // DRIFT_PERSIST should be a pattern-break with a more actionable primary path.
+  if (overlay.dataset.eventType === "DRIFT_PERSIST") {
+    overlay.dataset.primaryEnterAction = "recover";
+    if (enterHint) enterHint.textContent = "Enter: Recover schedule";
+    backBtn.classList.remove("primary");
+    recoverBtn.classList.add("primary");
+
+    // Move focus to the primary recovery action to reduce friction.
+    // If we're in "align" mode, don't steal focus from the input/choices.
+    const isAlignMode = Boolean(payload?.choices && Array.isArray(payload.choices));
+    if (!isAlignMode) recoverBtn.focus();
+  }
 
   if (payload.choices && Array.isArray(payload.choices)) {
     overlay.dataset.mode = "align";
@@ -161,11 +181,12 @@ window.overlayAPI.onPause(() => {
 });
 
 window.addEventListener("keydown", (event) => {
-  // Don't treat Enter as "Back on track" while the user is typing or interacting with a control.
+  // Don't treat Enter as a global action while the user is typing or interacting with a control.
   if (event.key === "Enter") {
     const ignoreEnter = window.overlayUtils?.shouldIgnoreGlobalEnter?.(event.target);
     if (!ignoreEnter) {
-      sendAction({ action: "back_on_track" });
+      const action = overlay.dataset.primaryEnterAction || "back_on_track";
+      sendAction({ action });
     }
   }
   if (event.key === "Escape") {
