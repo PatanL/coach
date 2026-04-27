@@ -247,6 +247,13 @@ button.primary:hover {
   text-shadow: 0 0 10px rgba(255, 73, 167, 0.35);
 }
 
+/* Accessibility: respect reduced-motion preferences (still a visual pattern-break via color/texture). */
+@media (prefers-reduced-motion: reduce) {
+  #overlay[data-event-type="DRIFT_PERSIST"] .card {
+    animation: none;
+  }
+}
+
 /* Deterministic screenshots: kill animations/transitions when running overlay/screenshot.js. */
 #overlay[data-screenshot="1"],
 #overlay[data-screenshot="1"] * {
