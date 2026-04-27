@@ -44,12 +44,18 @@
     return String(value || "").toUpperCase();
   }
 
-  // Default global Enter action by event type.
-  // DRIFT_PERSIST is a pattern-break: Enter should encourage a concrete recovery step.
-  function primaryEnterAction(eventType) {
+  // Decide which global action (if any) Enter should trigger when focus isn't in a control.
+  // Keep this deterministic and unit-testable.
+  function selectGlobalEnterAction({ eventType, mode } = {}) {
+    if (mode === "align") return null;
     const t = normalizeEventType(eventType);
     if (t === "DRIFT_PERSIST") return "recover";
     return "back_on_track";
+  }
+
+  // Back-compat wrapper (older call sites only pass eventType).
+  function primaryEnterAction(eventType) {
+    return selectGlobalEnterAction({ eventType });
   }
 
   return {
@@ -57,6 +63,7 @@
     isInteractiveTarget,
     shouldIgnoreGlobalEnter,
     normalizeEventType,
+    selectGlobalEnterAction,
     primaryEnterAction
   };
 });

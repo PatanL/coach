@@ -6,6 +6,7 @@ const {
   isInteractiveTarget,
   shouldIgnoreGlobalEnter,
   normalizeEventType,
+  selectGlobalEnterAction,
   primaryEnterAction
 } = require("./overlay-utils");
 
@@ -57,6 +58,11 @@ test("normalizeEventType: uppercases and tolerates nullish", () => {
   assert.equal(normalizeEventType("drift_persist"), "DRIFT_PERSIST");
   assert.equal(normalizeEventType(""), "");
   assert.equal(normalizeEventType(null), "");
+});
+
+test("selectGlobalEnterAction: mode=align disables global Enter", () => {
+  assert.equal(selectGlobalEnterAction({ eventType: "DRIFT_PERSIST", mode: "align" }), null);
+  assert.equal(selectGlobalEnterAction({ eventType: "DRIFT_START", mode: "align" }), null);
 });
 
 test("primaryEnterAction: DRIFT_PERSIST -> recover; default -> back_on_track", () => {

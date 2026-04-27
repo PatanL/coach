@@ -71,8 +71,21 @@ function showOverlay(payload) {
   updateEventLabel(payload);
   updatePrimaryLabel(payload);
 
-  const primaryEnterAction = window.overlayUtils?.primaryEnterAction?.(overlay.dataset.eventType) || "back_on_track";
+  if (payload.choices && Array.isArray(payload.choices)) {
+    overlay.dataset.mode = "align";
+  } else {
+    overlay.dataset.mode = "";
+  }
+
+  const primaryEnterAction =
+    window.overlayUtils?.selectGlobalEnterAction?.({ eventType: overlay.dataset.eventType, mode: overlay.dataset.mode }) ||
+    window.overlayUtils?.primaryEnterAction?.(overlay.dataset.eventType) ||
+    "back_on_track";
   overlay.dataset.primaryEnterAction = primaryEnterAction;
+  if (overlay.dataset.mode === "align") {
+    // Align mode owns Enter (submit input). Don't allow a global Enter hotkey fallback.
+    overlay.dataset.primaryEnterAction = "";
+  }
 
   // Default (non-persistent drift): Back on track is primary.
   if (primaryEnterAction === "back_on_track") {
@@ -89,14 +102,13 @@ function showOverlay(payload) {
 
     // Move focus to the primary recovery action to reduce friction.
     // If we're in "align" mode, don't steal focus from the input/choices.
-    const isAlignMode = Boolean(payload?.choices && Array.isArray(payload.choices));
+    const isAlignMode = overlay.dataset.mode === "align";
     if (!isAlignMode) recoverBtn.focus();
   }
 
-  if (payload.choices && Array.isArray(payload.choices)) {
-    overlay.dataset.mode = "align";
-  } else {
-    overlay.dataset.mode = "";
+  // In align mode, the input owns Enter.
+  if (overlay.dataset.mode === "align") {
+    if (enterHint) enterHint.textContent = "Enter: Submit";
   }
   setText(blockName, payload.block_name || "");
   setText(headline, payload.headline || "Reset.");
@@ -196,8 +208,8 @@ window.addEventListener("keydown", (event) => {
   if (event.key === "Enter") {
     const ignoreEnter = window.overlayUtils?.shouldIgnoreGlobalEnter?.(event.target);
     if (!ignoreEnter) {
-      const action = overlay.dataset.primaryEnterAction || "back_on_track";
-      sendAction({ action });
+      const action = overlay.dataset.primaryEnterAction || "";
+      if (action) sendAction({ action });
     }
   }
   if (event.key === "Escape") {
