@@ -33,10 +33,14 @@ function updatePrimaryLabel(payload) {
   backBtn.textContent = "Back on track";
 }
 
-function updateEventLabel(payload) {
+function getEventType(payload) {
   // Prefer the originating event type when available (used for visual pattern-breaks like DRIFT_PERSIST).
   const raw = payload?.source_event_type || payload?.event_type || payload?.type || "";
-  const eventType = String(raw).toUpperCase();
+  return String(raw).toUpperCase();
+}
+
+function updateEventLabel(payload) {
+  const eventType = getEventType(payload);
   overlay.dataset.eventType = eventType;
 
   if (!eventType) {
@@ -55,20 +59,21 @@ function updateEventLabel(payload) {
 }
 
 function updatePrimaryAction(payload) {
-  const raw = payload?.source_event_type || payload?.event_type || payload?.type || "";
-  const eventType = String(raw).toUpperCase();
+  const eventType = getEventType(payload);
 
-  // For persistent drift, make the recovery path visually primary (Option B actionable overlay).
-  if (eventType === "DRIFT_PERSIST") {
-    recoverBtn.classList.add("primary");
-    backBtn.classList.remove("primary");
-    if (enterHint) setText(enterHint, "Enter: Recover schedule");
-    return;
-  }
-
-  recoverBtn.classList.remove("primary");
+  // Default: "Back on track" is the primary, low-friction action.
   backBtn.classList.add("primary");
+  recoverBtn.classList.remove("primary");
+  recoverBtn.textContent = "Recover schedule";
   if (enterHint) setText(enterHint, "Enter: Back on track");
+
+  // For persistent drift, prioritize an explicit recovery action (Option B actionable overlay).
+  if (eventType === "DRIFT_PERSIST") {
+    backBtn.classList.remove("primary");
+    recoverBtn.classList.add("primary");
+    recoverBtn.textContent = "Recover now";
+    if (enterHint) setText(enterHint, "Enter: Recover now");
+  }
 }
 
 function resetSnooze() {
@@ -180,11 +185,11 @@ window.overlayAPI.onPause(() => {
 });
 
 window.addEventListener("keydown", (event) => {
-  // Don't treat Enter as "Back on track" while the user is typing or interacting with a control.
+  // Don't treat Enter as a global action while the user is typing or interacting with a control.
   if (event.key === "Enter") {
     const ignoreEnter = window.overlayUtils?.shouldIgnoreGlobalEnter?.(event.target);
     if (!ignoreEnter) {
-      const eventType = String(overlay?.dataset?.eventType || "").toUpperCase();
+      const eventType = getEventType(currentPayload);
       if (eventType === "DRIFT_PERSIST") {
         sendAction({ action: "recover" });
       } else {
