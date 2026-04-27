@@ -40,9 +40,18 @@
     return isTextInputTarget(t) || isInteractiveTarget(t);
   }
 
+  // For global hotkeys, ignore modified keys (Ctrl/Cmd/Alt/Shift). This prevents
+  // accidental actions when the user is doing common shortcuts like Cmd+Enter or Shift+Enter.
+  function shouldIgnoreGlobalEnterEvent(event) {
+    if (!event) return false;
+    if (event.metaKey || event.ctrlKey || event.altKey || event.shiftKey) return true;
+    return shouldIgnoreGlobalEnter(event.target);
+  }
+
   return {
     isTextInputTarget,
     isInteractiveTarget,
-    shouldIgnoreGlobalEnter
+    shouldIgnoreGlobalEnter,
+    shouldIgnoreGlobalEnterEvent
   };
 });
