@@ -35,7 +35,11 @@
     return target;
   }
 
-  function shouldIgnoreGlobalEnter(target) {
+  function shouldIgnoreGlobalEnter(target, overlayMode) {
+    // In "align" mode, Enter should be reserved for submitting an answer (handled by the input)
+    // and should never trigger the overlay's global default action.
+    if (overlayMode === "align") return true;
+
     const t = findHotkeyRelevantTarget(target);
     return isTextInputTarget(t) || isInteractiveTarget(t);
   }

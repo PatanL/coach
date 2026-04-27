@@ -34,6 +34,11 @@ test("shouldIgnoreGlobalEnter: typing or clicking should block global Enter acti
   assert.equal(shouldIgnoreGlobalEnter({ tagName: "DIV" }), false);
 });
 
+test("shouldIgnoreGlobalEnter: align mode should always block global Enter", () => {
+  assert.equal(shouldIgnoreGlobalEnter({ tagName: "DIV" }, "align"), true);
+  assert.equal(shouldIgnoreGlobalEnter({ tagName: "INPUT" }, "align"), true);
+});
+
 test("shouldIgnoreGlobalEnter: child of button/link should still block global Enter", () => {
   const button = { tagName: "BUTTON" };
   const spanInsideButton = {

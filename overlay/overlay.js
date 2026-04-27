@@ -115,6 +115,7 @@ function showOverlay(payload) {
 
   if (payload.choices && Array.isArray(payload.choices)) {
     overlay.dataset.mode = "align";
+    if (enterHint) setText(enterHint, "Enter: Submit");
   } else {
     overlay.dataset.mode = "";
   }
@@ -209,7 +210,7 @@ window.overlayAPI.onPause(() => {
 window.addEventListener("keydown", (event) => {
   // Don't treat Enter as a global action while the user is typing or interacting with a control.
   if (event.key === "Enter") {
-    const ignoreEnter = window.overlayUtils?.shouldIgnoreGlobalEnter?.(event.target);
+    const ignoreEnter = window.overlayUtils?.shouldIgnoreGlobalEnter?.(event.target, overlay?.dataset?.mode);
     if (!ignoreEnter) {
       const eventType = getEventType(currentPayload);
       if (eventType === "DRIFT_PERSIST") {
