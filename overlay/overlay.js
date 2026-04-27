@@ -11,6 +11,7 @@ const choiceButtons = document.getElementById("choiceButtons");
 const alignInput = document.getElementById("alignInput");
 const alignText = document.getElementById("alignText");
 const alignSubmit = document.getElementById("alignSubmit");
+const enterHint = document.getElementById("enterHint");
 
 const backBtn = document.getElementById("backBtn");
 const stuckBtn = document.getElementById("stuckBtn");
@@ -107,6 +108,31 @@ function showOverlay(payload) {
   overlay.dataset.level = payload.level || "B";
   currentPayload = payload;
   shownAt = Date.now();
+
+  // Focus + hotkey hint:
+  // - For DRIFT_PERSIST, we want a strong pattern-break and a safer default than "Enter → Back on track".
+  // - For align mode, focus the text input so Enter submits the typed choice.
+  const eventType = String(overlay.dataset.eventType || "").toUpperCase();
+  const isAlignMode = overlay.dataset.mode === "align";
+
+  if (enterHint) {
+    if (isAlignMode) setText(enterHint, "Enter: Submit");
+    else if (eventType === "DRIFT_PERSIST") setText(enterHint, "Enter: Recover schedule");
+    else setText(enterHint, "Enter: Back on track");
+  }
+
+  // Defer focus until after the DOM updates are painted.
+  window.requestAnimationFrame(() => {
+    if (isAlignMode) {
+      alignText?.focus?.();
+      return;
+    }
+    if (eventType === "DRIFT_PERSIST") {
+      recoverBtn?.focus?.();
+      return;
+    }
+    backBtn?.focus?.();
+  });
 }
 
 function sendAction(action) {
