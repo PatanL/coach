@@ -2,6 +2,9 @@ const { app, BrowserWindow } = require("electron");
 const path = require("path");
 const fs = require("fs");
 
+// Deterministic screenshots across machines/monitors (avoid HiDPI DPR differences).
+app.commandLine.appendSwitch("force-device-scale-factor", "1");
+
 const OUT_DIR = path.join(__dirname, "screenshots");
 
 function ensureDir(dir) {
@@ -34,6 +37,14 @@ async function main() {
 
   await win.loadFile(htmlPath);
 
+  // Deterministic screenshots: disable animations/transitions so captures are stable across runs.
+  await win.webContents.insertCSS(`
+    *, *::before, *::after {
+      animation: none !important;
+      transition: none !important;
+    }
+  `);
+
   async function capture(name, payload) {
     // Give the DOM a moment to settle, then render the payload.
     await new Promise((r) => setTimeout(r, 50));
@@ -47,6 +58,7 @@ async function main() {
   }
 
   const common = {
+    screenshot: true,
     level: "B",
     block_name: "Deep Work",
     headline: "Reset.",
