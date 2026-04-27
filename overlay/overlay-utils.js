@@ -40,9 +40,23 @@
     return isTextInputTarget(t) || isInteractiveTarget(t);
   }
 
+  function normalizeEventType(value) {
+    return String(value || "").toUpperCase();
+  }
+
+  // Default global Enter action by event type.
+  // DRIFT_PERSIST is a pattern-break: Enter should encourage a concrete recovery step.
+  function primaryEnterAction(eventType) {
+    const t = normalizeEventType(eventType);
+    if (t === "DRIFT_PERSIST") return "recover";
+    return "back_on_track";
+  }
+
   return {
     isTextInputTarget,
     isInteractiveTarget,
-    shouldIgnoreGlobalEnter
+    shouldIgnoreGlobalEnter,
+    normalizeEventType,
+    primaryEnterAction
   };
 });

@@ -71,15 +71,18 @@ function showOverlay(payload) {
   updateEventLabel(payload);
   updatePrimaryLabel(payload);
 
-  // Default (non-persistent drift): Enter = Back on track.
-  overlay.dataset.primaryEnterAction = "back_on_track";
-  if (enterHint) enterHint.textContent = "Enter: Back on track";
-  backBtn.classList.add("primary");
-  recoverBtn.classList.remove("primary");
+  const primaryEnterAction = window.overlayUtils?.primaryEnterAction?.(overlay.dataset.eventType) || "back_on_track";
+  overlay.dataset.primaryEnterAction = primaryEnterAction;
+
+  // Default (non-persistent drift): Back on track is primary.
+  if (primaryEnterAction === "back_on_track") {
+    if (enterHint) enterHint.textContent = "Enter: Back on track";
+    backBtn.classList.add("primary");
+    recoverBtn.classList.remove("primary");
+  }
 
   // DRIFT_PERSIST should be a pattern-break with a more actionable primary path.
-  if (overlay.dataset.eventType === "DRIFT_PERSIST") {
-    overlay.dataset.primaryEnterAction = "recover";
+  if (primaryEnterAction === "recover") {
     if (enterHint) enterHint.textContent = "Enter: Recover schedule";
     backBtn.classList.remove("primary");
     recoverBtn.classList.add("primary");
