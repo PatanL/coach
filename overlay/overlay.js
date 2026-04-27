@@ -67,6 +67,10 @@ function showOverlay(payload) {
   overlay.classList.remove("hidden");
   resetSnooze();
   resetAlignInput();
+
+  // Deterministic rendering for screenshot runs: disable CSS motion.
+  overlay.dataset.screenshot = payload?.cmd_id === "screenshot" ? "true" : "";
+
   updateEventLabel(payload);
   updatePrimaryLabel(payload);
 

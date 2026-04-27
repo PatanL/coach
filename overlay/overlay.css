@@ -50,6 +50,13 @@ html, body {
   100% { transform: translateX(0); }
 }
 
+/* Screenshot runs should be fully deterministic (no motion/transition variance). */
+#overlay[data-screenshot="true"] *,
+#overlay[data-screenshot="true"] {
+  animation: none !important;
+  transition: none !important;
+}
+
 #overlay[data-level="A"] .card {
   width: 320px;
   padding: 18px 20px;
