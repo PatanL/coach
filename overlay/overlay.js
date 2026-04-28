@@ -12,6 +12,8 @@ const alignInput = document.getElementById("alignInput");
 const alignText = document.getElementById("alignText");
 const alignSubmit = document.getElementById("alignSubmit");
 
+const enterHint = document.getElementById("enterHint");
+
 const backBtn = document.getElementById("backBtn");
 const stuckBtn = document.getElementById("stuckBtn");
 const recoverBtn = document.getElementById("recoverBtn");
@@ -53,6 +55,26 @@ function updateEventLabel(payload) {
   setText(eventLabel, eventType.replaceAll("_", " "));
 }
 
+function applyPatternBreak(eventType) {
+  const t = String(eventType || "").toUpperCase();
+  const enterAction = window.overlayUtils?.getGlobalEnterAction?.(t) || "back_on_track";
+
+  // Keep the on-screen hint aligned with what Enter actually does.
+  if (enterHint) {
+    enterHint.textContent = enterAction === "recover" ? "Enter: Recover schedule" : "Enter: Back on track";
+  }
+
+  // On DRIFT_PERSIST we want the recovery action to feel primary.
+  const isPersist = t === "DRIFT_PERSIST";
+  backBtn.classList.toggle("primary", !isPersist);
+  recoverBtn.classList.toggle("primary", isPersist);
+
+  // Gentle nudge: focus the primary action so Enter is less "surprising".
+  if (isPersist) {
+    recoverBtn?.focus?.();
+  }
+}
+
 function resetSnooze() {
   snooze.classList.add("hidden");
 }
@@ -68,6 +90,7 @@ function showOverlay(payload) {
   resetAlignInput();
   updateEventLabel(payload);
   updatePrimaryLabel(payload);
+  applyPatternBreak(overlay.dataset.eventType);
 
   if (payload.choices && Array.isArray(payload.choices)) {
     overlay.dataset.mode = "align";
@@ -165,7 +188,9 @@ window.addEventListener("keydown", (event) => {
   if (event.key === "Enter") {
     const ignoreEnter = window.overlayUtils?.shouldIgnoreGlobalEnter?.(event.target);
     if (!ignoreEnter) {
-      sendAction({ action: "back_on_track" });
+      const eventType = overlay?.dataset?.eventType || "";
+      const action = window.overlayUtils?.getGlobalEnterAction?.(eventType) || "back_on_track";
+      sendAction({ action });
     }
   }
   if (event.key === "Escape") {
