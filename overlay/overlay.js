@@ -105,6 +105,21 @@ function showOverlay(payload) {
   }
 
   overlay.dataset.level = payload.level || "B";
+
+  // Focus management (recovery UX): pick a safe default action.
+  // - Align mode: focus the text input.
+  // - DRIFT_PERSIST: focus Recover for a stronger pattern-break.
+  // - Otherwise: focus Back on track.
+  const focusId = window.overlayUtils?.getInitialFocusId?.({
+    eventType: overlay.dataset.eventType,
+    mode: overlay.dataset.mode
+  });
+  if (focusId) {
+    const el = document.getElementById(focusId);
+    // Defer to ensure DOM/layout is settled before focusing.
+    setTimeout(() => el?.focus?.(), 0);
+  }
+
   currentPayload = payload;
   shownAt = Date.now();
 }

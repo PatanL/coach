@@ -40,9 +40,20 @@
     return isTextInputTarget(t) || isInteractiveTarget(t);
   }
 
+  // Decide which control should receive focus when the overlay is shown.
+  // This is a recovery UX affordance: for DRIFT_PERSIST we want a strong, actionable default.
+  // Returns an element id to focus (or null).
+  function getInitialFocusId({ eventType, mode } = {}) {
+    const et = String(eventType || "").toUpperCase();
+    if (mode === "align") return "alignText";
+    if (et === "DRIFT_PERSIST") return "recoverBtn";
+    return "backBtn";
+  }
+
   return {
     isTextInputTarget,
     isInteractiveTarget,
-    shouldIgnoreGlobalEnter
+    shouldIgnoreGlobalEnter,
+    getInitialFocusId
   };
 });
