@@ -9,6 +9,13 @@
     if (!target) return false;
     const tag = String(target.tagName || "").toLowerCase();
     if (target.isContentEditable) return true;
+
+    // Support custom inputs (e.g. <div role="textbox">) so global Enter hotkeys
+    // don't accidentally trigger overlay actions while the user is typing.
+    const role = String(target.getAttribute?.("role") || "").toLowerCase();
+    const textRoles = new Set(["textbox", "searchbox", "combobox", "spinbutton"]);
+    if (textRoles.has(role)) return true;
+
     return tag === "input" || tag === "textarea" || tag === "select";
   }
 
