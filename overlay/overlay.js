@@ -62,6 +62,24 @@ function resetAlignInput() {
   alignInput.classList.add("hidden");
 }
 
+function focusPrimaryControl(payload) {
+  // Make the next action obvious and reduce accidental global hotkey triggers.
+  // DRIFT_PERSIST should be a strong pattern-break: default focus goes to "Recover".
+  const eventType = String(overlay?.dataset?.eventType || "").toUpperCase();
+
+  if (payload?.choices && Array.isArray(payload.choices)) {
+    alignText?.focus?.();
+    return;
+  }
+
+  if (eventType === "DRIFT_PERSIST") {
+    recoverBtn?.focus?.();
+    return;
+  }
+
+  backBtn?.focus?.();
+}
+
 function showOverlay(payload) {
   overlay.classList.remove("hidden");
   resetSnooze();
@@ -107,6 +125,10 @@ function showOverlay(payload) {
   overlay.dataset.level = payload.level || "B";
   currentPayload = payload;
   shownAt = Date.now();
+
+  // Ensure focus reflects the intended primary action for this overlay.
+  // Defer to the next tick so DOM updates (hidden classes, button creation) are applied.
+  setTimeout(() => focusPrimaryControl(payload), 0);
 }
 
 function sendAction(action) {
