@@ -1,7 +1,12 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
 
-const { isTextInputTarget, isInteractiveTarget, shouldIgnoreGlobalEnter } = require("./overlay-utils");
+const {
+  isTextInputTarget,
+  isInteractiveTarget,
+  shouldIgnoreGlobalEnter,
+  shouldTriggerBackOnTrackHotkey
+} = require("./overlay-utils");
 
 test("isTextInputTarget: recognizes common typing targets", () => {
   assert.equal(isTextInputTarget({ tagName: "INPUT" }), true);
@@ -45,4 +50,20 @@ test("shouldIgnoreGlobalEnter: child of button/link should still block global En
     }
   };
   assert.equal(shouldIgnoreGlobalEnter(spanInsideButton), true);
+});
+
+test("shouldTriggerBackOnTrackHotkey: defaults to allowing Enter when safe", () => {
+  assert.equal(shouldTriggerBackOnTrackHotkey("DRIFT_START", { target: { tagName: "DIV" } }), true);
+  assert.equal(shouldTriggerBackOnTrackHotkey("", { target: { tagName: "DIV" } }), true);
+});
+
+test("shouldTriggerBackOnTrackHotkey: blocks Enter while typing/clicking", () => {
+  assert.equal(shouldTriggerBackOnTrackHotkey("DRIFT_START", { target: { tagName: "INPUT" } }), false);
+  assert.equal(shouldTriggerBackOnTrackHotkey("DRIFT_START", { target: { tagName: "BUTTON" } }), false);
+});
+
+test("shouldTriggerBackOnTrackHotkey: requires Ctrl/Cmd on DRIFT_PERSIST", () => {
+  assert.equal(shouldTriggerBackOnTrackHotkey("DRIFT_PERSIST", { target: { tagName: "DIV" } }), false);
+  assert.equal(shouldTriggerBackOnTrackHotkey("DRIFT_PERSIST", { target: { tagName: "DIV" }, ctrlKey: true }), true);
+  assert.equal(shouldTriggerBackOnTrackHotkey("drift_persist", { target: { tagName: "DIV" }, metaKey: true }), true);
 });

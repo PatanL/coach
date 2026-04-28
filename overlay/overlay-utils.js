@@ -40,9 +40,25 @@
     return isTextInputTarget(t) || isInteractiveTarget(t);
   }
 
+  // Global Enter maps to the fast "Back on track" action.
+  // For DRIFT_PERSIST we require a deliberate modifier (Ctrl/Cmd) to avoid accidental dismissal.
+  function shouldTriggerBackOnTrackHotkey(eventType, event) {
+    const type = String(eventType || "").toUpperCase();
+    const target = event?.target || null;
+
+    if (shouldIgnoreGlobalEnter(target)) return false;
+
+    if (type === "DRIFT_PERSIST") {
+      return Boolean(event?.ctrlKey || event?.metaKey);
+    }
+
+    return true;
+  }
+
   return {
     isTextInputTarget,
     isInteractiveTarget,
-    shouldIgnoreGlobalEnter
+    shouldIgnoreGlobalEnter,
+    shouldTriggerBackOnTrackHotkey
   };
 });
