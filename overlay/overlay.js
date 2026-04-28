@@ -107,6 +107,22 @@ function showOverlay(payload) {
   overlay.dataset.level = payload.level || "B";
   currentPayload = payload;
   shownAt = Date.now();
+
+  // Reduce friction: deterministic initial focus.
+  // - Align mode: focus the freeform text box.
+  // - DRIFT_PERSIST: focus the recover action to encourage an immediate next step.
+  // - Otherwise: focus Back on track.
+  const focusId = window.overlayUtils?.getInitialFocusId?.({
+    eventType: overlay.dataset.eventType,
+    mode: overlay.dataset.mode
+  });
+  if (focusId) {
+    // Wait a tick so layout/visibility changes have applied.
+    setTimeout(() => {
+      const el = document.getElementById(focusId);
+      if (el && typeof el.focus === "function") el.focus();
+    }, 0);
+  }
 }
 
 function sendAction(action) {

@@ -40,9 +40,20 @@
     return isTextInputTarget(t) || isInteractiveTarget(t);
   }
 
+  // Deterministic focus: reduce friction to recover while staying safe for typing modes.
+  // Returns an element id to focus, or null.
+  function getInitialFocusId({ eventType = "", mode = "" } = {}) {
+    const et = String(eventType || "").toUpperCase();
+    const m = String(mode || "").toLowerCase();
+    if (m === "align") return "alignText";
+    if (et === "DRIFT_PERSIST") return "recoverBtn";
+    return "backBtn";
+  }
+
   return {
     isTextInputTarget,
     isInteractiveTarget,
-    shouldIgnoreGlobalEnter
+    shouldIgnoreGlobalEnter,
+    getInitialFocusId
   };
 });
