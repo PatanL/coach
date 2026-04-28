@@ -6,12 +6,13 @@ const humanLine = document.getElementById("humanLine");
 const diagnosis = document.getElementById("diagnosis");
 const nextAction = document.getElementById("nextAction");
 const snooze = document.getElementById("snoozeReason");
-const enterHint = document.getElementById("enterHint");
 const miniPlan = document.getElementById("miniPlan");
 const choiceButtons = document.getElementById("choiceButtons");
 const alignInput = document.getElementById("alignInput");
 const alignText = document.getElementById("alignText");
 const alignSubmit = document.getElementById("alignSubmit");
+
+const enterHint = document.getElementById("enterHint");
 
 const backBtn = document.getElementById("backBtn");
 const stuckBtn = document.getElementById("stuckBtn");
@@ -54,6 +55,26 @@ function updateEventLabel(payload) {
   setText(eventLabel, eventType.replaceAll("_", " "));
 }
 
+function applyPatternBreak(eventType) {
+  const t = String(eventType || "").toUpperCase();
+  const enterAction = window.overlayUtils?.getGlobalEnterAction?.(t) || "back_on_track";
+
+  // Keep the on-screen hint aligned with what Enter actually does.
+  if (enterHint) {
+    enterHint.textContent = enterAction === "recover" ? "Enter: Recover schedule" : "Enter: Back on track";
+  }
+
+  // On DRIFT_PERSIST we want the recovery action to feel primary.
+  const isPersist = t === "DRIFT_PERSIST";
+  backBtn.classList.toggle("primary", !isPersist);
+  recoverBtn.classList.toggle("primary", isPersist);
+
+  // Gentle nudge: focus the primary action so Enter is less "surprising".
+  if (isPersist) {
+    recoverBtn?.focus?.();
+  }
+}
+
 function resetSnooze() {
   snooze.classList.add("hidden");
 }
@@ -69,12 +90,7 @@ function showOverlay(payload) {
   resetAlignInput();
   updateEventLabel(payload);
   updatePrimaryLabel(payload);
-
-  // DRIFT_PERSIST is a special moment: keep the interaction actionable and obvious.
-  // Default Enter behavior and initial focus should point at recovery rather than dismissal.
-  if (enterHint) {
-    enterHint.textContent = overlay.dataset.eventType === "DRIFT_PERSIST" ? "Enter: Recover schedule" : "Enter: Back on track";
-  }
+  applyPatternBreak(overlay.dataset.eventType);
 
   if (payload.choices && Array.isArray(payload.choices)) {
     overlay.dataset.mode = "align";
@@ -114,11 +130,6 @@ function showOverlay(payload) {
   overlay.dataset.level = payload.level || "B";
   currentPayload = payload;
   shownAt = Date.now();
-
-  if (overlay.dataset.eventType === "DRIFT_PERSIST") {
-    // Ensure keyboard users land on the recovery path; Enter will activate this button.
-    recoverBtn?.focus?.();
-  }
 }
 
 function sendAction(action) {
@@ -173,13 +184,13 @@ window.overlayAPI.onPause(() => {
 });
 
 window.addEventListener("keydown", (event) => {
-  // Don't treat Enter as a global action while the user is typing or interacting with a control.
-  // For DRIFT_PERSIST specifically, Enter should be an "actionable" recovery shortcut (pattern-break).
+  // Don't treat Enter as "Back on track" while the user is typing or interacting with a control.
   if (event.key === "Enter") {
     const ignoreEnter = window.overlayUtils?.shouldIgnoreGlobalEnter?.(event.target);
     if (!ignoreEnter) {
-      const isPersist = overlay?.dataset?.eventType === "DRIFT_PERSIST";
-      sendAction({ action: isPersist ? "recover" : "back_on_track" });
+      const eventType = overlay?.dataset?.eventType || "";
+      const action = window.overlayUtils?.getGlobalEnterAction?.(eventType) || "back_on_track";
+      sendAction({ action });
     }
   }
   if (event.key === "Escape") {
