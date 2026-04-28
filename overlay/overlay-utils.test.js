@@ -46,3 +46,20 @@ test("shouldIgnoreGlobalEnter: child of button/link should still block global En
   };
   assert.equal(shouldIgnoreGlobalEnter(spanInsideButton), true);
 });
+
+test("shouldIgnoreGlobalEnter: role=link should block global Enter", () => {
+  const node = {
+    tagName: "DIV",
+    getAttribute: (k) => (k === "role" ? "link" : null)
+  };
+  assert.equal(shouldIgnoreGlobalEnter(node), true);
+});
+
+test("shouldIgnoreGlobalEnter: closest contenteditable should block global Enter", () => {
+  const editable = { tagName: "DIV", isContentEditable: true };
+  const child = {
+    tagName: "SPAN",
+    closest: () => editable
+  };
+  assert.equal(shouldIgnoreGlobalEnter(child), true);
+});
