@@ -16,6 +16,13 @@ html, body {
   background: rgba(6, 8, 10, 0.45);
 }
 
+/* Deterministic rendering for screenshot tests: disable motion so captured frames are stable. */
+#overlay[data-screenshot="true"],
+#overlay[data-screenshot="true"] * {
+  animation: none !important;
+  transition: none !important;
+}
+
 .hidden {
   display: none;
 }

@@ -66,6 +66,8 @@ function showOverlay(payload) {
   overlay.classList.remove("hidden");
   resetSnooze();
   resetAlignInput();
+  // When generating deterministic screenshots, disable transitions/animations via a data attribute.
+  overlay.dataset.screenshot = payload?.screenshot ? "true" : "";
   updateEventLabel(payload);
   updatePrimaryLabel(payload);
 
