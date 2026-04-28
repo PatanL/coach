@@ -17,6 +17,8 @@ const stuckBtn = document.getElementById("stuckBtn");
 const recoverBtn = document.getElementById("recoverBtn");
 const snoozeBtn = document.getElementById("snoozeBtn");
 
+const enterHint = document.getElementById("enterHint");
+
 let shownAt = null;
 let currentPayload = null;
 
@@ -24,18 +26,40 @@ function setText(el, value) {
   el.textContent = value || "";
 }
 
+function getEventType(payload) {
+  const raw = payload?.source_event_type || payload?.event_type || payload?.type || "";
+  return String(raw).toUpperCase();
+}
+
+function setEnterHint(label) {
+  if (!enterHint) return;
+  enterHint.textContent = `Enter: ${label}`;
+}
+
 function updatePrimaryLabel(payload) {
+  const eventType = getEventType(payload);
+
+  // Habit flow: keep the primary action semantically accurate.
   if (payload?.block_id && String(payload.block_id).includes("habit")) {
     backBtn.textContent = "Habit completed";
+    setEnterHint("Habit completed");
     return;
   }
+
+  // DRIFT_PERSIST should feel like a stronger pattern-break: a crisp, actionable reset.
+  if (eventType === "DRIFT_PERSIST") {
+    backBtn.textContent = "Reset now (60s)";
+    setEnterHint("Reset now (60s)");
+    return;
+  }
+
   backBtn.textContent = "Back on track";
+  setEnterHint("Back on track");
 }
 
 function updateEventLabel(payload) {
   // Prefer the originating event type when available (used for visual pattern-breaks like DRIFT_PERSIST).
-  const raw = payload?.source_event_type || payload?.event_type || payload?.type || "";
-  const eventType = String(raw).toUpperCase();
+  const eventType = getEventType(payload);
   overlay.dataset.eventType = eventType;
 
   if (!eventType) {
