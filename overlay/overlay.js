@@ -33,18 +33,11 @@ function updatePrimaryLabel(payload) {
 }
 
 function updatePrimaryAction(payload) {
-  // Default: make the quickest "back on track" action visually primary.
-  backBtn.classList.add("primary");
-  recoverBtn.classList.remove("primary");
-
   const raw = payload?.source_event_type || payload?.event_type || payload?.type || "";
-  const eventType = String(raw).toUpperCase();
+  const primary = window.overlayUtils?.getPrimaryActionForEventType?.(raw) || "back_on_track";
 
-  // For persistent drift, emphasize recovery as the "pattern-break" action.
-  if (eventType === "DRIFT_PERSIST") {
-    backBtn.classList.remove("primary");
-    recoverBtn.classList.add("primary");
-  }
+  backBtn.classList.toggle("primary", primary === "back_on_track");
+  recoverBtn.classList.toggle("primary", primary === "recover");
 }
 
 function updateEventLabel(payload) {

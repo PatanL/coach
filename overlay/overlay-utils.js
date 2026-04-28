@@ -40,9 +40,19 @@
     return isTextInputTarget(t) || isInteractiveTarget(t);
   }
 
+  function getPrimaryActionForEventType(rawEventType) {
+    const eventType = String(rawEventType || "").toUpperCase();
+    // Default: quick confirmation action.
+    if (!eventType) return "back_on_track";
+    // Pattern-break: on persistent drift, emphasize recovery.
+    if (eventType === "DRIFT_PERSIST") return "recover";
+    return "back_on_track";
+  }
+
   return {
     isTextInputTarget,
     isInteractiveTarget,
-    shouldIgnoreGlobalEnter
+    shouldIgnoreGlobalEnter,
+    getPrimaryActionForEventType
   };
 });
