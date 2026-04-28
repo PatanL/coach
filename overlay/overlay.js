@@ -6,6 +6,7 @@ const humanLine = document.getElementById("humanLine");
 const diagnosis = document.getElementById("diagnosis");
 const nextAction = document.getElementById("nextAction");
 const snooze = document.getElementById("snoozeReason");
+const enterHint = document.getElementById("enterHint");
 const miniPlan = document.getElementById("miniPlan");
 const choiceButtons = document.getElementById("choiceButtons");
 const alignInput = document.getElementById("alignInput");
@@ -69,6 +70,12 @@ function showOverlay(payload) {
   updateEventLabel(payload);
   updatePrimaryLabel(payload);
 
+  // DRIFT_PERSIST is a special moment: keep the interaction actionable and obvious.
+  // Default Enter behavior and initial focus should point at recovery rather than dismissal.
+  if (enterHint) {
+    enterHint.textContent = overlay.dataset.eventType === "DRIFT_PERSIST" ? "Enter: Recover schedule" : "Enter: Back on track";
+  }
+
   if (payload.choices && Array.isArray(payload.choices)) {
     overlay.dataset.mode = "align";
   } else {
@@ -107,6 +114,11 @@ function showOverlay(payload) {
   overlay.dataset.level = payload.level || "B";
   currentPayload = payload;
   shownAt = Date.now();
+
+  if (overlay.dataset.eventType === "DRIFT_PERSIST") {
+    // Ensure keyboard users land on the recovery path; Enter will activate this button.
+    recoverBtn?.focus?.();
+  }
 }
 
 function sendAction(action) {
@@ -161,11 +173,13 @@ window.overlayAPI.onPause(() => {
 });
 
 window.addEventListener("keydown", (event) => {
-  // Don't treat Enter as "Back on track" while the user is typing or interacting with a control.
+  // Don't treat Enter as a global action while the user is typing or interacting with a control.
+  // For DRIFT_PERSIST specifically, Enter should be an "actionable" recovery shortcut (pattern-break).
   if (event.key === "Enter") {
     const ignoreEnter = window.overlayUtils?.shouldIgnoreGlobalEnter?.(event.target);
     if (!ignoreEnter) {
-      sendAction({ action: "back_on_track" });
+      const isPersist = overlay?.dataset?.eventType === "DRIFT_PERSIST";
+      sendAction({ action: isPersist ? "recover" : "back_on_track" });
     }
   }
   if (event.key === "Escape") {
