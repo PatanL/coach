@@ -69,6 +69,23 @@ function showOverlay(payload) {
   updateEventLabel(payload);
   updatePrimaryLabel(payload);
 
+  // Primary action tuning:
+  // - Default: quick acknowledgement (Back on track).
+  // - DRIFT_PERSIST: pattern-break + steer toward recovery flow.
+  backBtn.classList.add("primary");
+  recoverBtn.classList.remove("primary");
+  if (overlay.dataset.eventType === "DRIFT_PERSIST") {
+    backBtn.classList.remove("primary");
+    recoverBtn.classList.add("primary");
+
+    // Focus the recovery action so keyboard users can commit quickly.
+    // If we're in "align" mode, focus will be moved to the text input below.
+    if (!payload?.choices) {
+      // (Enter is still globally mapped; this is for explicit button activation.)
+      recoverBtn.focus();
+    }
+  }
+
   if (payload.choices && Array.isArray(payload.choices)) {
     overlay.dataset.mode = "align";
   } else {
