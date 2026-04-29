@@ -35,9 +35,18 @@
     return target;
   }
 
+  function isNonActionableTarget(target) {
+    if (!target) return true;
+    const tag = String(target.tagName || "").toLowerCase();
+    if (tag === "body" || tag === "html") return true;
+    // If focus falls back to the overlay container, treat it as non-actionable.
+    if (String(target.id || "") === "overlay") return true;
+    return false;
+  }
+
   function shouldIgnoreGlobalEnter(target) {
     const t = findHotkeyRelevantTarget(target);
-    return isTextInputTarget(t) || isInteractiveTarget(t);
+    return isNonActionableTarget(t) || isTextInputTarget(t) || isInteractiveTarget(t);
   }
 
   // Pure selection logic so we can unit test overlay focus behavior.

@@ -34,6 +34,13 @@ test("shouldIgnoreGlobalEnter: typing or clicking should block global Enter acti
   assert.equal(shouldIgnoreGlobalEnter({ tagName: "DIV" }), false);
 });
 
+test("shouldIgnoreGlobalEnter: non-actionable targets (body/html/overlay) should block global Enter action", () => {
+  assert.equal(shouldIgnoreGlobalEnter(null), true);
+  assert.equal(shouldIgnoreGlobalEnter({ tagName: "BODY" }), true);
+  assert.equal(shouldIgnoreGlobalEnter({ tagName: "HTML" }), true);
+  assert.equal(shouldIgnoreGlobalEnter({ tagName: "DIV", id: "overlay" }), true);
+});
+
 test("shouldIgnoreGlobalEnter: child of button/link should still block global Enter", () => {
   const button = { tagName: "BUTTON" };
   const spanInsideButton = {
