@@ -40,9 +40,19 @@
     return isTextInputTarget(t) || isInteractiveTarget(t);
   }
 
+  // Global Enter is a convenience hotkey to quickly mark "Back on track".
+  // For DRIFT_PERSIST we disable it to avoid accidental dismissal: persistent drift
+  // should require an explicit click.
+  function shouldTriggerGlobalEnter(target, eventType) {
+    const type = String(eventType || "").toUpperCase();
+    if (type === "DRIFT_PERSIST") return false;
+    return !shouldIgnoreGlobalEnter(target);
+  }
+
   return {
     isTextInputTarget,
     isInteractiveTarget,
-    shouldIgnoreGlobalEnter
+    shouldIgnoreGlobalEnter,
+    shouldTriggerGlobalEnter
   };
 });
