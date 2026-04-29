@@ -229,6 +229,14 @@ button.primary:hover {
   transition: none !important;
 }
 
+/* Deterministic screenshots: disable motion/animation to keep captures stable. */
+#overlay[data-screenshot="1"] *,
+#overlay[data-screenshot="1"] *::before,
+#overlay[data-screenshot="1"] *::after {
+  animation: none !important;
+  transition: none !important;
+}
+
 /* Visual pattern-break for persistent drift: subtle but unmistakable */
 @keyframes driftPersistPulse {
   0% {
