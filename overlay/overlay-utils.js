@@ -40,9 +40,17 @@
     return isTextInputTarget(t) || isInteractiveTarget(t);
   }
 
+  // Persistent drift should feel different: require a deliberate Enter confirmation
+  // to avoid accidental "Back on track" when the user is still mentally/context switching.
+  function shouldConfirmGlobalEnter(eventType) {
+    const t = String(eventType || "").toUpperCase();
+    return t === "DRIFT_PERSIST";
+  }
+
   return {
     isTextInputTarget,
     isInteractiveTarget,
-    shouldIgnoreGlobalEnter
+    shouldIgnoreGlobalEnter,
+    shouldConfirmGlobalEnter
   };
 });

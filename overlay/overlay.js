@@ -11,6 +11,7 @@ const choiceButtons = document.getElementById("choiceButtons");
 const alignInput = document.getElementById("alignInput");
 const alignText = document.getElementById("alignText");
 const alignSubmit = document.getElementById("alignSubmit");
+const enterHint = document.getElementById("enterHint");
 
 const backBtn = document.getElementById("backBtn");
 const stuckBtn = document.getElementById("stuckBtn");
@@ -19,6 +20,7 @@ const snoozeBtn = document.getElementById("snoozeBtn");
 
 let shownAt = null;
 let currentPayload = null;
+let enterArmedAt = null;
 
 function setText(el, value) {
   el.textContent = value || "";
@@ -37,6 +39,11 @@ function updateEventLabel(payload) {
   const raw = payload?.source_event_type || payload?.event_type || payload?.type || "";
   const eventType = String(raw).toUpperCase();
   overlay.dataset.eventType = eventType;
+
+  const requireConfirm = window.overlayUtils?.shouldConfirmGlobalEnter?.(eventType);
+  if (enterHint) {
+    enterHint.textContent = requireConfirm ? "Enter x2: Back on track" : "Enter: Back on track";
+  }
 
   if (!eventType) {
     setText(eventLabel, "DRIFT");
@@ -66,6 +73,7 @@ function showOverlay(payload) {
   overlay.classList.remove("hidden");
   resetSnooze();
   resetAlignInput();
+  enterArmedAt = null;
   updateEventLabel(payload);
   updatePrimaryLabel(payload);
 
@@ -165,7 +173,26 @@ window.addEventListener("keydown", (event) => {
   if (event.key === "Enter") {
     const ignoreEnter = window.overlayUtils?.shouldIgnoreGlobalEnter?.(event.target);
     if (!ignoreEnter) {
-      sendAction({ action: "back_on_track" });
+      const eventType = overlay?.dataset?.eventType || "";
+      const requireConfirm = window.overlayUtils?.shouldConfirmGlobalEnter?.(eventType);
+
+      if (!requireConfirm) {
+        sendAction({ action: "back_on_track" });
+        return;
+      }
+
+      // DRIFT_PERSIST: require a deliberate double-Enter within a short window.
+      const now = Date.now();
+      const windowMs = 1500;
+      if (enterArmedAt && now - enterArmedAt < windowMs) {
+        enterArmedAt = null;
+        sendAction({ action: "back_on_track" });
+        return;
+      }
+
+      enterArmedAt = now;
+      // Nudge attention to the primary button instead of firing immediately.
+      backBtn.focus();
     }
   }
   if (event.key === "Escape") {
