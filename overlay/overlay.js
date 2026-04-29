@@ -40,6 +40,7 @@ function updateEventLabel(payload) {
   const eventType = String(raw).toUpperCase();
   overlay.dataset.eventType = eventType;
 
+
   if (!eventType) {
     setText(eventLabel, "DRIFT");
     return;
@@ -198,12 +199,9 @@ window.addEventListener("keydown", (event) => {
   if (event.key === "Enter") {
     const ignoreEnter = window.overlayUtils?.shouldIgnoreGlobalEnter?.(event.target);
     if (!ignoreEnter) {
-      const eventType = String(overlay?.dataset?.eventType || "").toUpperCase();
-      if (eventType === "DRIFT_PERSIST") {
-        sendAction({ action: "recover" });
-      } else {
-        sendAction({ action: "back_on_track" });
-      }
+      const eventType = overlay?.dataset?.eventType || "";
+      const enterAction = window.overlayUtils?.getGlobalEnterAction?.(eventType) || "back_on_track";
+      sendAction({ action: enterAction });
     }
   }
   if (event.key === "Escape") {
