@@ -43,7 +43,8 @@ function updateEventLabel(payload) {
     return;
   }
   if (eventType === "DRIFT_PERSIST") {
-    setText(eventLabel, "DRIFT — PERSIST");
+    // Make it explicit that this is not a new drift, but a continuing one.
+    setText(eventLabel, "DRIFT — PERSISTING");
     return;
   }
   if (eventType.startsWith("DRIFT")) {
