@@ -8,6 +8,7 @@ const nextAction = document.getElementById("nextAction");
 const snooze = document.getElementById("snoozeReason");
 const miniPlan = document.getElementById("miniPlan");
 const choiceButtons = document.getElementById("choiceButtons");
+const buttonsRow = document.querySelector(".buttons");
 const alignInput = document.getElementById("alignInput");
 const alignText = document.getElementById("alignText");
 const alignSubmit = document.getElementById("alignSubmit");
@@ -63,6 +64,19 @@ function resetAlignInput() {
   alignInput.classList.add("hidden");
 }
 
+function setButtonsOrderForEventType(eventType) {
+  if (!buttonsRow) return;
+
+  // Default order: quickest safe action first.
+  const normal = [backBtn, stuckBtn, recoverBtn, snoozeBtn];
+  const persist = [recoverBtn, backBtn, stuckBtn, snoozeBtn];
+
+  const order = eventType === "DRIFT_PERSIST" ? persist : normal;
+  order.forEach((btn) => {
+    if (btn && btn.parentElement === buttonsRow) buttonsRow.appendChild(btn);
+  });
+}
+
 function setPrimaryActionForEventType(eventType) {
   // Default: Back on track is the safest quick action.
   backBtn.classList.add("primary");
@@ -84,7 +98,9 @@ function showOverlay(payload) {
   resetAlignInput();
   updateEventLabel(payload);
   updatePrimaryLabel(payload);
-  setPrimaryActionForEventType(overlay.dataset.eventType || "");
+  const eventType = overlay.dataset.eventType || "";
+  setButtonsOrderForEventType(eventType);
+  setPrimaryActionForEventType(eventType);
 
   if (payload.choices && Array.isArray(payload.choices)) {
     overlay.dataset.mode = "align";
