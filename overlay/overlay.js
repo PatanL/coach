@@ -8,9 +8,11 @@ const nextAction = document.getElementById("nextAction");
 const snooze = document.getElementById("snoozeReason");
 const miniPlan = document.getElementById("miniPlan");
 const choiceButtons = document.getElementById("choiceButtons");
+const buttonsRow = document.querySelector(".buttons");
 const alignInput = document.getElementById("alignInput");
 const alignText = document.getElementById("alignText");
 const alignSubmit = document.getElementById("alignSubmit");
+const enterHint = document.getElementById("enterHint");
 
 const backBtn = document.getElementById("backBtn");
 const stuckBtn = document.getElementById("stuckBtn");
@@ -38,6 +40,7 @@ function updateEventLabel(payload) {
   const eventType = String(raw).toUpperCase();
   overlay.dataset.eventType = eventType;
 
+
   if (!eventType) {
     setText(eventLabel, "DRIFT");
     return;
@@ -62,12 +65,43 @@ function resetAlignInput() {
   alignInput.classList.add("hidden");
 }
 
+function setButtonsOrderForEventType(eventType) {
+  if (!buttonsRow) return;
+
+  // Default order: quickest safe action first.
+  const normal = [backBtn, stuckBtn, recoverBtn, snoozeBtn];
+  const persist = [recoverBtn, backBtn, stuckBtn, snoozeBtn];
+
+  const order = eventType === "DRIFT_PERSIST" ? persist : normal;
+  order.forEach((btn) => {
+    if (btn && btn.parentElement === buttonsRow) buttonsRow.appendChild(btn);
+  });
+}
+
+function setPrimaryActionForEventType(eventType) {
+  // Default: Back on track is the safest quick action.
+  backBtn.classList.add("primary");
+  recoverBtn.classList.remove("primary");
+  if (enterHint) enterHint.textContent = "Enter: Back on track";
+
+  // DRIFT_PERSIST: strong pattern-break + actionable recovery.
+  // Make recovery the primary action so the user doesn't accidentally "dismiss" persistent drift.
+  if (eventType === "DRIFT_PERSIST") {
+    backBtn.classList.remove("primary");
+    recoverBtn.classList.add("primary");
+    if (enterHint) enterHint.textContent = "Enter: Recover schedule";
+  }
+}
+
 function showOverlay(payload) {
   overlay.classList.remove("hidden");
   resetSnooze();
   resetAlignInput();
   updateEventLabel(payload);
   updatePrimaryLabel(payload);
+  const eventType = overlay.dataset.eventType || "";
+  setButtonsOrderForEventType(eventType);
+  setPrimaryActionForEventType(eventType);
 
   if (payload.choices && Array.isArray(payload.choices)) {
     overlay.dataset.mode = "align";
@@ -161,14 +195,17 @@ window.overlayAPI.onPause(() => {
 });
 
 window.addEventListener("keydown", (event) => {
-  // Don't treat Enter as "Back on track" while the user is typing or interacting with a control.
+  // Don't treat Enter as a global action while the user is typing or interacting with a control.
   if (event.key === "Enter") {
     const ignoreEnter = window.overlayUtils?.shouldIgnoreGlobalEnter?.(event.target);
     if (!ignoreEnter) {
-      sendAction({ action: "back_on_track" });
+      const eventType = overlay?.dataset?.eventType || "";
+      const enterAction = window.overlayUtils?.getGlobalEnterAction?.(eventType) || "back_on_track";
+      sendAction({ action: enterAction });
     }
   }
   if (event.key === "Escape") {
-    snooze.classList.remove("hidden");
+    // Escape should dismiss the snooze menu if it's open.
+    snooze.classList.add("hidden");
   }
 });
