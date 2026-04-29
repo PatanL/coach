@@ -193,6 +193,12 @@ button.primary:hover {
   background: #ff7a69;
 }
 
+button:focus-visible,
+.align-input input:focus-visible {
+  outline: 2px solid rgba(255, 206, 61, 0.9);
+  outline-offset: 2px;
+}
+
 .snooze {
   margin-bottom: 12px;
 }

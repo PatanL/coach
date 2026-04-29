@@ -69,6 +69,8 @@ function showOverlay(payload) {
   updateEventLabel(payload);
   updatePrimaryLabel(payload);
 
+  const eventType = String(overlay.dataset.eventType || "").toUpperCase();
+
   if (payload.choices && Array.isArray(payload.choices)) {
     overlay.dataset.mode = "align";
   } else {
@@ -107,6 +109,23 @@ function showOverlay(payload) {
   overlay.dataset.level = payload.level || "B";
   currentPayload = payload;
   shownAt = Date.now();
+
+  // Focus defaults:
+  // - Align mode: focus text input so users can type immediately.
+  // - DRIFT_PERSIST: steer toward the recovery action (strong pattern-break).
+  // - Otherwise: default to the safe "Back on track" action.
+  // Defer to the next frame so we don't fight initial paint/layout.
+  requestAnimationFrame(() => {
+    if (overlay.dataset.mode === "align" && !alignInput.classList.contains("hidden")) {
+      alignText.focus();
+      return;
+    }
+    if (eventType === "DRIFT_PERSIST") {
+      recoverBtn.focus();
+      return;
+    }
+    backBtn.focus();
+  });
 }
 
 function sendAction(action) {
