@@ -12,6 +12,8 @@ const alignInput = document.getElementById("alignInput");
 const alignText = document.getElementById("alignText");
 const alignSubmit = document.getElementById("alignSubmit");
 
+const enterHint = document.getElementById("enterHint");
+
 const backBtn = document.getElementById("backBtn");
 const stuckBtn = document.getElementById("stuckBtn");
 const recoverBtn = document.getElementById("recoverBtn");
@@ -33,10 +35,14 @@ function updatePrimaryLabel(payload) {
   backBtn.textContent = "Back on track";
 }
 
-function updateEventLabel(payload) {
+function getEventType(payload) {
   // Prefer the originating event type when available (used for visual pattern-breaks like DRIFT_PERSIST).
   const raw = payload?.source_event_type || payload?.event_type || payload?.type || "";
-  const eventType = String(raw).toUpperCase();
+  return String(raw).toUpperCase();
+}
+
+function updateEventLabel(payload) {
+  const eventType = getEventType(payload);
   overlay.dataset.eventType = eventType;
 
   if (!eventType) {
