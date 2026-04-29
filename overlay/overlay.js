@@ -161,8 +161,13 @@ window.overlayAPI.onPause(() => {
 });
 
 window.addEventListener("keydown", (event) => {
-  // Don't treat Enter as "Back on track" while the user is typing or interacting with a control.
+  // Don't treat Enter as "Back on track" while the user is typing, interacting with a control,
+  // or when we're in an alternate UI state (align flow / snooze menu).
   if (event.key === "Enter") {
+    const snoozeOpen = !snooze.classList.contains("hidden");
+    const alignMode = overlay?.dataset?.mode === "align" && !alignInput.classList.contains("hidden");
+    if (snoozeOpen || alignMode) return;
+
     const ignoreEnter = window.overlayUtils?.shouldIgnoreGlobalEnter?.(event.target);
     if (!ignoreEnter) {
       sendAction({ action: "back_on_track" });
