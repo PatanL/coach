@@ -107,6 +107,20 @@ function showOverlay(payload) {
   overlay.dataset.level = payload.level || "B";
   currentPayload = payload;
   shownAt = Date.now();
+
+  // Focus management: make the next best action easy, and avoid accidental global-hotkey actions.
+  // Keep it deterministic and rule-based (see overlay-utils for logic + tests).
+  const focusId = window.overlayUtils?.getInitialFocusId?.({
+    eventType: overlay.dataset.eventType,
+    mode: overlay.dataset.mode
+  });
+  if (focusId) {
+    // Defer to ensure DOM is painted/updated before focusing.
+    window.requestAnimationFrame(() => {
+      const el = document.getElementById(focusId);
+      if (el && typeof el.focus === "function") el.focus();
+    });
+  }
 }
 
 function sendAction(action) {
