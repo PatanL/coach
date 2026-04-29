@@ -11,6 +11,7 @@ const choiceButtons = document.getElementById("choiceButtons");
 const alignInput = document.getElementById("alignInput");
 const alignText = document.getElementById("alignText");
 const alignSubmit = document.getElementById("alignSubmit");
+const enterHint = document.getElementById("enterHint");
 
 const backBtn = document.getElementById("backBtn");
 const stuckBtn = document.getElementById("stuckBtn");
@@ -67,6 +68,9 @@ function showOverlay(payload) {
   resetSnooze();
   resetAlignInput();
   updateEventLabel(payload);
+  if (enterHint) {
+    enterHint.textContent = overlay.dataset.eventType === "DRIFT_PERSIST" ? "Shift+Enter: Back on track" : "Enter: Back on track";
+  }
   updatePrimaryLabel(payload);
 
   if (payload.choices && Array.isArray(payload.choices)) {
@@ -165,7 +169,11 @@ window.addEventListener("keydown", (event) => {
   if (event.key === "Enter") {
     const ignoreEnter = window.overlayUtils?.shouldIgnoreGlobalEnter?.(event.target);
     if (!ignoreEnter) {
-      sendAction({ action: "back_on_track" });
+      const eventType = overlay?.dataset?.eventType || "";
+      const requiresShift = String(eventType).toUpperCase() === "DRIFT_PERSIST";
+      if (!requiresShift || event.shiftKey) {
+        sendAction({ action: "back_on_track" });
+      }
     }
   }
   if (event.key === "Escape") {
