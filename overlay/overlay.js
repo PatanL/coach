@@ -107,6 +107,28 @@ function showOverlay(payload) {
   overlay.dataset.level = payload.level || "B";
   currentPayload = payload;
   shownAt = Date.now();
+
+  // Focus rules (keyboard safety + frictionless recovery):
+  // - If the overlay is asking for alignment input, focus the text box.
+  // - For persistent drift, default focus to the Recover action as the "next step".
+  // - Otherwise, focus the primary "Back on track" action.
+  // Note: When a button is focused, pressing Enter activates that button and our
+  // global Enter handler is suppressed via overlayUtils.shouldIgnoreGlobalEnter.
+  queueMicrotask(() => {
+    try {
+      if (!overlay.classList.contains("hidden") && overlay.dataset.mode === "align") {
+        alignText?.focus?.();
+        return;
+      }
+      if (!overlay.classList.contains("hidden") && overlay.dataset.eventType === "DRIFT_PERSIST") {
+        recoverBtn?.focus?.();
+        return;
+      }
+      backBtn?.focus?.();
+    } catch {
+      // ignore focus errors (e.g., in test/screenshot harness)
+    }
+  });
 }
 
 function sendAction(action) {
