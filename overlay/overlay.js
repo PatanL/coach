@@ -12,6 +12,8 @@ const alignInput = document.getElementById("alignInput");
 const alignText = document.getElementById("alignText");
 const alignSubmit = document.getElementById("alignSubmit");
 
+const enterHint = document.getElementById("enterHint");
+
 const backBtn = document.getElementById("backBtn");
 const stuckBtn = document.getElementById("stuckBtn");
 const recoverBtn = document.getElementById("recoverBtn");
@@ -32,10 +34,14 @@ function updatePrimaryLabel(payload) {
   backBtn.textContent = "Back on track";
 }
 
-function updateEventLabel(payload) {
+function getEventType(payload) {
   // Prefer the originating event type when available (used for visual pattern-breaks like DRIFT_PERSIST).
   const raw = payload?.source_event_type || payload?.event_type || payload?.type || "";
-  const eventType = String(raw).toUpperCase();
+  return String(raw).toUpperCase();
+}
+
+function updateEventLabel(payload) {
+  const eventType = getEventType(payload);
   overlay.dataset.eventType = eventType;
 
   if (!eventType) {
@@ -64,6 +70,7 @@ function resetAlignInput() {
 
 function showOverlay(payload) {
   overlay.classList.remove("hidden");
+  overlay.dataset.screenshot = payload?.screenshot ? "true" : "";
   resetSnooze();
   resetAlignInput();
   updateEventLabel(payload);
@@ -73,6 +80,40 @@ function showOverlay(payload) {
     overlay.dataset.mode = "align";
   } else {
     overlay.dataset.mode = "";
+  }
+
+  const primaryEnterAction =
+    window.overlayUtils?.selectGlobalEnterAction?.({ eventType: overlay.dataset.eventType, mode: overlay.dataset.mode }) ||
+    window.overlayUtils?.primaryEnterAction?.(overlay.dataset.eventType) ||
+    "back_on_track";
+  overlay.dataset.primaryEnterAction = primaryEnterAction;
+  if (overlay.dataset.mode === "align") {
+    // Align mode owns Enter (submit input). Don't allow a global Enter hotkey fallback.
+    overlay.dataset.primaryEnterAction = "";
+  }
+
+  // Default (non-persistent drift): Back on track is primary.
+  if (primaryEnterAction === "back_on_track") {
+    if (enterHint) enterHint.textContent = "Enter: Back on track";
+    backBtn.classList.add("primary");
+    recoverBtn.classList.remove("primary");
+  }
+
+  // DRIFT_PERSIST should be a pattern-break with a more actionable primary path.
+  if (primaryEnterAction === "recover") {
+    if (enterHint) enterHint.textContent = "Enter: Recover schedule";
+    backBtn.classList.remove("primary");
+    recoverBtn.classList.add("primary");
+
+    // Move focus to the primary recovery action to reduce friction.
+    // If we're in "align" mode, don't steal focus from the input/choices.
+    const isAlignMode = overlay.dataset.mode === "align";
+    if (!isAlignMode) recoverBtn.focus();
+  }
+
+  // In align mode, the input owns Enter.
+  if (overlay.dataset.mode === "align") {
+    if (enterHint) enterHint.textContent = "Enter: Submit";
   }
   setText(blockName, payload.block_name || "");
   setText(headline, payload.headline || "Reset.");
@@ -99,6 +140,13 @@ function showOverlay(payload) {
     });
     choiceButtons.classList.remove("hidden");
     alignInput.classList.remove("hidden");
+
+    // In align mode, proactively focus the text input so Enter submits the user's answer
+    // (and doesn't accidentally trigger the global Enter action).
+    // Skip during deterministic screenshot renders to avoid focus rings in snapshots.
+    if (!payload?.screenshot) {
+      alignText.focus();
+    }
   } else {
     choiceButtons.classList.add("hidden");
     alignInput.classList.add("hidden");
@@ -161,11 +209,12 @@ window.overlayAPI.onPause(() => {
 });
 
 window.addEventListener("keydown", (event) => {
-  // Don't treat Enter as "Back on track" while the user is typing or interacting with a control.
+  // Don't treat Enter as a global action while the user is typing or interacting with a control.
   if (event.key === "Enter") {
     const ignoreEnter = window.overlayUtils?.shouldIgnoreGlobalEnter?.(event.target);
     if (!ignoreEnter) {
-      sendAction({ action: "back_on_track" });
+      const action = overlay.dataset.primaryEnterAction || "";
+      if (action) sendAction({ action });
     }
   }
   if (event.key === "Escape") {

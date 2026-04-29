@@ -40,9 +40,30 @@
     return isTextInputTarget(t) || isInteractiveTarget(t);
   }
 
+  function normalizeEventType(value) {
+    return String(value || "").toUpperCase();
+  }
+
+  // Decide which global action (if any) Enter should trigger when focus isn't in a control.
+  // Keep this deterministic and unit-testable.
+  function selectGlobalEnterAction({ eventType, mode } = {}) {
+    if (mode === "align") return null;
+    const t = normalizeEventType(eventType);
+    if (t === "DRIFT_PERSIST") return "recover";
+    return "back_on_track";
+  }
+
+  // Back-compat wrapper (older call sites only pass eventType).
+  function primaryEnterAction(eventType) {
+    return selectGlobalEnterAction({ eventType });
+  }
+
   return {
     isTextInputTarget,
     isInteractiveTarget,
-    shouldIgnoreGlobalEnter
+    shouldIgnoreGlobalEnter,
+    normalizeEventType,
+    selectGlobalEnterAction,
+    primaryEnterAction
   };
 });

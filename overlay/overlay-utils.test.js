@@ -1,7 +1,14 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
 
-const { isTextInputTarget, isInteractiveTarget, shouldIgnoreGlobalEnter } = require("./overlay-utils");
+const {
+  isTextInputTarget,
+  isInteractiveTarget,
+  shouldIgnoreGlobalEnter,
+  normalizeEventType,
+  selectGlobalEnterAction,
+  primaryEnterAction
+} = require("./overlay-utils");
 
 test("isTextInputTarget: recognizes common typing targets", () => {
   assert.equal(isTextInputTarget({ tagName: "INPUT" }), true);
@@ -45,4 +52,23 @@ test("shouldIgnoreGlobalEnter: child of button/link should still block global En
     }
   };
   assert.equal(shouldIgnoreGlobalEnter(spanInsideButton), true);
+});
+
+test("normalizeEventType: uppercases and tolerates nullish", () => {
+  assert.equal(normalizeEventType("drift_persist"), "DRIFT_PERSIST");
+  assert.equal(normalizeEventType(""), "");
+  assert.equal(normalizeEventType(null), "");
+});
+
+test("selectGlobalEnterAction: mode=align disables global Enter", () => {
+  assert.equal(selectGlobalEnterAction({ eventType: "DRIFT_PERSIST", mode: "align" }), null);
+  assert.equal(selectGlobalEnterAction({ eventType: "DRIFT_START", mode: "align" }), null);
+});
+
+test("primaryEnterAction: DRIFT_PERSIST -> recover; default -> back_on_track", () => {
+  assert.equal(primaryEnterAction("DRIFT_PERSIST"), "recover");
+  assert.equal(primaryEnterAction("drift_persist"), "recover");
+  assert.equal(primaryEnterAction("DRIFT_START"), "back_on_track");
+  assert.equal(primaryEnterAction(""), "back_on_track");
+  assert.equal(primaryEnterAction(null), "back_on_track");
 });
