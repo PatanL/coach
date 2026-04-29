@@ -40,9 +40,21 @@
     return isTextInputTarget(t) || isInteractiveTarget(t);
   }
 
+  // Pure selection logic so we can unit test overlay focus behavior.
+  // mode: "align" when the user must answer; default action buttons otherwise.
+  function getInitialFocusId({ eventType, mode } = {}) {
+    const t = String(eventType || "").toUpperCase();
+    const m = String(mode || "").toLowerCase();
+    if (m === "align") return "alignText";
+    // DRIFT_PERSIST should feel like a clear escalation: bias focus toward recovery.
+    if (t === "DRIFT_PERSIST") return "recoverBtn";
+    return "backBtn";
+  }
+
   return {
     isTextInputTarget,
     isInteractiveTarget,
-    shouldIgnoreGlobalEnter
+    shouldIgnoreGlobalEnter,
+    getInitialFocusId
   };
 });

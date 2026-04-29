@@ -105,6 +105,19 @@ function showOverlay(payload) {
   }
 
   overlay.dataset.level = payload.level || "B";
+
+  // Deterministic focus to prevent accidental global-hotkey actions and reduce recovery friction.
+  try {
+    const focusId = window.overlayUtils?.getInitialFocusId?.({
+      eventType: overlay.dataset.eventType,
+      mode: overlay.dataset.mode
+    });
+    const el = focusId ? document.getElementById(focusId) : null;
+    if (el && typeof el.focus === "function") el.focus();
+  } catch {
+    // Non-fatal: never block overlay render on focus issues.
+  }
+
   currentPayload = payload;
   shownAt = Date.now();
 }
