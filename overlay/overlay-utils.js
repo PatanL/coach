@@ -40,9 +40,20 @@
     return isTextInputTarget(t) || isInteractiveTarget(t);
   }
 
+  // Map global Enter to the safest/highest-leverage action for the current overlay state.
+  // Keeping this deterministic makes it easy to test.
+  function getGlobalEnterAction({ eventType, mode } = {}) {
+    const et = String(eventType || "").toUpperCase();
+    const m = String(mode || "").toLowerCase();
+    if (m === "align") return null;
+    if (et === "DRIFT_PERSIST") return "recover";
+    return "back_on_track";
+  }
+
   return {
     isTextInputTarget,
     isInteractiveTarget,
-    shouldIgnoreGlobalEnter
+    shouldIgnoreGlobalEnter,
+    getGlobalEnterAction
   };
 });
