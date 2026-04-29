@@ -161,10 +161,15 @@ window.overlayAPI.onPause(() => {
 });
 
 window.addEventListener("keydown", (event) => {
-  // Don't treat Enter as "Back on track" while the user is typing or interacting with a control.
   if (event.key === "Enter") {
+    const eventType = overlay?.dataset?.eventType || "";
+    const shouldTrigger = window.overlayUtils?.shouldTriggerGlobalEnter?.(event, event.target, eventType);
+
+    // Back-compat: if helper isn't available, fall back to the old behavior.
     const ignoreEnter = window.overlayUtils?.shouldIgnoreGlobalEnter?.(event.target);
-    if (!ignoreEnter) {
+    const legacyShouldTrigger = !ignoreEnter;
+
+    if (typeof shouldTrigger === "boolean" ? shouldTrigger : legacyShouldTrigger) {
       sendAction({ action: "back_on_track" });
     }
   }

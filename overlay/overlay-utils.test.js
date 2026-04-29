@@ -1,7 +1,12 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
 
-const { isTextInputTarget, isInteractiveTarget, shouldIgnoreGlobalEnter } = require("./overlay-utils");
+const {
+  isTextInputTarget,
+  isInteractiveTarget,
+  shouldIgnoreGlobalEnter,
+  shouldTriggerGlobalEnter
+} = require("./overlay-utils");
 
 test("isTextInputTarget: recognizes common typing targets", () => {
   assert.equal(isTextInputTarget({ tagName: "INPUT" }), true);
@@ -45,4 +50,22 @@ test("shouldIgnoreGlobalEnter: child of button/link should still block global En
     }
   };
   assert.equal(shouldIgnoreGlobalEnter(spanInsideButton), true);
+});
+
+test("shouldTriggerGlobalEnter: DRIFT_PERSIST requires modifier", () => {
+  const baseEvent = { key: "Enter", metaKey: false, ctrlKey: false };
+  assert.equal(shouldTriggerGlobalEnter(baseEvent, { tagName: "DIV" }, "DRIFT_PERSIST"), false);
+  assert.equal(shouldTriggerGlobalEnter({ ...baseEvent, metaKey: true }, { tagName: "DIV" }, "DRIFT_PERSIST"), true);
+  assert.equal(shouldTriggerGlobalEnter({ ...baseEvent, ctrlKey: true }, { tagName: "DIV" }, "DRIFT_PERSIST"), true);
+});
+
+test("shouldTriggerGlobalEnter: non-DRIFT_PERSIST triggers without modifier (when safe)", () => {
+  const event = { key: "Enter", metaKey: false, ctrlKey: false };
+  assert.equal(shouldTriggerGlobalEnter(event, { tagName: "DIV" }, "DRIFT_START"), true);
+});
+
+test("shouldTriggerGlobalEnter: typing/clicking still blocks regardless of event type", () => {
+  const event = { key: "Enter", metaKey: true, ctrlKey: false };
+  assert.equal(shouldTriggerGlobalEnter(event, { tagName: "INPUT" }, "DRIFT_PERSIST"), false);
+  assert.equal(shouldTriggerGlobalEnter(event, { tagName: "BUTTON" }, "DRIFT_START"), false);
 });

@@ -40,9 +40,24 @@
     return isTextInputTarget(t) || isInteractiveTarget(t);
   }
 
+  // DRIFT_PERSIST is a higher-stakes moment: avoid accidental "Enter" dismissals.
+  // Require an explicit modifier (Cmd/Ctrl+Enter) to trigger the global primary action.
+  function shouldTriggerGlobalEnter(event, target, eventType) {
+    if (!event || event.key !== "Enter") return false;
+    const ignore = shouldIgnoreGlobalEnter(target);
+    if (ignore) return false;
+
+    const type = String(eventType || "").toUpperCase();
+    if (type === "DRIFT_PERSIST") {
+      return Boolean(event.metaKey || event.ctrlKey);
+    }
+    return true;
+  }
+
   return {
     isTextInputTarget,
     isInteractiveTarget,
-    shouldIgnoreGlobalEnter
+    shouldIgnoreGlobalEnter,
+    shouldTriggerGlobalEnter
   };
 });
