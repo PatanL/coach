@@ -37,10 +37,14 @@ async function main() {
   async function capture(name, payload) {
     // Give the DOM a moment to settle, then render the payload.
     await new Promise((r) => setTimeout(r, 50));
+
+    // Ensure deterministic output: disable animations/transitions during capture.
+    await win.webContents.executeJavaScript('document.documentElement.dataset.screenshot = "true";');
+
     win.webContents.send("overlay:show", payload);
 
-    // Allow any CSS animations to reach a stable frame.
-    await new Promise((r) => setTimeout(r, 250));
+    // Give layout a beat to apply styles.
+    await new Promise((r) => setTimeout(r, 50));
 
     const image = await win.capturePage();
     fs.writeFileSync(path.join(OUT_DIR, name), image.toPNG());
