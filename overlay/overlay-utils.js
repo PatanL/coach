@@ -40,9 +40,19 @@
     return isTextInputTarget(t) || isInteractiveTarget(t);
   }
 
+  // DRIFT_PERSIST is deliberately a “pattern-break” event: require a deliberate click.
+  // We still allow Enter submission inside the align text input because that handler
+  // stops propagation before the global handler runs.
+  function shouldAllowGlobalEnter(eventType) {
+    const type = String(eventType || "").toUpperCase();
+    if (type === "DRIFT_PERSIST") return false;
+    return true;
+  }
+
   return {
     isTextInputTarget,
     isInteractiveTarget,
-    shouldIgnoreGlobalEnter
+    shouldIgnoreGlobalEnter,
+    shouldAllowGlobalEnter
   };
 });

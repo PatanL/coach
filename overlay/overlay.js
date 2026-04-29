@@ -162,9 +162,11 @@ window.overlayAPI.onPause(() => {
 
 window.addEventListener("keydown", (event) => {
   // Don't treat Enter as "Back on track" while the user is typing or interacting with a control.
+  // Also, DRIFT_PERSIST is a deliberate pattern-break: require a click/tap to acknowledge.
   if (event.key === "Enter") {
     const ignoreEnter = window.overlayUtils?.shouldIgnoreGlobalEnter?.(event.target);
-    if (!ignoreEnter) {
+    const allowGlobalEnter = window.overlayUtils?.shouldAllowGlobalEnter?.(overlay?.dataset?.eventType);
+    if (!ignoreEnter && allowGlobalEnter !== false) {
       sendAction({ action: "back_on_track" });
     }
   }
