@@ -11,6 +11,7 @@ const choiceButtons = document.getElementById("choiceButtons");
 const alignInput = document.getElementById("alignInput");
 const alignText = document.getElementById("alignText");
 const alignSubmit = document.getElementById("alignSubmit");
+const enterHint = document.getElementById("enterHint");
 
 const backBtn = document.getElementById("backBtn");
 const stuckBtn = document.getElementById("stuckBtn");
@@ -62,6 +63,19 @@ function resetAlignInput() {
   alignInput.classList.add("hidden");
 }
 
+function updateEnterHint() {
+  if (!enterHint) return;
+  if (overlay.dataset.mode === "align") {
+    enterHint.textContent = "Enter: Submit";
+    return;
+  }
+  if (overlay.dataset.eventType === "DRIFT_PERSIST") {
+    enterHint.textContent = "Enter: Recover schedule";
+    return;
+  }
+  enterHint.textContent = "Enter: Back on track";
+}
+
 function showOverlay(payload) {
   overlay.classList.remove("hidden");
   resetSnooze();
@@ -74,6 +88,7 @@ function showOverlay(payload) {
   } else {
     overlay.dataset.mode = "";
   }
+  updateEnterHint();
   setText(blockName, payload.block_name || "");
   setText(headline, payload.headline || "Reset.");
   setText(humanLine, payload.human_line || "");
@@ -107,6 +122,28 @@ function showOverlay(payload) {
   overlay.dataset.level = payload.level || "B";
   currentPayload = payload;
   shownAt = Date.now();
+
+  // Focus rules (keyboard safety + frictionless recovery):
+  // - If the overlay is asking for alignment input, focus the text box.
+  // - For persistent drift, default focus to the Recover action as the "next step".
+  // - Otherwise, focus the primary "Back on track" action.
+  // Note: When a button is focused, pressing Enter activates that button and our
+  // global Enter handler is suppressed via overlayUtils.shouldIgnoreGlobalEnter.
+  queueMicrotask(() => {
+    try {
+      if (!overlay.classList.contains("hidden") && overlay.dataset.mode === "align") {
+        alignText?.focus?.();
+        return;
+      }
+      if (!overlay.classList.contains("hidden") && overlay.dataset.eventType === "DRIFT_PERSIST") {
+        recoverBtn?.focus?.();
+        return;
+      }
+      backBtn?.focus?.();
+    } catch {
+      // ignore focus errors (e.g., in test/screenshot harness)
+    }
+  });
 }
 
 function sendAction(action) {
@@ -161,11 +198,16 @@ window.overlayAPI.onPause(() => {
 });
 
 window.addEventListener("keydown", (event) => {
-  // Don't treat Enter as "Back on track" while the user is typing or interacting with a control.
+  // Don't treat Enter as a global action while the user is typing or interacting with a control.
   if (event.key === "Enter") {
+    if (overlay.classList.contains("hidden")) return;
     const ignoreEnter = window.overlayUtils?.shouldIgnoreGlobalEnter?.(event.target);
     if (!ignoreEnter) {
-      sendAction({ action: "back_on_track" });
+      const action = window.overlayUtils?.getGlobalEnterAction?.({
+        eventType: overlay.dataset.eventType,
+        mode: overlay.dataset.mode
+      });
+      if (action) sendAction({ action });
     }
   }
   if (event.key === "Escape") {
