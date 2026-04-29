@@ -11,6 +11,7 @@ const choiceButtons = document.getElementById("choiceButtons");
 const alignInput = document.getElementById("alignInput");
 const alignText = document.getElementById("alignText");
 const alignSubmit = document.getElementById("alignSubmit");
+const enterHint = document.getElementById("enterHint");
 
 const backBtn = document.getElementById("backBtn");
 const stuckBtn = document.getElementById("stuckBtn");
@@ -62,6 +63,22 @@ function resetAlignInput() {
   alignInput.classList.add("hidden");
 }
 
+function updateEnterHint({ eventType = "", mode = "" } = {}) {
+  const normalizedType = String(eventType || "").toUpperCase();
+  const normalizedMode = String(mode || "").toLowerCase();
+
+  if (!enterHint) return;
+  if (normalizedMode === "align") {
+    enterHint.textContent = "Enter: Submit";
+    return;
+  }
+  if (normalizedType === "DRIFT_PERSIST") {
+    enterHint.textContent = "Enter: Recover schedule";
+    return;
+  }
+  enterHint.textContent = "Enter: Back on track";
+}
+
 function showOverlay(payload) {
   overlay.classList.remove("hidden");
   resetSnooze();
@@ -74,6 +91,7 @@ function showOverlay(payload) {
   } else {
     overlay.dataset.mode = "";
   }
+  updateEnterHint({ eventType: overlay.dataset.eventType, mode: overlay.dataset.mode });
   setText(blockName, payload.block_name || "");
   setText(headline, payload.headline || "Reset.");
   setText(humanLine, payload.human_line || "");
@@ -107,6 +125,20 @@ function showOverlay(payload) {
   overlay.dataset.level = payload.level || "B";
   currentPayload = payload;
   shownAt = Date.now();
+
+  // Focus management: make the next best action easy, and avoid accidental global-hotkey actions.
+  // Keep it deterministic and rule-based (see overlay-utils for logic + tests).
+  const focusId = window.overlayUtils?.getInitialFocusId?.({
+    eventType: overlay.dataset.eventType,
+    mode: overlay.dataset.mode
+  });
+  if (focusId) {
+    // Defer to ensure DOM is painted/updated before focusing.
+    window.requestAnimationFrame(() => {
+      const el = document.getElementById(focusId);
+      if (el && typeof el.focus === "function") el.focus();
+    });
+  }
 }
 
 function sendAction(action) {

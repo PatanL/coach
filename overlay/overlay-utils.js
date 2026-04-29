@@ -40,9 +40,24 @@
     return isTextInputTarget(t) || isInteractiveTarget(t);
   }
 
+  // Decide what should receive focus when the overlay appears.
+  // Goals:
+  // - Reduce accidental actions (no surprise focus on destructive controls).
+  // - Make the next best action easy (esp. for persistent drift).
+  // - If the overlay is in "align" mode, put the cursor in the input.
+  function getInitialFocusId({ eventType = "", mode = "" } = {}) {
+    const normalizedType = String(eventType || "").toUpperCase();
+    const normalizedMode = String(mode || "").toLowerCase();
+
+    if (normalizedMode === "align") return "alignText";
+    if (normalizedType === "DRIFT_PERSIST") return "recoverBtn";
+    return "backBtn";
+  }
+
   return {
     isTextInputTarget,
     isInteractiveTarget,
-    shouldIgnoreGlobalEnter
+    shouldIgnoreGlobalEnter,
+    getInitialFocusId
   };
 });
