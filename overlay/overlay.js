@@ -205,6 +205,7 @@ window.addEventListener("keydown", (event) => {
     }
   }
   if (event.key === "Escape") {
-    snooze.classList.remove("hidden");
+    // Escape should dismiss the snooze menu if it's open.
+    snooze.classList.add("hidden");
   }
 });
