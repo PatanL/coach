@@ -18,7 +18,6 @@ const backBtn = document.getElementById("backBtn");
 const stuckBtn = document.getElementById("stuckBtn");
 const recoverBtn = document.getElementById("recoverBtn");
 const snoozeBtn = document.getElementById("snoozeBtn");
-const enterHint = document.getElementById("enterHint");
 
 let shownAt = null;
 let currentPayload = null;
