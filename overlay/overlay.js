@@ -69,6 +69,9 @@ function showOverlay(payload) {
   updateEventLabel(payload);
   updatePrimaryLabel(payload);
 
+  // Used by screenshot harness to disable animations for deterministic captures.
+  overlay.dataset.screenshot = payload?.screenshot ? "true" : "false";
+
   if (payload.choices && Array.isArray(payload.choices)) {
     overlay.dataset.mode = "align";
   } else {
