@@ -16,6 +16,7 @@ const backBtn = document.getElementById("backBtn");
 const stuckBtn = document.getElementById("stuckBtn");
 const recoverBtn = document.getElementById("recoverBtn");
 const snoozeBtn = document.getElementById("snoozeBtn");
+const enterHint = document.getElementById("enterHint");
 
 let shownAt = null;
 let currentPayload = null;
@@ -37,6 +38,15 @@ function updateEventLabel(payload) {
   const raw = payload?.source_event_type || payload?.event_type || payload?.type || "";
   const eventType = String(raw).toUpperCase();
   overlay.dataset.eventType = eventType;
+
+  // Pattern-break UX: DRIFT_PERSIST should require an explicit click (no "Enter to dismiss").
+  if (enterHint) {
+    if (eventType === "DRIFT_PERSIST") {
+      setText(enterHint, "Enter: (disabled) — choose a button");
+    } else {
+      setText(enterHint, "Enter: Back on track");
+    }
+  }
 
   if (!eventType) {
     setText(eventLabel, "DRIFT");
