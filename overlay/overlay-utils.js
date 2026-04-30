@@ -40,9 +40,24 @@
     return isTextInputTarget(t) || isInteractiveTarget(t);
   }
 
+  // Decide whether the overlay should treat Enter as a global "Back on track" action.
+  // Safety goals:
+  // - Never trigger while typing or interacting with a control.
+  // - Never trigger in "align" mode (user should answer the alignment prompt).
+  // - Ignore repeats/modifiers to reduce accidental activation.
+  function shouldTriggerGlobalEnterAction(event, overlayMode) {
+    if (!event || event.key !== "Enter") return false;
+    if (overlayMode === "align") return false;
+    if (event.repeat) return false;
+    if (event.metaKey || event.ctrlKey || event.altKey) return false;
+    const ignore = shouldIgnoreGlobalEnter(event.target);
+    return !ignore;
+  }
+
   return {
     isTextInputTarget,
     isInteractiveTarget,
-    shouldIgnoreGlobalEnter
+    shouldIgnoreGlobalEnter,
+    shouldTriggerGlobalEnterAction
   };
 });
