@@ -62,6 +62,24 @@ function resetAlignInput() {
   alignInput.classList.add("hidden");
 }
 
+function focusPrimaryControl(payload) {
+  // Make the next action obvious and reduce accidental global hotkey triggers.
+  // DRIFT_PERSIST should be a strong pattern-break: default focus goes to "Recover".
+  const eventType = String(overlay?.dataset?.eventType || "").toUpperCase();
+
+  if (payload?.choices && Array.isArray(payload.choices)) {
+    alignText?.focus?.();
+    return;
+  }
+
+  if (eventType === "DRIFT_PERSIST") {
+    recoverBtn?.focus?.();
+    return;
+  }
+
+  backBtn?.focus?.();
+}
+
 function showOverlay(payload) {
   overlay.classList.remove("hidden");
   resetSnooze();
@@ -107,6 +125,10 @@ function showOverlay(payload) {
   overlay.dataset.level = payload.level || "B";
   currentPayload = payload;
   shownAt = Date.now();
+
+  // Ensure focus reflects the intended primary action for this overlay.
+  // Defer to the next tick so DOM updates (hidden classes, button creation) are applied.
+  setTimeout(() => focusPrimaryControl(payload), 0);
 }
 
 function sendAction(action) {
@@ -161,11 +183,18 @@ window.overlayAPI.onPause(() => {
 });
 
 window.addEventListener("keydown", (event) => {
-  // Don't treat Enter as "Back on track" while the user is typing or interacting with a control.
+  // Don't treat Enter as a global action while the user is typing or interacting with a control.
   if (event.key === "Enter") {
     const ignoreEnter = window.overlayUtils?.shouldIgnoreGlobalEnter?.(event.target);
     if (!ignoreEnter) {
-      sendAction({ action: "back_on_track" });
+      // For persistent drift we want an unmistakable "recovery" affordance.
+      // Make Enter map to Recover instead of implicitly marking "Back on track".
+      const eventType = String(overlay?.dataset?.eventType || "").toUpperCase();
+      if (eventType === "DRIFT_PERSIST") {
+        sendAction({ action: "recover" });
+      } else {
+        sendAction({ action: "back_on_track" });
+      }
     }
   }
   if (event.key === "Escape") {
