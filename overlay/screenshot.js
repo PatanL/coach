@@ -68,6 +68,13 @@ async function main() {
     headline: "Interrupt the loop."
   });
 
+  await capture("drift_persist_snooze_open.png", {
+    ...common,
+    event_type: "DRIFT_PERSIST",
+    headline: "Interrupt the loop.",
+    open_snooze: true
+  });
+
   win.destroy();
   app.quit();
 }

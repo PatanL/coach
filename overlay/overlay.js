@@ -66,6 +66,11 @@ function showOverlay(payload) {
   overlay.classList.remove("hidden");
   resetSnooze();
   resetAlignInput();
+
+  if (payload?.open_snooze) {
+    showSnooze();
+  }
+
   updateEventLabel(payload);
   updatePrimaryLabel(payload);
 
@@ -141,8 +146,18 @@ alignText.addEventListener("keydown", (event) => {
   }
 });
 
-snoozeBtn.addEventListener("click", () => {
+function showSnooze() {
   snooze.classList.remove("hidden");
+  // Make keyboard flow safe: after opening snooze, focus the first reason button so Enter activates it
+  // instead of accidentally triggering a global overlay action.
+  const firstReason = snooze.querySelector?.("button[data-reason]");
+  if (firstReason && typeof firstReason.focus === "function") {
+    firstReason.focus();
+  }
+}
+
+snoozeBtn.addEventListener("click", () => {
+  showSnooze();
 });
 
 snooze.addEventListener("click", (event) => {
@@ -162,13 +177,15 @@ window.overlayAPI.onPause(() => {
 
 window.addEventListener("keydown", (event) => {
   // Don't treat Enter as "Back on track" while the user is typing or interacting with a control.
+  // Also ignore Enter when the snooze panel is open (keyboard flow should stay inside the panel).
   if (event.key === "Enter") {
-    const ignoreEnter = window.overlayUtils?.shouldIgnoreGlobalEnter?.(event.target);
+    const snoozeOpen = !snooze.classList.contains("hidden");
+    const ignoreEnter = snoozeOpen || window.overlayUtils?.shouldIgnoreGlobalEnter?.(event.target);
     if (!ignoreEnter) {
       sendAction({ action: "back_on_track" });
     }
   }
   if (event.key === "Escape") {
-    snooze.classList.remove("hidden");
+    showSnooze();
   }
 });
