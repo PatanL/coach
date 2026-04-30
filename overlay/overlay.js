@@ -107,6 +107,17 @@ function showOverlay(payload) {
   overlay.dataset.level = payload.level || "B";
   currentPayload = payload;
   shownAt = Date.now();
+
+  // Focus a safe default control so Enter triggers an intentional action.
+  // DRIFT_PERSIST should strongly bias toward recovery (visual + interaction pattern-break).
+  const wantsAlign = overlay.dataset.mode === "align";
+  const eventType = overlay.dataset.eventType || "";
+  const focusTarget = wantsAlign ? alignText : eventType === "DRIFT_PERSIST" ? recoverBtn : backBtn;
+
+  // Defer to ensure the element is visible and focusable after DOM updates.
+  window.requestAnimationFrame(() => {
+    focusTarget?.focus?.();
+  });
 }
 
 function sendAction(action) {
