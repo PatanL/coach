@@ -53,11 +53,29 @@
     return "backBtn";
   }
 
+  // Decide what the global Enter key should do when not focused in an interactive control.
+  // Returns an overlay action string, e.g. "recover" | "back_on_track".
+  function getPrimaryEnterAction({ eventType, mode } = {}) {
+    const t = normalizeEventType(eventType);
+    if (mode === "align") return "back_on_track";
+    if (t === "DRIFT_PERSIST") return "recover";
+    return "back_on_track";
+  }
+
+  function getEnterHintText({ eventType, mode } = {}) {
+    const t = normalizeEventType(eventType);
+    if (mode === "align") return "Enter: Submit";
+    if (t === "DRIFT_PERSIST") return "Enter: Recover schedule";
+    return "Enter: Back on track";
+  }
+
   return {
     isTextInputTarget,
     isInteractiveTarget,
     shouldIgnoreGlobalEnter,
     normalizeEventType,
-    getPreferredInitialFocus
+    getPreferredInitialFocus,
+    getPrimaryEnterAction,
+    getEnterHintText
   };
 });

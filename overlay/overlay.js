@@ -11,6 +11,7 @@ const choiceButtons = document.getElementById("choiceButtons");
 const alignInput = document.getElementById("alignInput");
 const alignText = document.getElementById("alignText");
 const alignSubmit = document.getElementById("alignSubmit");
+const enterHint = document.getElementById("enterHint");
 
 const backBtn = document.getElementById("backBtn");
 const stuckBtn = document.getElementById("stuckBtn");
@@ -51,6 +52,14 @@ function updateEventLabel(payload) {
     return;
   }
   setText(eventLabel, eventType.replaceAll("_", " "));
+}
+
+function updateEnterHint() {
+  if (!enterHint) return;
+  const mode = overlay.dataset.mode || "";
+  const eventType = overlay.dataset.eventType || "";
+  const text = window.overlayUtils?.getEnterHintText?.({ eventType, mode }) || "Enter: Back on track";
+  enterHint.textContent = text;
 }
 
 function resetSnooze() {
@@ -108,6 +117,7 @@ function showOverlay(payload) {
   } else {
     overlay.dataset.mode = "";
   }
+  updateEnterHint();
   setText(blockName, payload.block_name || "");
   setText(headline, payload.headline || "Reset.");
   setText(humanLine, payload.human_line || "");
@@ -201,7 +211,12 @@ window.addEventListener("keydown", (event) => {
   if (event.key === "Enter") {
     const ignoreEnter = window.overlayUtils?.shouldIgnoreGlobalEnter?.(event.target);
     if (!ignoreEnter) {
-      sendAction({ action: "back_on_track" });
+      const eventType = overlay.dataset.eventType || "";
+      const mode = overlay.dataset.mode || "";
+      const action =
+        window.overlayUtils?.getPrimaryEnterAction?.({ eventType, mode }) ||
+        "back_on_track";
+      sendAction({ action });
     }
   }
   if (event.key === "Escape") {
