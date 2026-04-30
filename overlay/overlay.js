@@ -66,6 +66,8 @@ function showOverlay(payload) {
   overlay.dataset.eventType = payload?.source_event_type || "";
   overlay.dataset.styleId = payload?.style_id || "";
   overlay.classList.remove("hidden");
+  // Used by screenshot tooling to disable animations for deterministic captures.
+  overlay.dataset.screenshot = payload?.screenshot ? "1" : "";
   resetSnooze();
   resetAlignInput();
   updateEventLabel(payload);

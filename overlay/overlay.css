@@ -224,4 +224,9 @@ button.primary:hover {
   color: rgba(246, 244, 239, 0.5);
 }
 
-/* (resolved during rebase) DRIFT_PERSIST visual pattern-break is defined near the top of the file. */
+/* Deterministic screenshots: disable animations/transitions while capture runs. */
+#overlay[data-screenshot="1"],
+#overlay[data-screenshot="1"] * {
+  animation: none !important;
+  transition: none !important;
+}
