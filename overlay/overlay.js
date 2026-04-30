@@ -105,6 +105,7 @@ function showOverlay(payload) {
   }
 
   overlay.dataset.level = payload.level || "B";
+  overlay.dataset.cmdId = payload.cmd_id || "";
   currentPayload = payload;
   shownAt = Date.now();
 }
