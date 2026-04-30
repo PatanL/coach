@@ -8,7 +8,8 @@ const {
   normalizeEventType,
   getPreferredInitialFocus,
   getPrimaryEnterAction,
-  getEnterHintText
+  getEnterHintText,
+  getPrimaryButtonId
 } = require("./overlay-utils");
 
 test("isTextInputTarget: recognizes common typing targets", () => {
@@ -93,4 +94,11 @@ test("getPrimaryEnterAction: default maps Enter to back_on_track", () => {
 test("getEnterHintText: aligns hint with mode/event", () => {
   assert.equal(getEnterHintText({ eventType: "DRIFT_PERSIST" }), "Enter: Recover schedule");
   assert.equal(getEnterHintText({ eventType: "DRIFT", mode: "align" }), "Enter: Submit");
+});
+
+test("getPrimaryButtonId: aligns primary styling with mode/event", () => {
+  assert.equal(getPrimaryButtonId({ eventType: "DRIFT", mode: "align" }), "alignSubmit");
+  assert.equal(getPrimaryButtonId({ eventType: "DRIFT_PERSIST" }), "recoverBtn");
+  assert.equal(getPrimaryButtonId({ eventType: "drift_persist" }), "recoverBtn");
+  assert.equal(getPrimaryButtonId({ eventType: "DRIFT" }), "backBtn");
 });

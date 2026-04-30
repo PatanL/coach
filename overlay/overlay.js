@@ -62,6 +62,19 @@ function updateEnterHint() {
   enterHint.textContent = text;
 }
 
+function applyPrimaryButtonStyle() {
+  const mode = overlay.dataset.mode || "";
+  const eventType = overlay.dataset.eventType || "";
+  const preferred = window.overlayUtils?.getPrimaryButtonId?.({ eventType, mode }) || "backBtn";
+
+  // Clear existing primary styles first.
+  [backBtn, recoverBtn, alignSubmit].forEach((el) => el?.classList?.remove("primary"));
+
+  const el =
+    preferred === "recoverBtn" ? recoverBtn : preferred === "alignSubmit" ? alignSubmit : backBtn;
+  el?.classList?.add("primary");
+}
+
 function resetSnooze() {
   snooze.classList.add("hidden");
 }
@@ -118,6 +131,7 @@ function showOverlay(payload) {
     overlay.dataset.mode = "";
   }
   updateEnterHint();
+  applyPrimaryButtonStyle();
   setText(blockName, payload.block_name || "");
   setText(headline, payload.headline || "Reset.");
   setText(humanLine, payload.human_line || "");

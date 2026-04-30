@@ -71,6 +71,15 @@
     return "Enter: Back on track";
   }
 
+  // Decide which button should be visually primary.
+  // Returns one of: "alignSubmit" | "recoverBtn" | "backBtn".
+  function getPrimaryButtonId({ eventType, mode } = {}) {
+    const t = normalizeEventType(eventType);
+    if (mode === "align") return "alignSubmit";
+    if (t === "DRIFT_PERSIST") return "recoverBtn";
+    return "backBtn";
+  }
+
   return {
     isTextInputTarget,
     isInteractiveTarget,
@@ -78,6 +87,7 @@
     normalizeEventType,
     getPreferredInitialFocus,
     getPrimaryEnterAction,
-    getEnterHintText
+    getEnterHintText,
+    getPrimaryButtonId
   };
 });
