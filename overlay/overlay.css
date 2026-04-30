@@ -266,3 +266,10 @@ button.primary:hover {
   color: #ff49a7;
   text-shadow: 0 0 10px rgba(255, 73, 167, 0.35);
 }
+
+/* Deterministic rendering for screenshot tests (disable animations/transitions). */
+#overlay[data-screenshot="true"],
+#overlay[data-screenshot="true"] * {
+  animation: none !important;
+  transition: none !important;
+}
