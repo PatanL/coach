@@ -12,6 +12,8 @@ const alignInput = document.getElementById("alignInput");
 const alignText = document.getElementById("alignText");
 const alignSubmit = document.getElementById("alignSubmit");
 
+const enterHint = document.getElementById("enterHint");
+
 const backBtn = document.getElementById("backBtn");
 const stuckBtn = document.getElementById("stuckBtn");
 const recoverBtn = document.getElementById("recoverBtn");
@@ -73,6 +75,10 @@ function showOverlay(payload) {
     overlay.dataset.mode = "align";
   } else {
     overlay.dataset.mode = "";
+  }
+
+  if (enterHint) {
+    enterHint.textContent = overlay.dataset.mode === "align" ? "Enter: Submit" : "Enter: Back on track";
   }
   setText(blockName, payload.block_name || "");
   setText(headline, payload.headline || "Reset.");
@@ -162,9 +168,11 @@ window.overlayAPI.onPause(() => {
 
 window.addEventListener("keydown", (event) => {
   // Don't treat Enter as "Back on track" while the user is typing or interacting with a control.
+  // Also, in "align" mode, avoid firing a global action from a stray Enter keypress (pattern: user is deciding/typing).
   if (event.key === "Enter") {
     const ignoreEnter = window.overlayUtils?.shouldIgnoreGlobalEnter?.(event.target);
-    if (!ignoreEnter) {
+    const isAlignMode = overlay?.dataset?.mode === "align";
+    if (!ignoreEnter && !isAlignMode) {
       sendAction({ action: "back_on_track" });
     }
   }
