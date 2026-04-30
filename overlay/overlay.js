@@ -107,6 +107,19 @@ function showOverlay(payload) {
   overlay.dataset.level = payload.level || "B";
   currentPayload = payload;
   shownAt = Date.now();
+
+  // UX: when drift has persisted, make the next best action immediately reachable.
+  // This is a deliberate pattern-break: we bias toward "Recover" without forcing a click.
+  if (overlay.dataset.eventType === "DRIFT_PERSIST" && overlay.dataset.mode !== "align") {
+    // Defer until after paint so the button exists + styles apply.
+    window.requestAnimationFrame(() => {
+      try {
+        recoverBtn?.focus?.();
+      } catch {
+        // no-op: focus is best-effort (e.g. in screenshot runner / test env)
+      }
+    });
+  }
 }
 
 function sendAction(action) {
