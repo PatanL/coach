@@ -65,13 +65,14 @@ function resetAlignInput() {
 function showOverlay(payload) {
   overlay.dataset.eventType = payload?.source_event_type || "";
   overlay.dataset.styleId = payload?.style_id || "";
-  overlay.classList.remove("hidden");
   // Used by screenshot tooling to disable animations for deterministic captures.
   overlay.dataset.screenshot = payload?.screenshot ? "1" : "";
   resetSnooze();
   resetAlignInput();
+  // Set data attributes + labels before showing to avoid a 1-frame style flash.
   updateEventLabel(payload);
   updatePrimaryLabel(payload);
+  overlay.classList.remove("hidden");
 
   if (payload.choices && Array.isArray(payload.choices)) {
     overlay.dataset.mode = "align";
