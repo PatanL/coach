@@ -40,9 +40,18 @@
     return isTextInputTarget(t) || isInteractiveTarget(t);
   }
 
+  // Global Enter can map to different overlay actions depending on event severity.
+  // We keep this logic in a tiny pure function for easy unit testing.
+  function getGlobalEnterAction(eventType) {
+    const t = String(eventType || "").toUpperCase();
+    if (t === "DRIFT_PERSIST") return "recover";
+    return "back_on_track";
+  }
+
   return {
     isTextInputTarget,
     isInteractiveTarget,
-    shouldIgnoreGlobalEnter
+    shouldIgnoreGlobalEnter,
+    getGlobalEnterAction
   };
 });
