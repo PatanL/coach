@@ -9,8 +9,12 @@ function ensureDir(dir) {
 }
 
 async function renderAndCapture(win, name, payload) {
-  win.webContents.send("overlay:show", payload);
-  await new Promise((r) => setTimeout(r, 75));
+  // Mark screenshot mode to disable animations/transitions for deterministic captures.
+  win.webContents.send("overlay:show", { ...payload, screenshot: true });
+
+  // Let the DOM/layout settle.
+  await new Promise((r) => setTimeout(r, 200));
+
   const image = await win.webContents.capturePage();
   fs.writeFileSync(path.join(OUT_DIR, name), image.toPNG());
 }
