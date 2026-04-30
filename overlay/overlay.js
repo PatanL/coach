@@ -62,6 +62,40 @@ function resetAlignInput() {
   alignInput.classList.add("hidden");
 }
 
+function tryFocus(el) {
+  if (!el) return false;
+  if (el.disabled) return false;
+  // offsetParent === null covers display:none and some hidden states.
+  if (el.offsetParent === null) return false;
+  el.focus({ preventScroll: true });
+  return true;
+}
+
+function applyInitialFocus() {
+  const mode = overlay.dataset.mode || "";
+  const eventType = overlay.dataset.eventType || "";
+  const preferred = window.overlayUtils?.getPreferredInitialFocus?.({ eventType, mode }) || "backBtn";
+
+  // Defer until after layout so visibility checks are accurate.
+  requestAnimationFrame(() => {
+    if (preferred === "alignText") {
+      if (!tryFocus(alignText)) {
+        tryFocus(backBtn);
+      }
+      return;
+    }
+
+    if (preferred === "recoverBtn") {
+      if (!tryFocus(recoverBtn)) {
+        tryFocus(backBtn);
+      }
+      return;
+    }
+
+    tryFocus(backBtn);
+  });
+}
+
 function showOverlay(payload) {
   overlay.classList.remove("hidden");
   resetSnooze();
@@ -107,6 +141,8 @@ function showOverlay(payload) {
   overlay.dataset.level = payload.level || "B";
   currentPayload = payload;
   shownAt = Date.now();
+
+  applyInitialFocus();
 }
 
 function sendAction(action) {

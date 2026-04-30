@@ -40,9 +40,24 @@
     return isTextInputTarget(t) || isInteractiveTarget(t);
   }
 
+  function normalizeEventType(raw) {
+    return String(raw || "").trim().toUpperCase();
+  }
+
+  // Centralize focus rules so overlay.js stays dumb and we can unit test the behavior.
+  // Returns one of: "alignText" | "recoverBtn" | "backBtn".
+  function getPreferredInitialFocus({ eventType, mode } = {}) {
+    const t = normalizeEventType(eventType);
+    if (mode === "align") return "alignText";
+    if (t === "DRIFT_PERSIST") return "recoverBtn";
+    return "backBtn";
+  }
+
   return {
     isTextInputTarget,
     isInteractiveTarget,
-    shouldIgnoreGlobalEnter
+    shouldIgnoreGlobalEnter,
+    normalizeEventType,
+    getPreferredInitialFocus
   };
 });
