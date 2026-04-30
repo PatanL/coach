@@ -57,7 +57,9 @@
   // Returns an overlay action string, e.g. "recover" | "back_on_track".
   function getPrimaryEnterAction({ eventType, mode } = {}) {
     const t = normalizeEventType(eventType);
-    if (mode === "align") return "back_on_track";
+    // In align mode, Enter should prefer submitting the answer rather than dismissing the overlay.
+    // overlay.js will route this to alignSubmit.click(), which is a no-op if the input is empty.
+    if (mode === "align") return "align_submit";
     if (t === "DRIFT_PERSIST") return "recover";
     return "back_on_track";
   }

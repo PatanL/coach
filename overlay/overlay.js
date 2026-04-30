@@ -216,7 +216,12 @@ window.addEventListener("keydown", (event) => {
       const action =
         window.overlayUtils?.getPrimaryEnterAction?.({ eventType, mode }) ||
         "back_on_track";
-      sendAction({ action });
+
+      if (action === "align_submit") {
+        alignSubmit.click();
+      } else {
+        sendAction({ action });
+      }
     }
   }
   if (event.key === "Escape") {

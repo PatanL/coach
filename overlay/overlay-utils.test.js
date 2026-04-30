@@ -75,6 +75,11 @@ test("getPreferredInitialFocus: default focuses back", () => {
   assert.equal(getPreferredInitialFocus({ eventType: "" }), "backBtn");
 });
 
+test("getPrimaryEnterAction: align mode maps Enter to align_submit", () => {
+  assert.equal(getPrimaryEnterAction({ eventType: "DRIFT", mode: "align" }), "align_submit");
+  assert.equal(getPrimaryEnterAction({ eventType: "DRIFT_PERSIST", mode: "align" }), "align_submit");
+});
+
 test("getPrimaryEnterAction: DRIFT_PERSIST maps Enter to recover", () => {
   assert.equal(getPrimaryEnterAction({ eventType: "DRIFT_PERSIST" }), "recover");
   assert.equal(getPrimaryEnterAction({ eventType: "drift_persist" }), "recover");
