@@ -172,7 +172,10 @@ window.addEventListener("keydown", (event) => {
     const ignoreEnter = window.overlayUtils?.shouldIgnoreGlobalEnter?.(event.target);
     if (!ignoreEnter) sendAction({ action: "back_on_track" });
   }
+
   if (event.key === "Escape") {
-    snooze.classList.remove("hidden");
+    // Don't pop open Snooze while the user is typing a custom alignment answer.
+    const ignoreEscape = window.overlayUtils?.shouldIgnoreGlobalEscape?.(event.target);
+    if (!ignoreEscape) snooze.classList.remove("hidden");
   }
 });

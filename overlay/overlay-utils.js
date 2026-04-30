@@ -43,9 +43,16 @@
     return isTextInputTarget(t) || isInteractiveTarget(t);
   }
 
+  function shouldIgnoreGlobalEscape(target) {
+    // Escape should never trigger a global overlay action while the user is typing.
+    const t = findHotkeyRelevantTarget(target);
+    return isTextInputTarget(t);
+  }
+
   return {
     isTextInputTarget,
     isInteractiveTarget,
-    shouldIgnoreGlobalEnter
+    shouldIgnoreGlobalEnter,
+    shouldIgnoreGlobalEscape
   };
 });
