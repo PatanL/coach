@@ -68,6 +68,15 @@ async function main() {
     headline: "Interrupt the loop."
   });
 
+  await capture("align_mode.png", {
+    ...common,
+    event_type: "DRIFT_START",
+    headline: "Pick the next move.",
+    human_line: "Name the smallest action that gets you back to the task.",
+    choices: ["Open task doc", "Close distracting tab", "Set 10-min timer"],
+    question_id: "screenshot_q1"
+  });
+
   win.destroy();
   app.quit();
 }
