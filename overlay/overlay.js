@@ -107,6 +107,18 @@ function showOverlay(payload) {
   overlay.dataset.level = payload.level || "B";
   currentPayload = payload;
   shownAt = Date.now();
+
+  // Actionable overlay (Option B): on persistent drift, steer attention to the recovery action.
+  // Focusing a button also prevents the global Enter handler from accidentally marking "Back on track".
+  if (overlay.dataset.eventType === "DRIFT_PERSIST" && overlay.dataset.mode !== "align") {
+    requestAnimationFrame(() => {
+      try {
+        recoverBtn?.focus?.();
+      } catch (_) {
+        // noop: focus is best-effort
+      }
+    });
+  }
 }
 
 function sendAction(action) {
