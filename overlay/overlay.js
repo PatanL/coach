@@ -12,6 +12,8 @@ const alignInput = document.getElementById("alignInput");
 const alignText = document.getElementById("alignText");
 const alignSubmit = document.getElementById("alignSubmit");
 
+const enterHint = document.getElementById("enterHint");
+
 const backBtn = document.getElementById("backBtn");
 const stuckBtn = document.getElementById("stuckBtn");
 const recoverBtn = document.getElementById("recoverBtn");
@@ -68,6 +70,15 @@ function showOverlay(payload) {
   resetAlignInput();
   updateEventLabel(payload);
   updatePrimaryLabel(payload);
+
+  // Actionable overlay (Option B): make the primary action match the most helpful default.
+  const eventType = overlay.dataset.eventType || "";
+  const enterAction = window.overlayUtils?.getGlobalEnterAction?.(eventType) || "back_on_track";
+  if (enterHint) {
+    enterHint.textContent = enterAction === "recover" ? "Enter: Recover schedule" : "Enter: Back on track";
+  }
+  backBtn.classList.toggle("primary", enterAction !== "recover");
+  recoverBtn.classList.toggle("primary", enterAction === "recover");
 
   if (payload.choices && Array.isArray(payload.choices)) {
     overlay.dataset.mode = "align";
@@ -161,11 +172,13 @@ window.overlayAPI.onPause(() => {
 });
 
 window.addEventListener("keydown", (event) => {
-  // Don't treat Enter as "Back on track" while the user is typing or interacting with a control.
+  // Don't treat Enter as a global overlay action while the user is typing or interacting with a control.
   if (event.key === "Enter") {
     const ignoreEnter = window.overlayUtils?.shouldIgnoreGlobalEnter?.(event.target);
     if (!ignoreEnter) {
-      sendAction({ action: "back_on_track" });
+      const eventType = overlay?.dataset?.eventType || "";
+      const action = window.overlayUtils?.getGlobalEnterAction?.(eventType) || "back_on_track";
+      sendAction({ action });
     }
   }
   if (event.key === "Escape") {
