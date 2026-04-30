@@ -107,6 +107,14 @@ function showOverlay(payload) {
   overlay.dataset.level = payload.level || "B";
   currentPayload = payload;
   shownAt = Date.now();
+
+  // Set a safe default focus to reduce accidental actions.
+  // For DRIFT_PERSIST we want a stronger recovery "pattern-break": focus the Recovery CTA.
+  const eventType = String(overlay.dataset.eventType || "").toUpperCase();
+  const preferred = eventType === "DRIFT_PERSIST" ? recoverBtn : backBtn;
+  if (preferred && typeof preferred.focus === "function") {
+    preferred.focus();
+  }
 }
 
 function sendAction(action) {
