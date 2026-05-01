@@ -32,6 +32,21 @@ function updatePrimaryLabel(payload) {
   backBtn.textContent = "Back on track";
 }
 
+function updatePrimaryAction(payload) {
+  const raw = payload?.source_event_type || payload?.event_type || payload?.type || "";
+  const eventType = String(raw).toUpperCase();
+
+  // Default: Enter → Back on track.
+  backBtn.classList.add("primary");
+  recoverBtn.classList.remove("primary");
+
+  // Pattern-break: when drift persists, make the recovery path the default action.
+  if (eventType === "DRIFT_PERSIST") {
+    backBtn.classList.remove("primary");
+    recoverBtn.classList.add("primary");
+  }
+}
+
 function updateEventLabel(payload) {
   // Prefer the originating event type when available (used for visual pattern-breaks like DRIFT_PERSIST).
   const raw = payload?.source_event_type || payload?.event_type || payload?.type || "";
@@ -68,6 +83,7 @@ function showOverlay(payload) {
   resetAlignInput();
   updateEventLabel(payload);
   updatePrimaryLabel(payload);
+  updatePrimaryAction(payload);
 
   if (payload.choices && Array.isArray(payload.choices)) {
     overlay.dataset.mode = "align";
@@ -115,6 +131,15 @@ function showOverlay(payload) {
 
   currentPayload = payload;
   shownAt = Date.now();
+
+  // Safety: put keyboard focus on the default primary action so Enter/Space behavior is predictable.
+  // When in align mode, prefer focusing the text input.
+  if (overlay.dataset.mode === "align") {
+    alignText.focus();
+  } else {
+    const primary = overlay.querySelector("button.primary");
+    primary?.focus?.();
+  }
 }
 
 function sendAction(action) {
