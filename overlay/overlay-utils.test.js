@@ -47,6 +47,17 @@ test("shouldIgnoreGlobalEnter: child of button/link should still block global En
   assert.equal(shouldIgnoreGlobalEnter(spanInsideButton), true);
 });
 
+test("isOverlayVisible: returns false when overlay is null", () => {
+  assert.equal(isOverlayVisible(null), false);
+});
+
+test("isOverlayVisible: respects the hidden class", () => {
+  const visible = { classList: { contains: () => false } };
+  const hidden = { classList: { contains: (c) => c === "hidden" } };
+  assert.equal(isOverlayVisible(visible), true);
+  assert.equal(isOverlayVisible(hidden), false);
+});
+
 test("isOverlayVisible: returns true unless overlay is hidden", () => {
   const overlayEl = { classList: { contains: (cls) => cls === "hidden" } };
   assert.equal(isOverlayVisible(overlayEl), false);
