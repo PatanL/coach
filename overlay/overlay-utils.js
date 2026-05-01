@@ -40,9 +40,15 @@
     return isTextInputTarget(t) || isInteractiveTarget(t);
   }
 
+  // For non-Enter hotkeys (e.g. single-letter quick actions), reuse the same safety rules.
+  function shouldIgnoreGlobalHotkeys(target) {
+    return shouldIgnoreGlobalEnter(target);
+  }
+
   return {
     isTextInputTarget,
     isInteractiveTarget,
-    shouldIgnoreGlobalEnter
+    shouldIgnoreGlobalEnter,
+    shouldIgnoreGlobalHotkeys
   };
 });
