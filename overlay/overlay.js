@@ -80,6 +80,19 @@ function showOverlay(payload) {
   setText(diagnosis, payload.diagnosis || "");
   setText(nextAction, payload.next_action || "");
 
+  // Stronger pattern-break on persistent drift: put the recovery action under the user's cursor.
+  // This also makes Enter behave safely (focused button activates itself; global Enter is ignored).
+  if (overlay.dataset.eventType === "DRIFT_PERSIST" && !(payload.choices && Array.isArray(payload.choices))) {
+    // Defer focus until after the DOM updates for this render.
+    queueMicrotask(() => {
+      try {
+        recoverBtn?.focus?.();
+      } catch (_) {
+        // ignore
+      }
+    });
+  }
+
   if (payload.level === "C") {
     miniPlan.classList.remove("hidden");
     setText(miniPlan, payload.mini_plan || "");
