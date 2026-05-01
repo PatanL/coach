@@ -69,6 +69,14 @@ function showOverlay(payload) {
   updateEventLabel(payload);
   updatePrimaryLabel(payload);
 
+  // Option B (actionable overlay): for persistent drift, visually cue the recovery action.
+  const eventType = String(overlay.dataset.eventType || "").toUpperCase();
+  if (eventType === "DRIFT_PERSIST") {
+    recoverBtn.classList.add("urgent");
+  } else {
+    recoverBtn.classList.remove("urgent");
+  }
+
   if (payload.choices && Array.isArray(payload.choices)) {
     overlay.dataset.mode = "align";
   } else {
@@ -168,6 +176,16 @@ window.addEventListener("keydown", (event) => {
       sendAction({ action: "back_on_track" });
     }
   }
+
+  // Option B (actionable overlay): quick recovery hotkey.
+  // Safety: ignore while typing or when focus is on an interactive element.
+  if (event.key === "r" || event.key === "R") {
+    const ignoreHotkeys = window.overlayUtils?.shouldIgnoreGlobalHotkeys?.(event.target);
+    if (!ignoreHotkeys) {
+      sendAction({ action: "recover" });
+    }
+  }
+
   if (event.key === "Escape") {
     snooze.classList.remove("hidden");
   }
