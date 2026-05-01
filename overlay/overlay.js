@@ -16,6 +16,7 @@ const backBtn = document.getElementById("backBtn");
 const stuckBtn = document.getElementById("stuckBtn");
 const recoverBtn = document.getElementById("recoverBtn");
 const snoozeBtn = document.getElementById("snoozeBtn");
+const hotkeyEnterHint = document.getElementById("hotkeyEnterHint");
 
 let shownAt = null;
 let currentPayload = null;
@@ -30,6 +31,24 @@ function updatePrimaryLabel(payload) {
     return;
   }
   backBtn.textContent = "Back on track";
+}
+
+function updatePrimaryAction(payload) {
+  const raw = payload?.source_event_type || payload?.event_type || payload?.type || "";
+  const eventType = String(raw).toUpperCase();
+
+  // Default: "Back on track" is the primary (fast path).
+  backBtn.classList.add("primary");
+  recoverBtn.classList.remove("primary");
+
+  if (hotkeyEnterHint) hotkeyEnterHint.textContent = "Enter: Back on track";
+
+  // Pattern-break: when drift is persisting, bias toward a concrete recovery action.
+  if (eventType === "DRIFT_PERSIST") {
+    backBtn.classList.remove("primary");
+    recoverBtn.classList.add("primary");
+    if (hotkeyEnterHint) hotkeyEnterHint.textContent = "Enter: Recover schedule";
+  }
 }
 
 function updateEventLabel(payload) {
@@ -68,6 +87,7 @@ function showOverlay(payload) {
   resetAlignInput();
   updateEventLabel(payload);
   updatePrimaryLabel(payload);
+  updatePrimaryAction(payload);
 
   // For persistent drift, bias toward the recovery action and make it the default keyboard target.
   // This creates a strong "pattern break" + lowers the chance of accidental "Back on track" via Enter.
