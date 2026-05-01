@@ -1,3 +1,13 @@
+// When running in screenshot mode, disable animations/transitions for deterministic renders.
+try {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get("screenshot") === "1") {
+    document.documentElement.dataset.screenshot = "true";
+  }
+} catch (_) {
+  // no-op
+}
+
 const overlay = document.getElementById("overlay");
 
 // Deterministic screenshot mode: disable animations/transitions when overlay.html is loaded
