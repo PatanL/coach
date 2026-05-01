@@ -40,9 +40,16 @@
     return isTextInputTarget(t) || isInteractiveTarget(t);
   }
 
+  // Escape is used for overlay-level UI (e.g. opening snooze) and should not interrupt typing.
+  function shouldIgnoreGlobalEscape(target) {
+    const t = findHotkeyRelevantTarget(target);
+    return isTextInputTarget(t);
+  }
+
   return {
     isTextInputTarget,
     isInteractiveTarget,
-    shouldIgnoreGlobalEnter
+    shouldIgnoreGlobalEnter,
+    shouldIgnoreGlobalEscape
   };
 });
