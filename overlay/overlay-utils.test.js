@@ -46,3 +46,26 @@ test("shouldIgnoreGlobalEnter: child of button/link should still block global En
   };
   assert.equal(shouldIgnoreGlobalEnter(spanInsideButton), true);
 });
+
+test("shouldIgnoreGlobalEnter: when a modal is visible, ignore Enter unless target is inside modal", () => {
+  const modal = { id: "snoozeReason" };
+
+  const insideModalButton = {
+    tagName: "BUTTON",
+    closest: (selector) => {
+      if (selector === "#snoozeReason") return modal;
+      return null;
+    }
+  };
+
+  const outsideModalDiv = {
+    tagName: "DIV",
+    closest: (selector) => {
+      if (selector === "#snoozeReason") return null;
+      return null;
+    }
+  };
+
+  assert.equal(shouldIgnoreGlobalEnter(insideModalButton, { modalVisible: true, modalRoot: modal }), false);
+  assert.equal(shouldIgnoreGlobalEnter(outsideModalDiv, { modalVisible: true, modalRoot: modal }), true);
+});
