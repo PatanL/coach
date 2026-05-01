@@ -68,6 +68,14 @@ async function main() {
     headline: "Interrupt the loop."
   });
 
+  await capture("align_choices.png", {
+    ...common,
+    event_type: "DRIFT_PERSIST",
+    headline: "Pick one next move.",
+    choices: ["Close it", "Rename task", "Take 2 min break"],
+    question_id: "q_screenshot_align"
+  });
+
   win.destroy();
   app.quit();
 }
