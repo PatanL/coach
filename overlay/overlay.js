@@ -33,6 +33,20 @@ function updatePrimaryLabel(payload) {
   backBtn.textContent = "Back on track";
 }
 
+function updatePrimaryButton(payload) {
+  // Default: Back is primary.
+  backBtn.classList.add("primary");
+  recoverBtn.classList.remove("primary");
+
+  const raw = payload?.source_event_type || payload?.event_type || payload?.type || "";
+  const eventType = String(raw).toUpperCase();
+  if (eventType === "DRIFT_PERSIST") {
+    // Persistent drift: make the recovery path the visually-primary action.
+    backBtn.classList.remove("primary");
+    recoverBtn.classList.add("primary");
+  }
+}
+
 function getEventType(payload) {
   // Prefer the originating event type when available (used for visual pattern-breaks like DRIFT_PERSIST).
   const raw = payload?.source_event_type || payload?.event_type || payload?.type || "";
@@ -111,6 +125,7 @@ function showOverlay(payload) {
   resetAlignInput();
   updateEventLabel(payload);
   updatePrimaryLabel(payload);
+  updatePrimaryButton(payload);
   updatePrimaryAction(payload);
 
   if (payload.choices && Array.isArray(payload.choices)) {
