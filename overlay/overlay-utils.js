@@ -40,9 +40,17 @@
     return isTextInputTarget(t) || isInteractiveTarget(t);
   }
 
+  function getPrimaryActionForEventType(eventType) {
+    const t = String(eventType || "").toUpperCase();
+    // Persistent drift should strongly bias toward schedule recovery.
+    if (t === "DRIFT_PERSIST") return "recover";
+    return "back_on_track";
+  }
+
   return {
     isTextInputTarget,
     isInteractiveTarget,
-    shouldIgnoreGlobalEnter
+    shouldIgnoreGlobalEnter,
+    getPrimaryActionForEventType
   };
 });
