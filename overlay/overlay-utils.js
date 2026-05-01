@@ -40,9 +40,17 @@
     return isTextInputTarget(t) || isInteractiveTarget(t);
   }
 
+  // Escape is used to reveal snooze. If the user is actively typing in a field,
+  // treat Escape as local (e.g. IME/cancel) and don't change overlay state.
+  function shouldIgnoreGlobalEscape(target) {
+    const t = findHotkeyRelevantTarget(target);
+    return isTextInputTarget(t);
+  }
+
   return {
     isTextInputTarget,
     isInteractiveTarget,
-    shouldIgnoreGlobalEnter
+    shouldIgnoreGlobalEnter,
+    shouldIgnoreGlobalEscape
   };
 });
