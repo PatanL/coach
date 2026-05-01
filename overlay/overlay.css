@@ -273,3 +273,9 @@ button.primary:hover {
     animation: none;
   }
 }
+
+/* Deterministic screenshots: disable animations/transitions during screenshot runs. */
+#overlay[data-screenshot="true"] * {
+  animation: none !important;
+  transition: none !important;
+}
