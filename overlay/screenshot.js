@@ -34,6 +34,11 @@ async function main() {
 
   await win.loadFile(htmlPath);
 
+  // Deterministic screenshots: disable animations/transitions via data-screenshot flag.
+  await win.webContents.executeJavaScript(
+    "document.getElementById('overlay')?.setAttribute('data-screenshot','1');"
+  );
+
   async function capture(name, payload) {
     // Give the DOM a moment to settle, then render the payload.
     await new Promise((r) => setTimeout(r, 50));
@@ -66,6 +71,14 @@ async function main() {
     ...common,
     event_type: "DRIFT_PERSIST",
     headline: "Interrupt the loop."
+  });
+
+  await capture("drift_persist_level_c.png", {
+    ...common,
+    event_type: "DRIFT_PERSIST",
+    level: "C",
+    headline: "Interrupt the loop.",
+    mini_plan: "1) Close the tab. 2) Reopen your task doc. 3) Do 2 minutes of the next tiny step."
   });
 
   win.destroy();

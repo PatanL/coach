@@ -40,9 +40,16 @@
     return isTextInputTarget(t) || isInteractiveTarget(t);
   }
 
+  // Escape opens the snooze panel. Ignore it while typing to avoid accidental snooze.
+  function shouldIgnoreGlobalEscape(target) {
+    const t = findHotkeyRelevantTarget(target);
+    return isTextInputTarget(t);
+  }
+
   return {
     isTextInputTarget,
     isInteractiveTarget,
-    shouldIgnoreGlobalEnter
+    shouldIgnoreGlobalEnter,
+    shouldIgnoreGlobalEscape
   };
 });
