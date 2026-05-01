@@ -46,3 +46,8 @@ test("shouldIgnoreGlobalEnter: child of button/link should still block global En
   };
   assert.equal(shouldIgnoreGlobalEnter(spanInsideButton), true);
 });
+
+test("shouldIgnoreGlobalEnter: align mode always blocks global Enter", () => {
+  assert.equal(shouldIgnoreGlobalEnter({ tagName: "DIV" }, { mode: "align" }), true);
+  assert.equal(shouldIgnoreGlobalEnter({ tagName: "INPUT" }, { mode: "align" }), true);
+});

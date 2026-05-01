@@ -35,7 +35,11 @@
     return target;
   }
 
-  function shouldIgnoreGlobalEnter(target) {
+  function shouldIgnoreGlobalEnter(target, opts = {}) {
+    // In align mode, Enter should never trigger the global "Back on track" action.
+    // Users are either selecting a choice button or submitting an alignment response.
+    if (String(opts.mode || "").toLowerCase() === "align") return true;
+
     const t = findHotkeyRelevantTarget(target);
     return isTextInputTarget(t) || isInteractiveTarget(t);
   }

@@ -34,6 +34,9 @@ async function main() {
 
   await win.loadFile(htmlPath);
 
+  // Make screenshots deterministic: disable animations/transitions so we don't capture mid-pulse frames.
+  await win.webContents.insertCSS("* { animation: none !important; transition: none !important; }");
+
   async function capture(name, payload) {
     // Give the DOM a moment to settle, then render the payload.
     await new Promise((r) => setTimeout(r, 50));
