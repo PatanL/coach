@@ -11,6 +11,7 @@ const choiceButtons = document.getElementById("choiceButtons");
 const alignInput = document.getElementById("alignInput");
 const alignText = document.getElementById("alignText");
 const alignSubmit = document.getElementById("alignSubmit");
+const enterHint = document.getElementById("enterHint");
 
 const backBtn = document.getElementById("backBtn");
 const stuckBtn = document.getElementById("stuckBtn");
@@ -37,6 +38,7 @@ function updateEventLabel(payload) {
   const raw = payload?.source_event_type || payload?.event_type || payload?.type || "";
   const eventType = String(raw).toUpperCase();
   overlay.dataset.eventType = eventType;
+  return eventType;
 
   if (!eventType) {
     setText(eventLabel, "DRIFT");
@@ -66,8 +68,15 @@ function showOverlay(payload) {
   overlay.classList.remove("hidden");
   resetSnooze();
   resetAlignInput();
-  updateEventLabel(payload);
+  const eventType = updateEventLabel(payload);
   updatePrimaryLabel(payload);
+
+  const primaryAction = window.overlayUtils?.getPrimaryActionForEventType?.(eventType) || "back_on_track";
+  backBtn.classList.toggle("primary", primaryAction === "back_on_track");
+  recoverBtn.classList.toggle("primary", primaryAction === "recover");
+  if (enterHint) {
+    enterHint.textContent = primaryAction === "recover" ? "Enter: Recover schedule" : "Enter: Back on track";
+  }
 
   if (payload.choices && Array.isArray(payload.choices)) {
     overlay.dataset.mode = "align";
@@ -161,11 +170,13 @@ window.overlayAPI.onPause(() => {
 });
 
 window.addEventListener("keydown", (event) => {
-  // Don't treat Enter as "Back on track" while the user is typing or interacting with a control.
+  // Don't treat Enter as a global action while the user is typing or interacting with a control.
   if (event.key === "Enter") {
     const ignoreEnter = window.overlayUtils?.shouldIgnoreGlobalEnter?.(event.target);
     if (!ignoreEnter) {
-      sendAction({ action: "back_on_track" });
+      const eventType = overlay?.dataset?.eventType || "";
+      const primaryAction = window.overlayUtils?.getPrimaryActionForEventType?.(eventType) || "back_on_track";
+      sendAction({ action: primaryAction });
     }
   }
   if (event.key === "Escape") {
