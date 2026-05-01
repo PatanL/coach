@@ -1,7 +1,12 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
 
-const { isTextInputTarget, isInteractiveTarget, shouldIgnoreGlobalEnter } = require("./overlay-utils");
+const {
+  isTextInputTarget,
+  isInteractiveTarget,
+  shouldIgnoreGlobalEnter,
+  shouldIgnoreGlobalEscape
+} = require("./overlay-utils");
 
 test("isTextInputTarget: recognizes common typing targets", () => {
   assert.equal(isTextInputTarget({ tagName: "INPUT" }), true);
@@ -45,4 +50,10 @@ test("shouldIgnoreGlobalEnter: child of button/link should still block global En
     }
   };
   assert.equal(shouldIgnoreGlobalEnter(spanInsideButton), true);
+});
+
+test("shouldIgnoreGlobalEscape: typing should block global Escape snooze reveal", () => {
+  assert.equal(shouldIgnoreGlobalEscape({ tagName: "INPUT" }), true);
+  assert.equal(shouldIgnoreGlobalEscape({ tagName: "TEXTAREA" }), true);
+  assert.equal(shouldIgnoreGlobalEscape({ tagName: "DIV" }), false);
 });
