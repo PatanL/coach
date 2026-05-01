@@ -114,6 +114,28 @@ function showOverlay(payload) {
   overlay.dataset.level = payload.level || "B";
   currentPayload = payload;
   shownAt = Date.now();
+
+  // Focus management (pattern-break + safety):
+  // - If we're asking an alignment question, put the caret in the input.
+  // - If drift is persisting, bias toward the recovery action to reduce accidental "Back on track".
+  // - Otherwise, default to the primary "Back on track" button.
+  // Use a microtask/tick so the element is focusable after DOM updates.
+  setTimeout(() => {
+    try {
+      if (payload.choices && Array.isArray(payload.choices)) {
+        alignText.focus();
+        return;
+      }
+      const eventType = String(overlay.dataset.eventType || "").toUpperCase();
+      if (eventType === "DRIFT_PERSIST") {
+        recoverBtn.focus();
+        return;
+      }
+      backBtn.focus();
+    } catch {
+      // Best-effort focus only.
+    }
+  }, 0);
 }
 
 function sendAction(action) {
