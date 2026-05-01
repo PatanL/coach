@@ -69,6 +69,20 @@ function showOverlay(payload) {
   updateEventLabel(payload);
   updatePrimaryLabel(payload);
 
+  // For persistent drift, nudge toward the higher-leverage action and make it visually obvious.
+  // (Option B actionable overlay: the default "primary" action should not always be "Back on track".)
+  backBtn.classList.remove("primary");
+  recoverBtn.classList.remove("primary");
+  const eventType = String(overlay.dataset.eventType || "").toUpperCase();
+  if (eventType === "DRIFT_PERSIST") {
+    recoverBtn.classList.add("primary");
+    // Focus the primary action to reduce friction (and to make Enter behavior more predictable).
+    recoverBtn.focus?.();
+  } else {
+    backBtn.classList.add("primary");
+    backBtn.focus?.();
+  }
+
   if (payload.choices && Array.isArray(payload.choices)) {
     overlay.dataset.mode = "align";
   } else {

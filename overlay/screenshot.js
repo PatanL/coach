@@ -34,6 +34,15 @@ async function main() {
 
   await win.loadFile(htmlPath);
 
+  // Deterministic screenshots: disable animations/transitions so captures don't depend on timing.
+  await win.webContents.insertCSS(`
+    *, *::before, *::after {
+      animation: none !important;
+      transition: none !important;
+      caret-color: transparent !important;
+    }
+  `);
+
   async function capture(name, payload) {
     // Give the DOM a moment to settle, then render the payload.
     await new Promise((r) => setTimeout(r, 50));
@@ -66,6 +75,13 @@ async function main() {
     ...common,
     event_type: "DRIFT_PERSIST",
     headline: "Interrupt the loop."
+  });
+
+  await capture("drift_persist_pattern_break.png", {
+    ...common,
+    event_type: "DRIFT_PERSIST",
+    headline: "Interrupt the loop.",
+    human_line: "Persistent drift detected — choose a reset that actually changes your context."
   });
 
   win.destroy();
