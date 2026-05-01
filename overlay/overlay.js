@@ -89,12 +89,6 @@ function showOverlay(payload) {
   updatePrimaryLabel(payload);
   updatePrimaryAction(payload);
 
-  // For persistent drift, bias toward the recovery action and make it the default keyboard target.
-  // This creates a strong "pattern break" + lowers the chance of accidental "Back on track" via Enter.
-  if (overlay.dataset.eventType === "DRIFT_PERSIST") {
-    // Defer focus until after the DOM paints to avoid occasional focus flakiness in Electron.
-    setTimeout(() => recoverBtn?.focus?.(), 0);
-  }
 
   if (payload.choices && Array.isArray(payload.choices)) {
     overlay.dataset.mode = "align";
