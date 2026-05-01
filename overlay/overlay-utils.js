@@ -35,14 +35,35 @@
     return target;
   }
 
-  function shouldIgnoreGlobalEnter(target) {
+  function isWithinRoot(target, root) {
+    if (!target || !root) return false;
+    if (target === root) return true;
+    if (typeof target.closest === "function" && root.id) {
+      // If the root has an id, use it for a stable closest() selector.
+      const hit = target.closest(`#${root.id}`);
+      return Boolean(hit);
+    }
+    return false;
+  }
+
+  // Options:
+  // - modalRoot: Element
+  // - modalVisible: boolean
+  // If a modal is visible, global Enter should be ignored unless the event target is within the modal.
+  function shouldIgnoreGlobalEnter(target, options = null) {
     const t = findHotkeyRelevantTarget(target);
+    const modalVisible = Boolean(options?.modalVisible);
+    const modalRoot = options?.modalRoot || null;
+    if (modalVisible) {
+      return !isWithinRoot(t, modalRoot);
+    }
     return isTextInputTarget(t) || isInteractiveTarget(t);
   }
 
   return {
     isTextInputTarget,
     isInteractiveTarget,
-    shouldIgnoreGlobalEnter
+    shouldIgnoreGlobalEnter,
+    isWithinRoot
   };
 });
