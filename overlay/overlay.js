@@ -161,13 +161,30 @@ window.overlayAPI.onPause(() => {
 });
 
 window.addEventListener("keydown", (event) => {
+  const ignoreGlobal = window.overlayUtils?.shouldIgnoreGlobalHotkey?.(event.target);
+
   // Don't treat Enter as "Back on track" while the user is typing or interacting with a control.
   if (event.key === "Enter") {
-    const ignoreEnter = window.overlayUtils?.shouldIgnoreGlobalEnter?.(event.target);
-    if (!ignoreEnter) {
+    if (!ignoreGlobal) {
       sendAction({ action: "back_on_track" });
     }
   }
+
+  // Actionable overlay hotkeys (Option B): quick recovery without accidental clicks.
+  // These are intentionally single-key (no modifiers) to keep recovery friction low.
+  // They must be focus-safe (ignored while typing or when a control owns interaction).
+  if (!ignoreGlobal) {
+    const key = String(event.key || "").toLowerCase();
+    if (key === "r") {
+      event.preventDefault();
+      recoverBtn.click();
+    }
+    if (key === "s") {
+      event.preventDefault();
+      stuckBtn.click();
+    }
+  }
+
   if (event.key === "Escape") {
     snooze.classList.remove("hidden");
   }

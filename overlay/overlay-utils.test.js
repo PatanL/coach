@@ -1,7 +1,12 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
 
-const { isTextInputTarget, isInteractiveTarget, shouldIgnoreGlobalEnter } = require("./overlay-utils");
+const {
+  isTextInputTarget,
+  isInteractiveTarget,
+  shouldIgnoreGlobalHotkey,
+  shouldIgnoreGlobalEnter
+} = require("./overlay-utils");
 
 test("isTextInputTarget: recognizes common typing targets", () => {
   assert.equal(isTextInputTarget({ tagName: "INPUT" }), true);
@@ -28,21 +33,26 @@ test("isInteractiveTarget: ignores non-interactive targets", () => {
   assert.equal(isInteractiveTarget(null), false);
 });
 
-test("shouldIgnoreGlobalEnter: typing or clicking should block global Enter action", () => {
+test("shouldIgnoreGlobalHotkey: typing or clicking should block global hotkeys", () => {
+  assert.equal(shouldIgnoreGlobalHotkey({ tagName: "INPUT" }), true);
+  assert.equal(shouldIgnoreGlobalHotkey({ tagName: "BUTTON" }), true);
+  assert.equal(shouldIgnoreGlobalHotkey({ tagName: "DIV" }), false);
+});
+
+test("shouldIgnoreGlobalEnter: alias stays consistent", () => {
   assert.equal(shouldIgnoreGlobalEnter({ tagName: "INPUT" }), true);
-  assert.equal(shouldIgnoreGlobalEnter({ tagName: "BUTTON" }), true);
   assert.equal(shouldIgnoreGlobalEnter({ tagName: "DIV" }), false);
 });
 
-test("shouldIgnoreGlobalEnter: child of button/link should still block global Enter", () => {
+test("shouldIgnoreGlobalHotkey: child of button/link should still block global hotkeys", () => {
   const button = { tagName: "BUTTON" };
   const spanInsideButton = {
     tagName: "SPAN",
     closest: (selector) => {
       // Return the button for any closest() selector query.
-      // We don't parse selectors here; we just validate that shouldIgnoreGlobalEnter uses closest.
+      // We don't parse selectors here; we just validate that shouldIgnoreGlobalHotkey uses closest.
       return selector ? button : null;
     }
   };
-  assert.equal(shouldIgnoreGlobalEnter(spanInsideButton), true);
+  assert.equal(shouldIgnoreGlobalHotkey(spanInsideButton), true);
 });
