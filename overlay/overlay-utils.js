@@ -35,14 +35,20 @@
     return target;
   }
 
-  function shouldIgnoreGlobalEnter(target) {
+  function shouldIgnoreGlobalHotkey(target) {
     const t = findHotkeyRelevantTarget(target);
     return isTextInputTarget(t) || isInteractiveTarget(t);
+  }
+
+  // Back-compat alias: Enter was the first global hotkey we guarded.
+  function shouldIgnoreGlobalEnter(target) {
+    return shouldIgnoreGlobalHotkey(target);
   }
 
   return {
     isTextInputTarget,
     isInteractiveTarget,
+    shouldIgnoreGlobalHotkey,
     shouldIgnoreGlobalEnter
   };
 });
