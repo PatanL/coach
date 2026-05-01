@@ -30,25 +30,8 @@ html, body {
   backdrop-filter: blur(8px);
 }
 
-/* Visual pattern-break when drift persists: stronger edge + subtle shake pulse. */
-#overlay[data-event-type="DRIFT_PERSIST"] .card {
-  border-color: rgba(241, 108, 91, 0.55);
-  box-shadow: 0 22px 80px rgba(241, 108, 91, 0.12), 0 18px 60px rgba(0, 0, 0, 0.55);
-  animation: driftPersistPulse 900ms ease-in-out 1;
-}
 
-#overlay[data-event-type="DRIFT_PERSIST"] .label {
-  color: #ffb24a;
-}
-
-@keyframes driftPersistPulse {
-  0% { transform: translateX(0); }
-  18% { transform: translateX(-6px); }
-  36% { transform: translateX(6px); }
-  54% { transform: translateX(-4px); }
-  72% { transform: translateX(4px); }
-  100% { transform: translateX(0); }
-}
+/* (moved) DRIFT_PERSIST pattern-break styles live near the bottom of this file. */
 
 #overlay[data-level="A"] .card {
   width: 320px;
@@ -240,13 +223,25 @@ button.primary:hover {
   }
 }
 
+@keyframes driftPersistShake {
+  0% { transform: translateX(0); }
+  18% { transform: translateX(-6px); }
+  36% { transform: translateX(6px); }
+  54% { transform: translateX(-4px); }
+  72% { transform: translateX(4px); }
+  100% { transform: translateX(0); }
+}
+
 /* Visual pattern-break: DRIFT_PERSIST should feel unmistakably different. */
 #overlay[data-event-type="DRIFT_PERSIST"] {
   background: rgba(10, 4, 10, 0.55);
 }
 
 #overlay[data-event-type="DRIFT_PERSIST"] .card {
-  animation: driftPersistPulse 1.15s ease-in-out 0s 3;
+  /* Two animations: (1) pulse ring, (2) quick lateral shake on first display. */
+  animation:
+    driftPersistPulse 1.15s ease-in-out 0s 3,
+    driftPersistShake 900ms ease-in-out 0s 1;
   border: 2px solid rgba(255, 73, 167, 0.85);
   box-shadow:
     0 24px 70px rgba(0, 0, 0, 0.55),
