@@ -161,6 +161,14 @@ window.overlayAPI.onPause(() => {
 });
 
 window.addEventListener("keydown", (event) => {
+  // Only handle global hotkeys while the overlay is actually visible.
+  // (The window listener is always active; without this guard, Enter/Escape could trigger
+  // overlay actions when the user is in another context.)
+  const isOverlayVisible = window.overlayUtils?.isOverlayVisible
+    ? window.overlayUtils.isOverlayVisible(overlay)
+    : !overlay.classList.contains("hidden");
+  if (!isOverlayVisible) return;
+
   // Don't treat Enter as "Back on track" while the user is typing or interacting with a control.
   if (event.key === "Enter") {
     const ignoreEnter = window.overlayUtils?.shouldIgnoreGlobalEnter?.(event.target);
