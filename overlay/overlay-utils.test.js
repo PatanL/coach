@@ -1,7 +1,7 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
 
-const { isTextInputTarget, isInteractiveTarget, shouldIgnoreGlobalEnter } = require("./overlay-utils");
+const { isTextInputTarget, isInteractiveTarget, findHotkeyRelevantTarget, shouldIgnoreGlobalEnter } = require("./overlay-utils");
 
 test("isTextInputTarget: recognizes common typing targets", () => {
   assert.equal(isTextInputTarget({ tagName: "INPUT" }), true);
@@ -34,15 +34,24 @@ test("shouldIgnoreGlobalEnter: typing or clicking should block global Enter acti
   assert.equal(shouldIgnoreGlobalEnter({ tagName: "DIV" }), false);
 });
 
-test("shouldIgnoreGlobalEnter: child of button/link should still block global Enter", () => {
+test("findHotkeyRelevantTarget: child of button/link should map to owning control", () => {
   const button = { tagName: "BUTTON" };
   const spanInsideButton = {
     tagName: "SPAN",
     closest: (selector) => {
       // Return the button for any closest() selector query.
-      // We don't parse selectors here; we just validate that shouldIgnoreGlobalEnter uses closest.
+      // We don't parse selectors here; we just validate that findHotkeyRelevantTarget uses closest.
       return selector ? button : null;
     }
+  };
+  assert.equal(findHotkeyRelevantTarget(spanInsideButton), button);
+});
+
+test("shouldIgnoreGlobalEnter: child of button/link should still block global Enter", () => {
+  const button = { tagName: "BUTTON" };
+  const spanInsideButton = {
+    tagName: "SPAN",
+    closest: () => button
   };
   assert.equal(shouldIgnoreGlobalEnter(spanInsideButton), true);
 });

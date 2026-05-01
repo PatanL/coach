@@ -43,6 +43,7 @@
   return {
     isTextInputTarget,
     isInteractiveTarget,
+    findHotkeyRelevantTarget,
     shouldIgnoreGlobalEnter
   };
 });
