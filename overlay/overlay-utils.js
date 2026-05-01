@@ -40,9 +40,25 @@
     return isTextInputTarget(t) || isInteractiveTarget(t);
   }
 
+  function chooseDefaultFocus(payload) {
+    const raw = payload?.source_event_type || payload?.event_type || payload?.type || "";
+    const eventType = String(raw).toUpperCase();
+    const isAlign = !!(payload?.choices && Array.isArray(payload.choices));
+
+    // If the overlay is in align mode, encourage responding instead of accidental actions.
+    if (isAlign) return "alignText";
+
+    // For persistent drift, default to recovery action. This also ensures Enter triggers the focused
+    // button (native behavior) instead of the global "Back on track" handler.
+    if (eventType === "DRIFT_PERSIST") return "recoverBtn";
+
+    return "backBtn";
+  }
+
   return {
     isTextInputTarget,
     isInteractiveTarget,
-    shouldIgnoreGlobalEnter
+    shouldIgnoreGlobalEnter,
+    chooseDefaultFocus
   };
 });
