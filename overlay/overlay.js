@@ -169,6 +169,18 @@ window.addEventListener("keydown", (event) => {
     }
   }
   if (event.key === "Escape") {
-    snooze.classList.remove("hidden");
+    // Esc toggles the Snooze panel. This avoids accidental persistent UI state and
+    // keeps keyboard recovery simple.
+    event.preventDefault();
+    const isHidden = snooze.classList.contains("hidden");
+    if (isHidden) {
+      snooze.classList.remove("hidden");
+      // Focus the first snooze reason button for predictable keyboard flow.
+      const first = snooze.querySelector?.("button[data-reason]");
+      first?.focus?.();
+    } else {
+      snooze.classList.add("hidden");
+      backBtn?.focus?.();
+    }
   }
 });
