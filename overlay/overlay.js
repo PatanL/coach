@@ -105,6 +105,12 @@ function showOverlay(payload) {
   }
 
   overlay.dataset.level = payload.level || "B";
+  // Keep screenshot generation deterministic by disabling animations/transitions when invoked via screenshot.js.
+  if (payload.cmd_id === "screenshot") {
+    overlay.dataset.screenshot = "true";
+  } else {
+    delete overlay.dataset.screenshot;
+  }
   currentPayload = payload;
   shownAt = Date.now();
 }
