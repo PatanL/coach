@@ -40,9 +40,16 @@
     return isTextInputTarget(t) || isInteractiveTarget(t);
   }
 
+  // Convenience helper so overlay hotkey gating can be unit-tested.
+  function isOverlayVisible(overlayEl) {
+    if (!overlayEl) return false;
+    return !overlayEl.classList?.contains?.("hidden");
+  }
+
   return {
     isTextInputTarget,
     isInteractiveTarget,
-    shouldIgnoreGlobalEnter
+    shouldIgnoreGlobalEnter,
+    isOverlayVisible
   };
 });
