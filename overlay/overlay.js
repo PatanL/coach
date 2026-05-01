@@ -107,6 +107,14 @@ function showOverlay(payload) {
   overlay.dataset.level = payload.level || "B";
   currentPayload = payload;
   shownAt = Date.now();
+
+  // Default focus to reduce accidental actions and make the recovery path the easiest keypress.
+  // (Especially important for DRIFT_PERSIST pattern-break UX.)
+  const focusId = window.overlayUtils?.chooseDefaultFocus?.(payload);
+  const focusEl = focusId ? document.getElementById(focusId) : null;
+  if (focusEl && typeof focusEl.focus === "function") {
+    focusEl.focus();
+  }
 }
 
 function sendAction(action) {
