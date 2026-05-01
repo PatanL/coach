@@ -266,3 +266,12 @@ button.primary:hover {
   color: #ff49a7;
   text-shadow: 0 0 10px rgba(255, 73, 167, 0.35);
 }
+
+/* When drift persists, guide the user toward the recovery path with a visible focus treatment. */
+#overlay[data-event-type="DRIFT_PERSIST"] #recoverBtn:focus-visible {
+  outline: 3px solid rgba(255, 206, 61, 0.95);
+  outline-offset: 3px;
+  box-shadow:
+    0 0 0 4px rgba(255, 73, 167, 0.25),
+    0 0 18px rgba(255, 206, 61, 0.28);
+}
