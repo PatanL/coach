@@ -8,7 +8,16 @@
   function isTextInputTarget(target) {
     if (!target) return false;
     const tag = String(target.tagName || "").toLowerCase();
+
+    // contenteditable can be exposed as a boolean (isContentEditable) or via attribute.
     if (target.isContentEditable) return true;
+    const contentEditableAttr = String(target.getAttribute?.("contenteditable") || "").toLowerCase();
+    if (contentEditableAttr === "true") return true;
+
+    // ARIA textbox-like roles should be treated as typing targets.
+    const role = String(target.getAttribute?.("role") || "").toLowerCase();
+    if (role === "textbox" || role === "searchbox" || role === "combobox") return true;
+
     return tag === "input" || tag === "textarea" || tag === "select";
   }
 
@@ -28,7 +37,7 @@
     // element that should "own" the keyboard interaction.
     if (typeof target.closest === "function") {
       const hit = target.closest(
-        'input,textarea,select,[contenteditable="true"],button,a,[role="button"],[role="link"]'
+        'input,textarea,select,[contenteditable="true"],button,a,[role="button"],[role="link"],[role="textbox"],[role="searchbox"],[role="combobox"]'
       );
       if (hit) return hit;
     }
@@ -43,6 +52,7 @@
   return {
     isTextInputTarget,
     isInteractiveTarget,
+    findHotkeyRelevantTarget,
     shouldIgnoreGlobalEnter
   };
 });
