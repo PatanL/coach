@@ -107,6 +107,13 @@ function showOverlay(payload) {
   overlay.dataset.level = payload.level || "B";
   currentPayload = payload;
   shownAt = Date.now();
+
+  // Deliberate default focus reduces accidental global Enter actions.
+  // Align mode: focus input. DRIFT_PERSIST: focus Recover (Option B). Else: Back on track.
+  const wantsAlignFocus = overlay.dataset.mode === "align";
+  const wantsPersistFocus = overlay.dataset.eventType === "DRIFT_PERSIST";
+  const elToFocus = wantsAlignFocus ? alignText : (wantsPersistFocus ? recoverBtn : backBtn);
+  if (elToFocus && typeof elToFocus.focus === "function") elToFocus.focus();
 }
 
 function sendAction(action) {
