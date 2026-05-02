@@ -114,7 +114,8 @@ function showOverlay(payload) {
   // - Default mode: focus the primary "Back on track" button.
   requestAnimationFrame(() => {
     try {
-      if (payload.choices && Array.isArray(payload.choices)) {
+      const focusKey = window.overlayUtils?.getDeterministicFocusTarget?.(payload) || "backBtn";
+      if (focusKey === "alignText") {
         alignText?.focus?.();
       } else {
         backBtn?.focus?.();

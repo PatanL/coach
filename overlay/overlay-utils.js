@@ -40,9 +40,17 @@
     return isTextInputTarget(t) || isInteractiveTarget(t);
   }
 
+  function getDeterministicFocusTarget(payload) {
+    // "Align" mode: payload.choices is present → focus the freeform text input.
+    // Default mode: focus the primary action button.
+    if (payload && Array.isArray(payload.choices)) return "alignText";
+    return "backBtn";
+  }
+
   return {
     isTextInputTarget,
     isInteractiveTarget,
-    shouldIgnoreGlobalEnter
+    shouldIgnoreGlobalEnter,
+    getDeterministicFocusTarget
   };
 });
