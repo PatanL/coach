@@ -104,8 +104,6 @@ function showOverlay(payload) {
 
   updateEventLabel(payload);
   updatePrimaryLabel(payload);
-  updatePrimaryActionStyling();
-  updateEnterHint();
 
   if (payload.choices && Array.isArray(payload.choices)) {
     overlay.dataset.mode = "align";
