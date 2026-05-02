@@ -5,6 +5,7 @@ const {
   isTextInputTarget,
   isInteractiveTarget,
   shouldIgnoreGlobalEnter,
+  getGlobalEnterAction,
   normalizeEventType,
   shouldAutofocusRecover
 } = require("./overlay-utils");
@@ -51,6 +52,16 @@ test("shouldIgnoreGlobalEnter: child of button/link should still block global En
     }
   };
   assert.equal(shouldIgnoreGlobalEnter(spanInsideButton), true);
+});
+
+test("getGlobalEnterAction: defaults to recover for DRIFT_PERSIST; otherwise back_on_track", () => {
+  assert.equal(getGlobalEnterAction({ event_type: "DRIFT_PERSIST" }, { tagName: "DIV" }), "recover");
+  assert.equal(getGlobalEnterAction({ event_type: "DRIFT" }, { tagName: "DIV" }), "back_on_track");
+});
+
+test("getGlobalEnterAction: respects shouldIgnoreGlobalEnter", () => {
+  assert.equal(getGlobalEnterAction({ event_type: "DRIFT_PERSIST" }, { tagName: "INPUT" }), null);
+  assert.equal(getGlobalEnterAction({ event_type: "DRIFT" }, { tagName: "BUTTON" }), null);
 });
 
 test("normalizeEventType: prefers source_event_type and uppercases", () => {
