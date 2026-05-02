@@ -5,6 +5,7 @@ const headline = document.getElementById("headline");
 const humanLine = document.getElementById("humanLine");
 const diagnosis = document.getElementById("diagnosis");
 const nextAction = document.getElementById("nextAction");
+const enterHint = document.getElementById("enterHint");
 const snooze = document.getElementById("snoozeReason");
 const miniPlan = document.getElementById("miniPlan");
 const choiceButtons = document.getElementById("choiceButtons");
@@ -37,6 +38,12 @@ function updateEventLabel(payload) {
   const raw = payload?.source_event_type || payload?.event_type || payload?.type || "";
   const eventType = String(raw).toUpperCase();
   overlay.dataset.eventType = eventType;
+
+  // Keep the footer hotkey hint accurate—DRIFT_PERSIST requires Ctrl/Cmd+Enter.
+  if (enterHint) {
+    enterHint.textContent =
+      eventType === "DRIFT_PERSIST" ? "Ctrl/Cmd+Enter: Back on track" : "Enter: Back on track";
+  }
 
   if (!eventType) {
     setText(eventLabel, "DRIFT");
