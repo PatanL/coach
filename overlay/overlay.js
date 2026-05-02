@@ -190,7 +190,13 @@ window.overlayAPI.onPause(() => {
 
 window.addEventListener("keydown", (event) => {
   // Don't treat Enter as a global action while the user is typing or interacting with a control.
+  // Additionally, for DRIFT_PERSIST we disable the global Enter shortcut entirely to avoid
+  // accidental dismissal during the pattern-break moment.
   if (event.key === "Enter") {
+    const eventType = overlay?.dataset?.eventType || "";
+    const disableEnter = window.overlayUtils?.shouldDisableGlobalEnterForEventType?.(eventType);
+    if (disableEnter) return;
+
     const ignoreEnter = window.overlayUtils?.shouldIgnoreGlobalEnter?.(event.target);
     if (!ignoreEnter) {
       sendAction({ action: enterHotkeyAction || "back_on_track" });

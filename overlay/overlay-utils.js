@@ -40,9 +40,17 @@
     return isTextInputTarget(t) || isInteractiveTarget(t);
   }
 
+  // For some event types (notably DRIFT_PERSIST), we want a stronger pattern-break and fewer
+  // accidental recoveries. Disable the global Enter shortcut entirely.
+  function shouldDisableGlobalEnterForEventType(eventType) {
+    if (!eventType) return false;
+    return String(eventType).toUpperCase() === "DRIFT_PERSIST";
+  }
+
   return {
     isTextInputTarget,
     isInteractiveTarget,
-    shouldIgnoreGlobalEnter
+    shouldIgnoreGlobalEnter,
+    shouldDisableGlobalEnterForEventType
   };
 });
