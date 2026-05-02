@@ -105,6 +105,24 @@ function showOverlay(payload) {
   }
 
   overlay.dataset.level = payload.level || "B";
+
+  // Focus management: prevent accidental global Enter and guide the user toward the intended next action.
+  // - Align mode: focus the free-text box so typing is immediate.
+  // - DRIFT_PERSIST: pattern-break = default focus on Recover (actionable overlay).
+  // - Otherwise: default focus on Back on track.
+  const eventType = String(overlay.dataset.eventType || "").toUpperCase();
+  setTimeout(() => {
+    if (overlay.dataset.mode === "align") {
+      alignText?.focus?.();
+      return;
+    }
+    if (eventType === "DRIFT_PERSIST") {
+      recoverBtn?.focus?.();
+      return;
+    }
+    backBtn?.focus?.();
+  }, 0);
+
   currentPayload = payload;
   shownAt = Date.now();
 }
@@ -162,8 +180,10 @@ window.overlayAPI.onPause(() => {
 
 window.addEventListener("keydown", (event) => {
   // Don't treat Enter as "Back on track" while the user is typing or interacting with a control.
+  // Note: event.target can be <body> even while focus is inside an input/button, so prefer activeElement.
   if (event.key === "Enter") {
-    const ignoreEnter = window.overlayUtils?.shouldIgnoreGlobalEnter?.(event.target);
+    const hotkeyTarget = document.activeElement || event.target;
+    const ignoreEnter = window.overlayUtils?.shouldIgnoreGlobalEnter?.(hotkeyTarget);
     if (!ignoreEnter) {
       sendAction({ action: "back_on_track" });
     }
