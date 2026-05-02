@@ -161,9 +161,14 @@ window.overlayAPI.onPause(() => {
 });
 
 window.addEventListener("keydown", (event) => {
-  // Don't treat Enter as "Back on track" while the user is typing or interacting with a control.
+  // Global hotkeys should only fire when the overlay is actually visible.
+  if (overlay.classList.contains("hidden")) return;
+
+  // Don't treat Enter as "Back on track" while the user is typing, interacting with a control,
+  // or when the snooze picker is open (pattern: prevent accidental "dismiss" actions).
   if (event.key === "Enter") {
-    const ignoreEnter = window.overlayUtils?.shouldIgnoreGlobalEnter?.(event.target);
+    const ignoreEnter =
+      !snooze.classList.contains("hidden") || window.overlayUtils?.shouldIgnoreGlobalEnter?.(event.target);
     if (!ignoreEnter) {
       sendAction({ action: "back_on_track" });
     }
