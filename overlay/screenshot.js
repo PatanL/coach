@@ -54,7 +54,8 @@ async function main() {
     diagnosis: "Detected off-task activity.",
     next_action: "Close the tab and reopen your task doc.",
     cmd_id: "screenshot",
-    block_id: "block_screenshot"
+    block_id: "block_screenshot",
+    disable_animations: true
   };
 
   await capture("drift_start.png", {
