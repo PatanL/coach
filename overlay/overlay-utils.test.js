@@ -62,6 +62,7 @@ test("normalizeEventType: prefers source_event_type and uppercases", () => {
 
 test("shouldAutofocusRecover: true for DRIFT_PERSIST without choices; false otherwise", () => {
   assert.equal(shouldAutofocusRecover({ source_event_type: "DRIFT_PERSIST" }), true);
+  assert.equal(shouldAutofocusRecover({ event_type: "DRIFT_PERSIST", choices: [] }), true);
   assert.equal(shouldAutofocusRecover({ event_type: "DRIFT_PERSIST", choices: ["a"] }), false);
   assert.equal(shouldAutofocusRecover({ event_type: "DRIFT" }), false);
 });

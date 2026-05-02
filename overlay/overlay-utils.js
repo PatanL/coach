@@ -49,7 +49,7 @@
   // default focus should land on the recovery action (not the quick-dismiss path).
   function shouldAutofocusRecover(payload) {
     const eventType = normalizeEventType(payload);
-    const hasChoices = !!(payload?.choices && Array.isArray(payload.choices));
+    const hasChoices = Array.isArray(payload?.choices) && payload.choices.length > 0;
     if (hasChoices) return false;
     return eventType === "DRIFT_PERSIST";
   }
