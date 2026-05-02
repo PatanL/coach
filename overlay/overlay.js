@@ -17,8 +17,11 @@ const stuckBtn = document.getElementById("stuckBtn");
 const recoverBtn = document.getElementById("recoverBtn");
 const snoozeBtn = document.getElementById("snoozeBtn");
 
+const enterHint = document.getElementById("enterHint");
+
 let shownAt = null;
 let currentPayload = null;
+let enterHotkeyAction = "back_on_track";
 
 function setText(el, value) {
   el.textContent = value || "";
@@ -62,12 +65,37 @@ function resetAlignInput() {
   alignInput.classList.add("hidden");
 }
 
+function setPrimaryButton(primaryEl) {
+  [backBtn, stuckBtn, recoverBtn, snoozeBtn, alignSubmit].forEach((btn) => {
+    if (!btn) return;
+    btn.classList.remove("primary");
+  });
+  if (primaryEl) primaryEl.classList.add("primary");
+}
+
+function configurePrimaryAction(payload) {
+  const eventType = String(overlay.dataset.eventType || "").toUpperCase();
+
+  // Default: "Back on track" is the fastest acknowledgement.
+  enterHotkeyAction = "back_on_track";
+  setPrimaryButton(backBtn);
+  if (enterHint) enterHint.textContent = "Enter: Back on track";
+
+  // Pattern-break: for persistent drift, bias toward a concrete recovery action.
+  if (eventType === "DRIFT_PERSIST") {
+    enterHotkeyAction = "recover";
+    setPrimaryButton(recoverBtn);
+    if (enterHint) enterHint.textContent = "Enter: Recover schedule";
+  }
+}
+
 function showOverlay(payload) {
   overlay.classList.remove("hidden");
   resetSnooze();
   resetAlignInput();
   updateEventLabel(payload);
   updatePrimaryLabel(payload);
+  configurePrimaryAction(payload);
 
   if (payload.choices && Array.isArray(payload.choices)) {
     overlay.dataset.mode = "align";
@@ -161,11 +189,17 @@ window.overlayAPI.onPause(() => {
 });
 
 window.addEventListener("keydown", (event) => {
-  // Don't treat Enter as "Back on track" while the user is typing or interacting with a control.
+  // Don't treat Enter as a global action while the user is typing or interacting with a control.
+  // Additionally, for DRIFT_PERSIST we disable the global Enter shortcut entirely to avoid
+  // accidental dismissal during the pattern-break moment.
   if (event.key === "Enter") {
+    const eventType = overlay?.dataset?.eventType || "";
+    const disableEnter = window.overlayUtils?.shouldDisableGlobalEnterForEventType?.(eventType);
+    if (disableEnter) return;
+
     const ignoreEnter = window.overlayUtils?.shouldIgnoreGlobalEnter?.(event.target);
     if (!ignoreEnter) {
-      sendAction({ action: "back_on_track" });
+      sendAction({ action: enterHotkeyAction || "back_on_track" });
     }
   }
   if (event.key === "Escape") {
