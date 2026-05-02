@@ -133,6 +133,19 @@ function showOverlay(payload) {
   overlay.dataset.level = payload.level || "B";
   currentPayload = payload;
   shownAt = Date.now();
+
+  // Focus management: default to the safest/highest-leverage next action.
+  // - If the user is meant to type (align mode), put focus in the input.
+  // - If drift is persistent, bias toward a recovery action.
+  // - Otherwise, bias toward a simple "back on track" confirmation.
+  const eventType = String(overlay.dataset.eventType || "").toUpperCase();
+  if (payload.choices && Array.isArray(payload.choices)) {
+    alignText.focus();
+  } else if (eventType === "DRIFT_PERSIST") {
+    recoverBtn.focus();
+  } else {
+    backBtn.focus();
+  }
 }
 
 function sendAction(action) {
