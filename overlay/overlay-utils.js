@@ -40,9 +40,18 @@
     return isTextInputTarget(t) || isInteractiveTarget(t);
   }
 
+  // DRIFT_PERSIST is intentionally a strong pattern-break: we avoid a global Enter
+  // shortcut that could accidentally dismiss/escalate the overlay.
+  function shouldAllowGlobalEnter(eventType) {
+    const type = String(eventType || "").toUpperCase();
+    if (!type) return true;
+    return type !== "DRIFT_PERSIST";
+  }
+
   return {
     isTextInputTarget,
     isInteractiveTarget,
-    shouldIgnoreGlobalEnter
+    shouldIgnoreGlobalEnter,
+    shouldAllowGlobalEnter
   };
 });
