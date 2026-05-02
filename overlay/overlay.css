@@ -240,9 +240,23 @@ button.primary:hover {
   }
 }
 
+/* Backdrop pulse: amplify the pattern-break without distracting from copy/buttons. */
+@keyframes driftPersistBackdropPulse {
+  0% {
+    background: rgba(10, 4, 10, 0.55);
+  }
+  45% {
+    background: rgba(18, 4, 14, 0.7);
+  }
+  100% {
+    background: rgba(10, 4, 10, 0.55);
+  }
+}
+
 /* Visual pattern-break: DRIFT_PERSIST should feel unmistakably different. */
 #overlay[data-event-type="DRIFT_PERSIST"] {
   background: rgba(10, 4, 10, 0.55);
+  animation: driftPersistBackdropPulse 1.15s ease-in-out 0s 3;
 }
 
 #overlay[data-event-type="DRIFT_PERSIST"] .card {

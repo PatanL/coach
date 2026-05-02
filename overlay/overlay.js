@@ -107,6 +107,18 @@ function showOverlay(payload) {
   overlay.dataset.level = payload.level || "B";
   currentPayload = payload;
   shownAt = Date.now();
+
+  // Pattern-break + safety: on DRIFT_PERSIST, default focus to the recovery action.
+  // This prevents an accidental global Enter from marking "Back on track" and makes the next step explicit.
+  if (overlay.dataset.eventType === "DRIFT_PERSIST") {
+    setTimeout(() => {
+      try {
+        recoverBtn?.focus?.({ preventScroll: true });
+      } catch {
+        // no-op
+      }
+    }, 0);
+  }
 }
 
 function sendAction(action) {

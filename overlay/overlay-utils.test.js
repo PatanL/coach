@@ -46,3 +46,19 @@ test("shouldIgnoreGlobalEnter: child of button/link should still block global En
   };
   assert.equal(shouldIgnoreGlobalEnter(spanInsideButton), true);
 });
+
+test("shouldIgnoreGlobalEnter: child of role=button/link should still block global Enter", () => {
+  const roleButton = { tagName: "DIV", getAttribute: (k) => (k === "role" ? "button" : null) };
+  const roleLink = { tagName: "DIV", getAttribute: (k) => (k === "role" ? "link" : null) };
+
+  const child = {
+    tagName: "SPAN",
+    closest: (selector) => {
+      // Simulate that the closest interactive ancestor can be either a role button or role link.
+      if (!selector) return null;
+      return selector.includes("role=\"button\"") ? roleButton : roleLink;
+    }
+  };
+
+  assert.equal(shouldIgnoreGlobalEnter(child), true);
+});
