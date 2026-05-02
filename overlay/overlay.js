@@ -107,6 +107,23 @@ function showOverlay(payload) {
   overlay.dataset.level = payload.level || "B";
   currentPayload = payload;
   shownAt = Date.now();
+
+  // Keyboard safety: ensure a deterministic focus target so Enter activates the focused control
+  // (and is ignored by the global Enter hotkey), rather than firing a global action from <body>.
+  // - Align mode: focus the text input to encourage an immediate answer.
+  // - Default mode: focus the primary "Back on track" button.
+  requestAnimationFrame(() => {
+    try {
+      const focusKey = window.overlayUtils?.getDeterministicFocusTarget?.(payload) || "backBtn";
+      if (focusKey === "alignText") {
+        alignText?.focus?.();
+      } else {
+        backBtn?.focus?.();
+      }
+    } catch {
+      // no-op
+    }
+  });
 }
 
 function sendAction(action) {
