@@ -107,6 +107,15 @@ function showOverlay(payload) {
   overlay.dataset.level = payload.level || "B";
   currentPayload = payload;
   shownAt = Date.now();
+
+  // Set a safe default focus target so keyboard interactions are predictable.
+  // (e.g. DRIFT_PERSIST emphasizes recovery; align mode emphasizes typing.)
+  const focusId = window.overlayUtils?.getInitialFocusId?.(payload);
+  const focusEl = focusId ? document.getElementById(focusId) : null;
+  if (focusEl && typeof focusEl.focus === "function") {
+    // Defer to ensure the element is visible after any mode/class toggles.
+    setTimeout(() => focusEl.focus(), 0);
+  }
 }
 
 function sendAction(action) {

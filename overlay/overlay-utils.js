@@ -40,9 +40,24 @@
     return isTextInputTarget(t) || isInteractiveTarget(t);
   }
 
+  // Decide what should receive keyboard focus when the overlay opens.
+  // This helps prevent accidental "Enter" activations and makes the next best action
+  // immediately accessible.
+  function getInitialFocusId(payload) {
+    if (!payload) return "backBtn";
+    if (payload.choices && Array.isArray(payload.choices)) return "alignText";
+
+    const raw = payload?.source_event_type || payload?.event_type || payload?.type || "";
+    const eventType = String(raw).toUpperCase();
+    if (eventType === "DRIFT_PERSIST") return "recoverBtn";
+
+    return "backBtn";
+  }
+
   return {
     isTextInputTarget,
     isInteractiveTarget,
-    shouldIgnoreGlobalEnter
+    shouldIgnoreGlobalEnter,
+    getInitialFocusId
   };
 });

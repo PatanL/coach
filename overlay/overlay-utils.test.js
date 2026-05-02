@@ -1,7 +1,7 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
 
-const { isTextInputTarget, isInteractiveTarget, shouldIgnoreGlobalEnter } = require("./overlay-utils");
+const { isTextInputTarget, isInteractiveTarget, shouldIgnoreGlobalEnter, getInitialFocusId } = require("./overlay-utils");
 
 test("isTextInputTarget: recognizes common typing targets", () => {
   assert.equal(isTextInputTarget({ tagName: "INPUT" }), true);
@@ -45,4 +45,18 @@ test("shouldIgnoreGlobalEnter: child of button/link should still block global En
     }
   };
   assert.equal(shouldIgnoreGlobalEnter(spanInsideButton), true);
+});
+
+test("getInitialFocusId: chooses alignText when choices exist", () => {
+  assert.equal(getInitialFocusId({ choices: ["A", "B"] }), "alignText");
+});
+
+test("getInitialFocusId: chooses recoverBtn for DRIFT_PERSIST", () => {
+  assert.equal(getInitialFocusId({ event_type: "DRIFT_PERSIST" }), "recoverBtn");
+  assert.equal(getInitialFocusId({ source_event_type: "drift_persist" }), "recoverBtn");
+});
+
+test("getInitialFocusId: defaults to backBtn", () => {
+  assert.equal(getInitialFocusId({ event_type: "DRIFT" }), "backBtn");
+  assert.equal(getInitialFocusId(null), "backBtn");
 });
