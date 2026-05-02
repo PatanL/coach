@@ -111,7 +111,7 @@ function showOverlay(payload) {
 
   // On DRIFT_PERSIST, default focus should land on the recovery action.
   // Do this after rendering so focus isn't stolen during align mode.
-  const shouldAutofocusRecover = window.overlayUtils?.shouldAutofocusRecover?.(payload);
+  const shouldAutofocusRecover = window.overlayUtils?.shouldAutofocusRecover?.(payload, document.activeElement);
   if (shouldAutofocusRecover && typeof recoverBtn?.focus === "function") {
     recoverBtn.focus();
   }

@@ -47,10 +47,18 @@
 
   // DRIFT_PERSIST should feel "actionable". If the user is already off-task for a while,
   // default focus should land on the recovery action (not the quick-dismiss path).
-  function shouldAutofocusRecover(payload) {
+  function shouldAutofocusRecover(payload, activeElement) {
     const eventType = normalizeEventType(payload);
     const hasChoices = Array.isArray(payload?.choices) && payload.choices.length > 0;
     if (hasChoices) return false;
+
+    // Never steal focus from a typing surface outside the overlay.
+    // (If focus is already within the overlay, it's safe to move it.)
+    if (activeElement) {
+      const isInsideOverlay = typeof activeElement.closest === "function" && !!activeElement.closest("#overlay");
+      if (!isInsideOverlay && isTextInputTarget(activeElement)) return false;
+    }
+
     return eventType === "DRIFT_PERSIST";
   }
 

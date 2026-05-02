@@ -66,3 +66,9 @@ test("shouldAutofocusRecover: true for DRIFT_PERSIST without choices; false othe
   assert.equal(shouldAutofocusRecover({ event_type: "DRIFT_PERSIST", choices: ["a"] }), false);
   assert.equal(shouldAutofocusRecover({ event_type: "DRIFT" }), false);
 });
+
+
+test("shouldAutofocusRecover: does not steal focus from text input outside overlay", () => {
+  const activeEl = { tagName: "INPUT", closest: () => null };
+  assert.equal(shouldAutofocusRecover({ source_event_type: "DRIFT_PERSIST" }, activeEl), false);
+});
