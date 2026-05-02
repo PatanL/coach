@@ -244,6 +244,12 @@ button.primary:hover {
     linear-gradient(140deg, rgba(19, 22, 26, 0.92), rgba(10, 12, 15, 0.96));
 }
 
+/* Screenshot capture should be deterministic: disable animations when screenshot runner sets data-screenshot. */
+#overlay[data-screenshot="true"] .card {
+  animation: none !important;
+  transform: none !important;
+}
+
 #overlay[data-event-type="DRIFT_PERSIST"] .label {
   color: #ff49a7;
   text-shadow: 0 0 10px rgba(255, 73, 167, 0.35);

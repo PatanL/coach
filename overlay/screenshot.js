@@ -59,11 +59,13 @@ async function main() {
 
   await capture("drift_start.png", {
     ...common,
+    screenshot: true,
     event_type: "DRIFT_START"
   });
 
   await capture("drift_persist.png", {
     ...common,
+    screenshot: true,
     event_type: "DRIFT_PERSIST",
     headline: "Interrupt the loop."
   });
