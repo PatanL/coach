@@ -9,6 +9,7 @@ const snooze = document.getElementById("snoozeReason");
 const miniPlan = document.getElementById("miniPlan");
 const choiceButtons = document.getElementById("choiceButtons");
 const alignInput = document.getElementById("alignInput");
+const enterHint = document.getElementById("enterHint");
 const alignText = document.getElementById("alignText");
 const alignSubmit = document.getElementById("alignSubmit");
 
@@ -40,12 +41,18 @@ function updateEventLabel(payload) {
   const eventType = String(raw).toUpperCase();
   overlay.dataset.eventType = eventType;
 
+  if (enterHint) {
+    // Default global hint: Enter will mark "Back on track" unless focus is on an interactive control.
+    enterHint.textContent = "Enter: Back on track";
+  }
+
   if (!eventType) {
     setText(eventLabel, "DRIFT");
     return;
   }
   if (eventType === "DRIFT_PERSIST") {
     setText(eventLabel, "DRIFT — PERSIST");
+    if (enterHint) enterHint.textContent = "Enter: Recover schedule";
     return;
   }
   if (eventType.startsWith("DRIFT")) {
@@ -139,12 +146,21 @@ function showOverlay(payload) {
   // - If drift is persistent, bias toward a recovery action.
   // - Otherwise, bias toward a simple "back on track" confirmation.
   const eventType = String(overlay.dataset.eventType || "").toUpperCase();
+  function safeFocus(el) {
+    if (!el?.focus) return;
+    try {
+      el.focus({ preventScroll: true });
+    } catch {
+      el.focus();
+    }
+  }
+
   if (payload.choices && Array.isArray(payload.choices)) {
-    alignText.focus();
+    safeFocus(alignText);
   } else if (eventType === "DRIFT_PERSIST") {
-    recoverBtn.focus();
+    safeFocus(recoverBtn);
   } else {
-    backBtn.focus();
+    safeFocus(backBtn);
   }
 }
 
