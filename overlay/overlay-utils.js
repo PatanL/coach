@@ -40,9 +40,18 @@
     return isTextInputTarget(t) || isInteractiveTarget(t);
   }
 
+  // Escape is used as a global "show snooze" affordance.
+  // If the user is typing in a text field, Escape should behave like a normal text-editing key
+  // (or be handled by the browser/OS), not open overlay UI.
+  function shouldIgnoreGlobalEscape(target) {
+    const t = findHotkeyRelevantTarget(target);
+    return isTextInputTarget(t);
+  }
+
   return {
     isTextInputTarget,
     isInteractiveTarget,
-    shouldIgnoreGlobalEnter
+    shouldIgnoreGlobalEnter,
+    shouldIgnoreGlobalEscape
   };
 });
