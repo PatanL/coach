@@ -266,3 +266,20 @@ button.primary:hover {
   color: #ff49a7;
   text-shadow: 0 0 10px rgba(255, 73, 167, 0.35);
 }
+
+/* Pattern-break cue: show the required hotkey on the primary action itself. */
+#overlay[data-event-type="DRIFT_PERSIST"] #backBtn.primary[data-hotkey] {
+  position: relative;
+}
+#overlay[data-event-type="DRIFT_PERSIST"] #backBtn.primary[data-hotkey]::after {
+  content: attr(data-hotkey);
+  margin-left: 10px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: rgba(255, 255, 255, 0.92);
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}

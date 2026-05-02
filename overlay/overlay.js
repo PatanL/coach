@@ -40,9 +40,19 @@ function updateEventLabel(payload) {
   overlay.dataset.eventType = eventType;
 
   // Keep the footer hotkey hint accurate—DRIFT_PERSIST requires Ctrl/Cmd+Enter.
+  const isPersist = eventType === "DRIFT_PERSIST";
   if (enterHint) {
-    enterHint.textContent =
-      eventType === "DRIFT_PERSIST" ? "Ctrl/Cmd+Enter: Back on track" : "Enter: Back on track";
+    enterHint.textContent = isPersist ? "Ctrl/Cmd+Enter: Back on track" : "Enter: Back on track";
+  }
+
+  // Add a deliberate, always-visible cue on the primary action when drift persists.
+  // This reinforces the pattern-break beyond the footer hint.
+  if (backBtn) {
+    if (isPersist) {
+      backBtn.setAttribute("data-hotkey", "Ctrl/Cmd+Enter");
+    } else {
+      backBtn.removeAttribute("data-hotkey");
+    }
   }
 
   if (!eventType) {
