@@ -40,9 +40,25 @@
     return isTextInputTarget(t) || isInteractiveTarget(t);
   }
 
+  function normalizeEventType(payload) {
+    const raw = payload?.source_event_type || payload?.event_type || payload?.type || "";
+    return String(raw).toUpperCase();
+  }
+
+  // DRIFT_PERSIST should feel "actionable". If the user is already off-task for a while,
+  // default focus should land on the recovery action (not the quick-dismiss path).
+  function shouldAutofocusRecover(payload) {
+    const eventType = normalizeEventType(payload);
+    const hasChoices = !!(payload?.choices && Array.isArray(payload.choices));
+    if (hasChoices) return false;
+    return eventType === "DRIFT_PERSIST";
+  }
+
   return {
     isTextInputTarget,
     isInteractiveTarget,
-    shouldIgnoreGlobalEnter
+    shouldIgnoreGlobalEnter,
+    normalizeEventType,
+    shouldAutofocusRecover
   };
 });

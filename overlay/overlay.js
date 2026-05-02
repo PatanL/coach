@@ -34,8 +34,9 @@ function updatePrimaryLabel(payload) {
 
 function updateEventLabel(payload) {
   // Prefer the originating event type when available (used for visual pattern-breaks like DRIFT_PERSIST).
-  const raw = payload?.source_event_type || payload?.event_type || payload?.type || "";
-  const eventType = String(raw).toUpperCase();
+  const eventType = window.overlayUtils?.normalizeEventType
+    ? window.overlayUtils.normalizeEventType(payload)
+    : String(payload?.source_event_type || payload?.event_type || payload?.type || "").toUpperCase();
   overlay.dataset.eventType = eventType;
 
   if (!eventType) {
@@ -107,6 +108,13 @@ function showOverlay(payload) {
   overlay.dataset.level = payload.level || "B";
   currentPayload = payload;
   shownAt = Date.now();
+
+  // On DRIFT_PERSIST, default focus should land on the recovery action.
+  // Do this after rendering so focus isn't stolen during align mode.
+  const shouldAutofocusRecover = window.overlayUtils?.shouldAutofocusRecover?.(payload);
+  if (shouldAutofocusRecover && typeof recoverBtn?.focus === "function") {
+    recoverBtn.focus();
+  }
 }
 
 function sendAction(action) {
