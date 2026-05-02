@@ -74,6 +74,9 @@ function showOverlay(payload) {
   } else {
     overlay.dataset.mode = "";
   }
+
+  // Expose mode to focus decision helper.
+  payload.mode = overlay.dataset.mode;
   setText(blockName, payload.block_name || "");
   setText(headline, payload.headline || "Reset.");
   setText(humanLine, payload.human_line || "");
@@ -107,6 +110,16 @@ function showOverlay(payload) {
   overlay.dataset.level = payload.level || "B";
   currentPayload = payload;
   shownAt = Date.now();
+
+  // Initial focus: make DRIFT_PERSIST a stronger pattern-break by defaulting focus to Recover,
+  // and focus the align input when in align mode.
+  const focusId = window.overlayUtils?.getInitialFocusId?.(payload);
+  if (focusId) {
+    requestAnimationFrame(() => {
+      const el = document.getElementById(focusId);
+      if (el && typeof el.focus === "function") el.focus();
+    });
+  }
 }
 
 function sendAction(action) {

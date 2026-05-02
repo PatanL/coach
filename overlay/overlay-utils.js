@@ -40,9 +40,22 @@
     return isTextInputTarget(t) || isInteractiveTarget(t);
   }
 
+  // Decide which control should receive initial focus when the overlay appears.
+  // Keep this conservative: only override focus when it reduces accidental actions.
+  function getInitialFocusId(payload) {
+    const mode = String(payload?.mode || "");
+    const raw = payload?.source_event_type || payload?.event_type || payload?.type || "";
+    const eventType = String(raw).toUpperCase();
+
+    if (mode === "align") return "alignText";
+    if (eventType === "DRIFT_PERSIST") return "recoverBtn";
+    return null;
+  }
+
   return {
     isTextInputTarget,
     isInteractiveTarget,
-    shouldIgnoreGlobalEnter
+    shouldIgnoreGlobalEnter,
+    getInitialFocusId
   };
 });
