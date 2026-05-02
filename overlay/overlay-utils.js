@@ -40,9 +40,40 @@
     return isTextInputTarget(t) || isInteractiveTarget(t);
   }
 
+  function getGlobalEnterAction(payload, target) {
+    if (shouldIgnoreGlobalEnter(target)) return null;
+    const eventType = normalizeEventType(payload);
+    return eventType === "DRIFT_PERSIST" ? "recover" : "back_on_track";
+  }
+
+  function normalizeEventType(payload) {
+    const raw = payload?.source_event_type || payload?.event_type || payload?.type || "";
+    return String(raw).toUpperCase();
+  }
+
+  // DRIFT_PERSIST should feel "actionable". If the user is already off-task for a while,
+  // default focus should land on the recovery action (not the quick-dismiss path).
+  function shouldAutofocusRecover(payload, activeElement) {
+    const eventType = normalizeEventType(payload);
+    const hasChoices = Array.isArray(payload?.choices) && payload.choices.length > 0;
+    if (hasChoices) return false;
+
+    // Never steal focus from a typing surface outside the overlay.
+    // (If focus is already within the overlay, it's safe to move it.)
+    if (activeElement) {
+      const isInsideOverlay = typeof activeElement.closest === "function" && !!activeElement.closest("#overlay");
+      if (!isInsideOverlay && isTextInputTarget(activeElement)) return false;
+    }
+
+    return eventType === "DRIFT_PERSIST";
+  }
+
   return {
     isTextInputTarget,
     isInteractiveTarget,
-    shouldIgnoreGlobalEnter
+    shouldIgnoreGlobalEnter,
+    getGlobalEnterAction,
+    normalizeEventType,
+    shouldAutofocusRecover
   };
 });

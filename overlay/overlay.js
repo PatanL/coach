@@ -12,6 +12,8 @@ const alignInput = document.getElementById("alignInput");
 const alignText = document.getElementById("alignText");
 const alignSubmit = document.getElementById("alignSubmit");
 
+const enterHint = document.getElementById("enterHint");
+
 const backBtn = document.getElementById("backBtn");
 const stuckBtn = document.getElementById("stuckBtn");
 const recoverBtn = document.getElementById("recoverBtn");
@@ -34,9 +36,15 @@ function updatePrimaryLabel(payload) {
 
 function updateEventLabel(payload) {
   // Prefer the originating event type when available (used for visual pattern-breaks like DRIFT_PERSIST).
-  const raw = payload?.source_event_type || payload?.event_type || payload?.type || "";
-  const eventType = String(raw).toUpperCase();
+  const eventType = window.overlayUtils?.normalizeEventType
+    ? window.overlayUtils.normalizeEventType(payload)
+    : String(payload?.source_event_type || payload?.event_type || payload?.type || "").toUpperCase();
   overlay.dataset.eventType = eventType;
+
+  // Update keyboard hint: on DRIFT_PERSIST we want Enter to push the user into recovery (pattern-break).
+  if (enterHint) {
+    enterHint.textContent = eventType === "DRIFT_PERSIST" ? "Enter: Recover schedule" : "Enter: Back on track";
+  }
 
   if (!eventType) {
     setText(eventLabel, "DRIFT");
@@ -107,6 +115,13 @@ function showOverlay(payload) {
   overlay.dataset.level = payload.level || "B";
   currentPayload = payload;
   shownAt = Date.now();
+
+  // On DRIFT_PERSIST, default focus should land on the recovery action.
+  // Do this after rendering so focus isn't stolen during align mode.
+  const shouldAutofocusRecover = window.overlayUtils?.shouldAutofocusRecover?.(payload, document.activeElement);
+  if (shouldAutofocusRecover && typeof recoverBtn?.focus === "function") {
+    recoverBtn.focus();
+  }
 }
 
 function sendAction(action) {
@@ -161,11 +176,11 @@ window.overlayAPI.onPause(() => {
 });
 
 window.addEventListener("keydown", (event) => {
-  // Don't treat Enter as "Back on track" while the user is typing or interacting with a control.
+  // Don't treat Enter as a global action while the user is typing or interacting with a control.
   if (event.key === "Enter") {
-    const ignoreEnter = window.overlayUtils?.shouldIgnoreGlobalEnter?.(event.target);
-    if (!ignoreEnter) {
-      sendAction({ action: "back_on_track" });
+    const action = window.overlayUtils?.getGlobalEnterAction?.(currentPayload, event.target);
+    if (action) {
+      sendAction({ action });
     }
   }
   if (event.key === "Escape") {

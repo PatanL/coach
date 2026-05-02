@@ -1,7 +1,14 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
 
-const { isTextInputTarget, isInteractiveTarget, shouldIgnoreGlobalEnter } = require("./overlay-utils");
+const {
+  isTextInputTarget,
+  isInteractiveTarget,
+  shouldIgnoreGlobalEnter,
+  getGlobalEnterAction,
+  normalizeEventType,
+  shouldAutofocusRecover
+} = require("./overlay-utils");
 
 test("isTextInputTarget: recognizes common typing targets", () => {
   assert.equal(isTextInputTarget({ tagName: "INPUT" }), true);
@@ -45,4 +52,34 @@ test("shouldIgnoreGlobalEnter: child of button/link should still block global En
     }
   };
   assert.equal(shouldIgnoreGlobalEnter(spanInsideButton), true);
+});
+
+test("getGlobalEnterAction: defaults to recover for DRIFT_PERSIST; otherwise back_on_track", () => {
+  assert.equal(getGlobalEnterAction({ event_type: "DRIFT_PERSIST" }, { tagName: "DIV" }), "recover");
+  assert.equal(getGlobalEnterAction({ event_type: "DRIFT" }, { tagName: "DIV" }), "back_on_track");
+});
+
+test("getGlobalEnterAction: respects shouldIgnoreGlobalEnter", () => {
+  assert.equal(getGlobalEnterAction({ event_type: "DRIFT_PERSIST" }, { tagName: "INPUT" }), null);
+  assert.equal(getGlobalEnterAction({ event_type: "DRIFT" }, { tagName: "BUTTON" }), null);
+});
+
+test("normalizeEventType: prefers source_event_type and uppercases", () => {
+  assert.equal(normalizeEventType({ source_event_type: "drift_persist" }), "DRIFT_PERSIST");
+  assert.equal(normalizeEventType({ event_type: "DRIFT" }), "DRIFT");
+  assert.equal(normalizeEventType({ type: "foo_bar" }), "FOO_BAR");
+  assert.equal(normalizeEventType({}), "");
+});
+
+test("shouldAutofocusRecover: true for DRIFT_PERSIST without choices; false otherwise", () => {
+  assert.equal(shouldAutofocusRecover({ source_event_type: "DRIFT_PERSIST" }), true);
+  assert.equal(shouldAutofocusRecover({ event_type: "DRIFT_PERSIST", choices: [] }), true);
+  assert.equal(shouldAutofocusRecover({ event_type: "DRIFT_PERSIST", choices: ["a"] }), false);
+  assert.equal(shouldAutofocusRecover({ event_type: "DRIFT" }), false);
+});
+
+
+test("shouldAutofocusRecover: does not steal focus from text input outside overlay", () => {
+  const activeEl = { tagName: "INPUT", closest: () => null };
+  assert.equal(shouldAutofocusRecover({ source_event_type: "DRIFT_PERSIST" }, activeEl), false);
 });
