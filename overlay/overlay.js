@@ -208,6 +208,11 @@ window.addEventListener("keydown", (event) => {
       : null;
 
     if (action) {
+      // Prevent the default "activate focused element" behavior.
+      // Without this, Enter can both click the focused button *and* fire the global handler,
+      // resulting in duplicate actions or accidental confirmations.
+      event.preventDefault();
+      event.stopPropagation();
       sendAction({ action });
     }
   }
