@@ -129,16 +129,8 @@ function showOverlay(payload) {
   currentPayload = payload;
   shownAt = Date.now();
 
-  // Initial focus: make DRIFT_PERSIST a stronger pattern-break by defaulting focus to Recover,
-  // and focus the align input when in align mode.
-  const focusId = window.overlayUtils?.getInitialFocusId?.(payload);
-  if (focusId) {
-    requestAnimationFrame(() => {
-      const el = document.getElementById(focusId);
-      if (el && typeof el.focus === "function") el.focus();
-    });
-  }
 }
+
 
 function sendAction(action) {
   const timeToAction = shownAt ? Date.now() - shownAt : 0;
