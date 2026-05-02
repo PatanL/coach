@@ -40,9 +40,27 @@
     return isTextInputTarget(t) || isInteractiveTarget(t);
   }
 
+  // DRIFT_PERSIST is intentionally "harder" to dismiss: require Cmd/Ctrl+Enter
+  // to create a clear visual + behavioral pattern-break and reduce accidental actions.
+  function requiresModifiedEnter(eventType) {
+    return String(eventType || "").toUpperCase() === "DRIFT_PERSIST";
+  }
+
+  function shouldTriggerBackOnTrack({ eventType, target, key, metaKey, ctrlKey }) {
+    if (key !== "Enter") return false;
+    if (shouldIgnoreGlobalEnter(target)) return false;
+
+    if (requiresModifiedEnter(eventType)) {
+      return Boolean(metaKey || ctrlKey);
+    }
+    return true;
+  }
+
   return {
     isTextInputTarget,
     isInteractiveTarget,
-    shouldIgnoreGlobalEnter
+    shouldIgnoreGlobalEnter,
+    requiresModifiedEnter,
+    shouldTriggerBackOnTrack
   };
 });
