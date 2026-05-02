@@ -55,6 +55,22 @@ test("shouldIgnoreGlobalEnter: child of button/link should still block global En
   assert.equal(shouldIgnoreGlobalEnter(spanInsideLink), true);
 });
 
+test("shouldIgnoreGlobalEnter: child of role=button/link should still block global Enter", () => {
+  const roleButton = { tagName: "DIV", getAttribute: (k) => (k === "role" ? "button" : null) };
+  const spanInsideRoleButton = {
+    tagName: "SPAN",
+    closest: (selector) => (selector ? roleButton : null)
+  };
+  assert.equal(shouldIgnoreGlobalEnter(spanInsideRoleButton), true);
+
+  const roleLink = { tagName: "DIV", getAttribute: (k) => (k === "role" ? "link" : null) };
+  const spanInsideRoleLink = {
+    tagName: "SPAN",
+    closest: (selector) => (selector ? roleLink : null)
+  };
+  assert.equal(shouldIgnoreGlobalEnter(spanInsideRoleLink), true);
+});
+
 test("getGlobalEnterAction: DRIFT_PERSIST prefers recovery action", () => {
   assert.equal(getGlobalEnterAction("DRIFT_PERSIST"), "recover");
   assert.equal(getGlobalEnterAction("drift_persist"), "recover");
