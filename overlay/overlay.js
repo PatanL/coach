@@ -16,6 +16,7 @@ const backBtn = document.getElementById("backBtn");
 const stuckBtn = document.getElementById("stuckBtn");
 const recoverBtn = document.getElementById("recoverBtn");
 const snoozeBtn = document.getElementById("snoozeBtn");
+const enterHint = document.getElementById("enterHint");
 
 let shownAt = null;
 let currentPayload = null;
@@ -74,6 +75,26 @@ function showOverlay(payload) {
   } else {
     overlay.dataset.mode = "";
   }
+
+  // Expose mode to focus decision helper.
+  payload.mode = overlay.dataset.mode;
+
+  // Default keyboard focus:
+  // Keep the logic in overlay-utils so we can unit test focus rules.
+  const focusId = window.overlayUtils?.getInitialFocusId?.(payload) || null;
+
+  if (enterHint) {
+    enterHint.textContent = focusId === "recoverBtn" ? "Enter: Recover schedule" : "Enter: Back on track";
+  }
+
+  queueMicrotask(() => {
+    if (focusId) {
+      document.getElementById(focusId)?.focus?.();
+      return;
+    }
+    backBtn?.focus?.();
+  });
+
   setText(blockName, payload.block_name || "");
   setText(headline, payload.headline || "Reset.");
   setText(humanLine, payload.human_line || "");
@@ -107,7 +128,9 @@ function showOverlay(payload) {
   overlay.dataset.level = payload.level || "B";
   currentPayload = payload;
   shownAt = Date.now();
+
 }
+
 
 function sendAction(action) {
   const timeToAction = shownAt ? Date.now() - shownAt : 0;
