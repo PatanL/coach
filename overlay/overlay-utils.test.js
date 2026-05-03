@@ -1,7 +1,12 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
 
-const { isTextInputTarget, isInteractiveTarget, shouldIgnoreGlobalEnter } = require("./overlay-utils");
+const {
+  isTextInputTarget,
+  isInteractiveTarget,
+  shouldIgnoreGlobalEnter,
+  pickInitialFocusTarget
+} = require("./overlay-utils");
 
 test("isTextInputTarget: recognizes common typing targets", () => {
   assert.equal(isTextInputTarget({ tagName: "INPUT" }), true);
@@ -45,4 +50,20 @@ test("shouldIgnoreGlobalEnter: child of button/link should still block global En
     }
   };
   assert.equal(shouldIgnoreGlobalEnter(spanInsideButton), true);
+});
+
+test("pickInitialFocusTarget: alignment question focuses input", () => {
+  assert.equal(pickInitialFocusTarget({ hasChoices: true, eventType: "DRIFT" }), "alignText");
+  assert.equal(pickInitialFocusTarget({ hasChoices: true, eventType: "DRIFT_PERSIST" }), "alignText");
+});
+
+test("pickInitialFocusTarget: DRIFT_PERSIST biases recover", () => {
+  assert.equal(pickInitialFocusTarget({ hasChoices: false, eventType: "DRIFT_PERSIST" }), "recoverBtn");
+  assert.equal(pickInitialFocusTarget({ hasChoices: false, eventType: "drift_persist" }), "recoverBtn");
+});
+
+test("pickInitialFocusTarget: default biases back on track", () => {
+  assert.equal(pickInitialFocusTarget({ hasChoices: false, eventType: "DRIFT" }), "backBtn");
+  assert.equal(pickInitialFocusTarget({ hasChoices: false, eventType: "" }), "backBtn");
+  assert.equal(pickInitialFocusTarget({ hasChoices: false, eventType: null }), "backBtn");
 });

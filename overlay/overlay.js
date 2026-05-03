@@ -136,12 +136,16 @@ function showOverlay(payload) {
   // Use a microtask/tick so the element is focusable after DOM updates.
   setTimeout(() => {
     try {
-      if (payload.choices && Array.isArray(payload.choices)) {
+      const targetId = window.overlayUtils?.pickInitialFocusTarget?.({
+        hasChoices: Boolean(payload.choices && Array.isArray(payload.choices)),
+        eventType: overlay.dataset.eventType
+      });
+
+      if (targetId === "alignText") {
         alignText.focus();
         return;
       }
-      const eventType = String(overlay.dataset.eventType || "").toUpperCase();
-      if (eventType === "DRIFT_PERSIST") {
+      if (targetId === "recoverBtn") {
         recoverBtn.focus();
         return;
       }
