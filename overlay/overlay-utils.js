@@ -40,9 +40,21 @@
     return isTextInputTarget(t) || isInteractiveTarget(t);
   }
 
+  // Avoid accidental "Enter" actions immediately after the overlay appears.
+  // This is especially important for DRIFT_PERSIST, where we want a stronger pattern-break.
+  function shouldAllowGlobalEnter(target, { shownAtMs, nowMs, eventType } = {}) {
+    if (shouldIgnoreGlobalEnter(target)) return false;
+    if (!shownAtMs || !nowMs) return true;
+
+    const type = String(eventType || "").toUpperCase();
+    const debounceMs = type === "DRIFT_PERSIST" ? 800 : 400;
+    return nowMs - shownAtMs >= debounceMs;
+  }
+
   return {
     isTextInputTarget,
     isInteractiveTarget,
-    shouldIgnoreGlobalEnter
+    shouldIgnoreGlobalEnter,
+    shouldAllowGlobalEnter
   };
 });

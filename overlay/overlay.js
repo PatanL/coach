@@ -162,9 +162,17 @@ window.overlayAPI.onPause(() => {
 
 window.addEventListener("keydown", (event) => {
   // Don't treat Enter as "Back on track" while the user is typing or interacting with a control.
+  // Also debounce the first Enter after show to avoid accidental dismissals when focus/keystrokes
+  // carry over from the underlying app.
   if (event.key === "Enter") {
+    const allowEnter = window.overlayUtils?.shouldAllowGlobalEnter?.(event.target, {
+      shownAtMs: shownAt,
+      nowMs: Date.now(),
+      eventType: overlay?.dataset?.eventType
+    });
+    // Back-compat if overlay-utils hasn't loaded for some reason.
     const ignoreEnter = window.overlayUtils?.shouldIgnoreGlobalEnter?.(event.target);
-    if (!ignoreEnter) {
+    if (allowEnter ?? !ignoreEnter) {
       sendAction({ action: "back_on_track" });
     }
   }

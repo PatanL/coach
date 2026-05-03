@@ -1,7 +1,7 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
 
-const { isTextInputTarget, isInteractiveTarget, shouldIgnoreGlobalEnter } = require("./overlay-utils");
+const { isTextInputTarget, isInteractiveTarget, shouldIgnoreGlobalEnter, shouldAllowGlobalEnter } = require("./overlay-utils");
 
 test("isTextInputTarget: recognizes common typing targets", () => {
   assert.equal(isTextInputTarget({ tagName: "INPUT" }), true);
@@ -45,4 +45,36 @@ test("shouldIgnoreGlobalEnter: child of button/link should still block global En
     }
   };
   assert.equal(shouldIgnoreGlobalEnter(spanInsideButton), true);
+});
+
+test("shouldAllowGlobalEnter: debounces immediately after show (default)", () => {
+  const target = { tagName: "DIV" };
+  assert.equal(
+    shouldAllowGlobalEnter(target, { shownAtMs: 1000, nowMs: 1200, eventType: "DRIFT" }),
+    false
+  );
+  assert.equal(
+    shouldAllowGlobalEnter(target, { shownAtMs: 1000, nowMs: 1600, eventType: "DRIFT" }),
+    true
+  );
+});
+
+test("shouldAllowGlobalEnter: stronger debounce for DRIFT_PERSIST", () => {
+  const target = { tagName: "DIV" };
+  assert.equal(
+    shouldAllowGlobalEnter(target, { shownAtMs: 1000, nowMs: 1750, eventType: "DRIFT_PERSIST" }),
+    false
+  );
+  assert.equal(
+    shouldAllowGlobalEnter(target, { shownAtMs: 1000, nowMs: 1800, eventType: "DRIFT_PERSIST" }),
+    true
+  );
+});
+
+test("shouldAllowGlobalEnter: never allows when typing/clicking", () => {
+  const target = { tagName: "INPUT" };
+  assert.equal(
+    shouldAllowGlobalEnter(target, { shownAtMs: 1000, nowMs: 99999, eventType: "DRIFT" }),
+    false
+  );
 });
