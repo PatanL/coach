@@ -40,9 +40,18 @@
     return isTextInputTarget(t) || isInteractiveTarget(t);
   }
 
+  // Decide which overlay action should be the default primary action for Enter.
+  // Kept in utils to make the hotkey behavior testable.
+  function primaryActionForEventType(eventType) {
+    const t = String(eventType || "").toUpperCase();
+    if (t === "DRIFT_PERSIST") return "recover";
+    return "back_on_track";
+  }
+
   return {
     isTextInputTarget,
     isInteractiveTarget,
-    shouldIgnoreGlobalEnter
+    shouldIgnoreGlobalEnter,
+    primaryActionForEventType
   };
 });

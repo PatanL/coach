@@ -246,6 +246,7 @@ button.primary:hover {
 }
 
 #overlay[data-event-type="DRIFT_PERSIST"] .card {
+  position: relative;
   animation: driftPersistPulse 1.15s ease-in-out 0s 3;
   border: 2px solid rgba(255, 73, 167, 0.85);
   box-shadow:
@@ -260,6 +261,20 @@ button.primary:hover {
       rgba(19, 22, 26, 0.92) 18px
     ),
     linear-gradient(140deg, rgba(19, 22, 26, 0.92), rgba(10, 12, 15, 0.96));
+}
+
+#overlay[data-event-type="DRIFT_PERSIST"] .card::before {
+  content: "PERSISTENT DRIFT";
+  position: absolute;
+  top: -10px;
+  right: 14px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  color: rgba(19, 22, 26, 0.95);
+  background: rgba(255, 206, 61, 0.92);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.45), 0 0 0 2px rgba(255, 73, 167, 0.35);
 }
 
 #overlay[data-event-type="DRIFT_PERSIST"] .label {

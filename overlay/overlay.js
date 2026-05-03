@@ -16,9 +16,11 @@ const backBtn = document.getElementById("backBtn");
 const stuckBtn = document.getElementById("stuckBtn");
 const recoverBtn = document.getElementById("recoverBtn");
 const snoozeBtn = document.getElementById("snoozeBtn");
+const primaryHint = document.getElementById("primaryHint");
 
 let shownAt = null;
 let currentPayload = null;
+let currentPrimaryAction = "back_on_track";
 
 function setText(el, value) {
   el.textContent = value || "";
@@ -53,6 +55,26 @@ function updateEventLabel(payload) {
   setText(eventLabel, eventType.replaceAll("_", " "));
 }
 
+function updatePrimaryAction(payload) {
+  const eventType = String(overlay.dataset.eventType || "").toUpperCase();
+
+  // Keep the selection logic testable.
+  currentPrimaryAction = window.overlayUtils?.primaryActionForEventType?.(eventType) || "back_on_track";
+
+  if (currentPrimaryAction === "recover") {
+    // For DRIFT_PERSIST, bias toward an immediate, concrete recovery move.
+    // We keep the Back-on-track button available, but make Recover the primary.
+    backBtn.classList.remove("primary");
+    recoverBtn.classList.add("primary");
+    if (primaryHint) setText(primaryHint, "Enter: Recover schedule");
+    return;
+  }
+
+  recoverBtn.classList.remove("primary");
+  backBtn.classList.add("primary");
+  if (primaryHint) setText(primaryHint, "Enter: Back on track");
+}
+
 function resetSnooze() {
   snooze.classList.add("hidden");
 }
@@ -68,6 +90,7 @@ function showOverlay(payload) {
   resetAlignInput();
   updateEventLabel(payload);
   updatePrimaryLabel(payload);
+  updatePrimaryAction(payload);
 
   if (payload.choices && Array.isArray(payload.choices)) {
     overlay.dataset.mode = "align";
@@ -165,7 +188,7 @@ window.addEventListener("keydown", (event) => {
   if (event.key === "Enter") {
     const ignoreEnter = window.overlayUtils?.shouldIgnoreGlobalEnter?.(event.target);
     if (!ignoreEnter) {
-      sendAction({ action: "back_on_track" });
+      sendAction({ action: currentPrimaryAction });
     }
   }
   if (event.key === "Escape") {
