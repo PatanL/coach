@@ -161,14 +161,38 @@ window.overlayAPI.onPause(() => {
 });
 
 window.addEventListener("keydown", (event) => {
+  const ignoreGlobalHotkeys = window.overlayUtils?.shouldIgnoreGlobalEnter?.(event.target);
+
   // Don't treat Enter as "Back on track" while the user is typing or interacting with a control.
   if (event.key === "Enter") {
-    const ignoreEnter = window.overlayUtils?.shouldIgnoreGlobalEnter?.(event.target);
-    if (!ignoreEnter) {
+    if (!ignoreGlobalHotkeys) {
       sendAction({ action: "back_on_track" });
     }
+    return;
   }
+
   if (event.key === "Escape") {
+    snooze.classList.remove("hidden");
+    return;
+  }
+
+  // Quick, low-friction recovery hotkeys (Option B overlay).
+  // Only when focus isn't inside an input/control.
+  if (ignoreGlobalHotkeys) return;
+
+  if (event.ctrlKey || event.metaKey || event.altKey) return;
+
+  const key = String(event.key || "").toLowerCase();
+  if (key === "b") {
+    sendAction({ action: "back_on_track" });
+  }
+  if (key === "s") {
+    sendAction({ action: "stuck" });
+  }
+  if (key === "r") {
+    sendAction({ action: "recover" });
+  }
+  if (key === "z") {
     snooze.classList.remove("hidden");
   }
 });
