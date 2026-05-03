@@ -37,6 +37,12 @@ async function main() {
   async function capture(name, payload) {
     // Give the DOM a moment to settle, then render the payload.
     await new Promise((r) => setTimeout(r, 50));
+
+    // Make screenshots deterministic (avoid animation-dependent frames).
+    await win.webContents.executeJavaScript(
+      "(() => { const el = document.getElementById('overlay'); if (el) el.dataset.screenshot = '1'; })()"
+    );
+
     win.webContents.send("overlay:show", payload);
 
     // Allow any CSS animations to reach a stable frame.
