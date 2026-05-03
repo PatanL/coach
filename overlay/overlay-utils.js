@@ -40,9 +40,17 @@
     return isTextInputTarget(t) || isInteractiveTarget(t);
   }
 
+  // Centralize the overlay's default primary action so it's easy to test.
+  function getPrimaryActionForEventType(eventType) {
+    const normalized = String(eventType || "").toUpperCase();
+    if (normalized === "DRIFT_PERSIST") return "recover";
+    return "back_on_track";
+  }
+
   return {
     isTextInputTarget,
     isInteractiveTarget,
-    shouldIgnoreGlobalEnter
+    shouldIgnoreGlobalEnter,
+    getPrimaryActionForEventType
   };
 });
