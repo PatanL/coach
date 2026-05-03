@@ -58,17 +58,18 @@ function updateEventLabel(payload) {
 function updatePrimaryAction(payload) {
   const eventType = String(overlay.dataset.eventType || "").toUpperCase();
 
-  // For DRIFT_PERSIST, bias toward an immediate, concrete recovery move.
-  // We keep the Back-on-track button available, but make Recover the primary.
-  if (eventType === "DRIFT_PERSIST") {
-    currentPrimaryAction = "recover";
+  // Keep the selection logic testable.
+  currentPrimaryAction = window.overlayUtils?.primaryActionForEventType?.(eventType) || "back_on_track";
+
+  if (currentPrimaryAction === "recover") {
+    // For DRIFT_PERSIST, bias toward an immediate, concrete recovery move.
+    // We keep the Back-on-track button available, but make Recover the primary.
     backBtn.classList.remove("primary");
     recoverBtn.classList.add("primary");
     if (primaryHint) setText(primaryHint, "Enter: Recover schedule");
     return;
   }
 
-  currentPrimaryAction = "back_on_track";
   recoverBtn.classList.remove("primary");
   backBtn.classList.add("primary");
   if (primaryHint) setText(primaryHint, "Enter: Back on track");
