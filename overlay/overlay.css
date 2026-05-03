@@ -30,11 +30,18 @@ html, body {
   backdrop-filter: blur(8px);
 }
 
-/* Visual pattern-break when drift persists: stronger edge + subtle shake pulse. */
+/* Visual pattern-break when drift persists: stronger edge + subtle shake pulse.
+   NOTE: honor reduced-motion; keep a strong static accent without the shake. */
 #overlay[data-event-type="DRIFT_PERSIST"] .card {
   border-color: rgba(241, 108, 91, 0.55);
   box-shadow: 0 22px 80px rgba(241, 108, 91, 0.12), 0 18px 60px rgba(0, 0, 0, 0.55);
   animation: driftPersistPulse 900ms ease-in-out 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #overlay[data-event-type="DRIFT_PERSIST"] .card {
+    animation: none;
+  }
 }
 
 #overlay[data-event-type="DRIFT_PERSIST"] .label {
