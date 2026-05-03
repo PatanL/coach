@@ -107,6 +107,21 @@ function showOverlay(payload) {
   overlay.dataset.level = payload.level || "B";
   currentPayload = payload;
   shownAt = Date.now();
+
+  // Focus management: reduce accidental global hotkeys by focusing the most relevant control.
+  // - In align mode, focus the text input so the user can type immediately.
+  // - Otherwise, focus the primary button so Enter activates that button (and our global Enter handler stays idle).
+  window.requestAnimationFrame(() => {
+    try {
+      if (payload.choices && Array.isArray(payload.choices)) {
+        alignText.focus();
+      } else {
+        backBtn.focus();
+      }
+    } catch {
+      // no-op (focus can fail in some browser states)
+    }
+  });
 }
 
 function sendAction(action) {
