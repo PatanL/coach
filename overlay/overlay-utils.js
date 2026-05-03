@@ -9,6 +9,12 @@
     if (!target) return false;
     const tag = String(target.tagName || "").toLowerCase();
     if (target.isContentEditable) return true;
+
+    // Many accessible text inputs are implemented as div/span with ARIA roles.
+    // Treat these as typing targets so global Enter hotkeys don't fire while the user is editing.
+    const role = String(target.getAttribute?.("role") || "").toLowerCase();
+    if (role === "textbox" || role === "combobox" || role === "searchbox") return true;
+
     return tag === "input" || tag === "textarea" || tag === "select";
   }
 
