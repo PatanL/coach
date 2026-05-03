@@ -5,7 +5,8 @@ const {
   isTextInputTarget,
   isInteractiveTarget,
   shouldIgnoreGlobalEnter,
-  pickInitialFocusTarget
+  pickInitialFocusTarget,
+  pickGlobalEnterAction
 } = require("./overlay-utils");
 
 test("isTextInputTarget: recognizes common typing targets", () => {
@@ -66,4 +67,15 @@ test("pickInitialFocusTarget: default biases back on track", () => {
   assert.equal(pickInitialFocusTarget({ hasChoices: false, eventType: "DRIFT" }), "backBtn");
   assert.equal(pickInitialFocusTarget({ hasChoices: false, eventType: "" }), "backBtn");
   assert.equal(pickInitialFocusTarget({ hasChoices: false, eventType: null }), "backBtn");
+});
+
+test("pickGlobalEnterAction: DRIFT_PERSIST triggers recovery", () => {
+  assert.equal(pickGlobalEnterAction({ eventType: "DRIFT_PERSIST" }), "recover");
+  assert.equal(pickGlobalEnterAction({ eventType: "drift_persist" }), "recover");
+});
+
+test("pickGlobalEnterAction: default triggers back_on_track", () => {
+  assert.equal(pickGlobalEnterAction({ eventType: "DRIFT" }), "back_on_track");
+  assert.equal(pickGlobalEnterAction({ eventType: "" }), "back_on_track");
+  assert.equal(pickGlobalEnterAction({ eventType: null }), "back_on_track");
 });

@@ -49,10 +49,19 @@
     return "backBtn";
   }
 
+  // Decide which semantic action Enter should trigger when using the global hotkey.
+  // Kept deterministic + testable so DRIFT_PERSIST can cleanly bias toward recovery.
+  function pickGlobalEnterAction({ eventType }) {
+    const t = String(eventType || "").toUpperCase();
+    if (t === "DRIFT_PERSIST") return "recover";
+    return "back_on_track";
+  }
+
   return {
     isTextInputTarget,
     isInteractiveTarget,
     shouldIgnoreGlobalEnter,
-    pickInitialFocusTarget
+    pickInitialFocusTarget,
+    pickGlobalEnterAction
   };
 });
