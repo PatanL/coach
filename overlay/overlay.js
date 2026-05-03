@@ -6,6 +6,7 @@ const humanLine = document.getElementById("humanLine");
 const diagnosis = document.getElementById("diagnosis");
 const nextAction = document.getElementById("nextAction");
 const snooze = document.getElementById("snoozeReason");
+const enterHint = document.getElementById("enterHint");
 const miniPlan = document.getElementById("miniPlan");
 const choiceButtons = document.getElementById("choiceButtons");
 const alignInput = document.getElementById("alignInput");
@@ -40,17 +41,18 @@ function updateEventLabel(payload) {
 
   if (!eventType) {
     setText(eventLabel, "DRIFT");
-    return;
+    return eventType;
   }
   if (eventType === "DRIFT_PERSIST") {
     setText(eventLabel, "DRIFT — PERSIST");
-    return;
+    return eventType;
   }
   if (eventType.startsWith("DRIFT")) {
     setText(eventLabel, "DRIFT");
-    return;
+    return eventType;
   }
   setText(eventLabel, eventType.replaceAll("_", " "));
+  return eventType;
 }
 
 function resetSnooze() {
@@ -62,11 +64,22 @@ function resetAlignInput() {
   alignInput.classList.add("hidden");
 }
 
+function setEnterHint(text) {
+  if (!enterHint) return;
+  setText(enterHint, text);
+}
+
+function setPrimaryAction(primary) {
+  // Ensure only one "primary" button styling at a time.
+  [backBtn, stuckBtn, recoverBtn, snoozeBtn].forEach((btn) => btn.classList.remove("primary"));
+  primary?.classList.add("primary");
+}
+
 function showOverlay(payload) {
   overlay.classList.remove("hidden");
   resetSnooze();
   resetAlignInput();
-  updateEventLabel(payload);
+  const eventType = updateEventLabel(payload);
   updatePrimaryLabel(payload);
 
   if (payload.choices && Array.isArray(payload.choices)) {
@@ -74,6 +87,17 @@ function showOverlay(payload) {
   } else {
     overlay.dataset.mode = "";
   }
+
+  // Option B actionable overlay: on persistent drift, make "Recover schedule" the default action.
+  // This is both a motivational pattern-break (different default) and a safer recovery path.
+  if (eventType === "DRIFT_PERSIST") {
+    setPrimaryAction(recoverBtn);
+    setEnterHint("Enter: Recover schedule");
+  } else {
+    setPrimaryAction(backBtn);
+    setEnterHint("Enter: Back on track");
+  }
+
   setText(blockName, payload.block_name || "");
   setText(headline, payload.headline || "Reset.");
   setText(humanLine, payload.human_line || "");
@@ -161,11 +185,16 @@ window.overlayAPI.onPause(() => {
 });
 
 window.addEventListener("keydown", (event) => {
-  // Don't treat Enter as "Back on track" while the user is typing or interacting with a control.
+  // Don't treat Enter as a global action while the user is typing or interacting with a control.
   if (event.key === "Enter") {
     const ignoreEnter = window.overlayUtils?.shouldIgnoreGlobalEnter?.(event.target);
     if (!ignoreEnter) {
-      sendAction({ action: "back_on_track" });
+      const eventType = String(overlay?.dataset?.eventType || "").toUpperCase();
+      if (eventType === "DRIFT_PERSIST") {
+        sendAction({ action: "recover" });
+      } else {
+        sendAction({ action: "back_on_track" });
+      }
     }
   }
   if (event.key === "Escape") {
