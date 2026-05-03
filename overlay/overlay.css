@@ -30,6 +30,8 @@ html, body {
   backdrop-filter: blur(8px);
 }
 
+/* DRIFT_PERSIST styling is defined once near the bottom of this file.
+   (Keeping it single-sourced avoids conflicting animations and makes screenshots deterministic.) */
 #overlay[data-level="A"] .card {
   width: 320px;
   padding: 18px 20px;
