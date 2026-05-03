@@ -40,9 +40,22 @@
     return isTextInputTarget(t) || isInteractiveTarget(t);
   }
 
+  // When an in-overlay panel is open (e.g. Snooze reason), treat global Enter as unsafe.
+  // This avoids accidental "Back on track" confirmations while the user is deciding.
+  function hasOpenOverlayPanel(overlayRoot) {
+    if (!overlayRoot || typeof overlayRoot.querySelector !== "function") return false;
+    return !!overlayRoot.querySelector(".snooze:not(.hidden), .align-input:not(.hidden)");
+  }
+
+  function shouldIgnoreGlobalEnterWithOverlay(target, overlayRoot) {
+    return shouldIgnoreGlobalEnter(target) || hasOpenOverlayPanel(overlayRoot);
+  }
+
   return {
     isTextInputTarget,
     isInteractiveTarget,
-    shouldIgnoreGlobalEnter
+    shouldIgnoreGlobalEnter,
+    hasOpenOverlayPanel,
+    shouldIgnoreGlobalEnterWithOverlay
   };
 });
