@@ -51,10 +51,17 @@
     return nowMs - shownAtMs >= debounceMs;
   }
 
+  function getDefaultEnterAction(eventType) {
+    const type = String(eventType || "").toUpperCase();
+    if (type === "DRIFT_PERSIST") return "recover";
+    return "back_on_track";
+  }
+
   return {
     isTextInputTarget,
     isInteractiveTarget,
     shouldIgnoreGlobalEnter,
-    shouldAllowGlobalEnter
+    shouldAllowGlobalEnter,
+    getDefaultEnterAction
   };
 });
