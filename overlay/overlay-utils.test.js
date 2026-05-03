@@ -1,7 +1,13 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
 
-const { isTextInputTarget, isInteractiveTarget, shouldIgnoreGlobalEnter } = require("./overlay-utils");
+const {
+  isTextInputTarget,
+  isInteractiveTarget,
+  shouldIgnoreGlobalEnter,
+  hasOpenOverlayPanel,
+  shouldIgnoreGlobalEnterWithOverlay
+} = require("./overlay-utils");
 
 test("isTextInputTarget: recognizes common typing targets", () => {
   assert.equal(isTextInputTarget({ tagName: "INPUT" }), true);
@@ -45,4 +51,20 @@ test("shouldIgnoreGlobalEnter: child of button/link should still block global En
     }
   };
   assert.equal(shouldIgnoreGlobalEnter(spanInsideButton), true);
+});
+
+test("hasOpenOverlayPanel: detects open panels", () => {
+  const overlayRoot = {
+    querySelector: (sel) => (sel.includes(".snooze") ? { id: "snooze" } : null)
+  };
+  assert.equal(hasOpenOverlayPanel(overlayRoot), true);
+  assert.equal(hasOpenOverlayPanel({ querySelector: () => null }), false);
+  assert.equal(hasOpenOverlayPanel(null), false);
+});
+
+test("shouldIgnoreGlobalEnterWithOverlay: blocks global Enter while panel open", () => {
+  const overlayRoot = {
+    querySelector: () => ({ id: "align" })
+  };
+  assert.equal(shouldIgnoreGlobalEnterWithOverlay({ tagName: "DIV" }, overlayRoot), true);
 });
