@@ -17,8 +17,11 @@ const stuckBtn = document.getElementById("stuckBtn");
 const recoverBtn = document.getElementById("recoverBtn");
 const snoozeBtn = document.getElementById("snoozeBtn");
 
+const enterHint = document.getElementById("enterHint");
+
 let shownAt = null;
 let currentPayload = null;
+let currentPrimaryAction = "back_on_track";
 
 function setText(el, value) {
   el.textContent = value || "";
@@ -37,6 +40,10 @@ function updateEventLabel(payload) {
   const raw = payload?.source_event_type || payload?.event_type || payload?.type || "";
   const eventType = String(raw).toUpperCase();
   overlay.dataset.eventType = eventType;
+
+  // Make DRIFT_PERSIST feel more actionable: default the primary "Enter" action to schedule recovery.
+  // (We still allow explicit clicks on any button.)
+  currentPrimaryAction = eventType === "DRIFT_PERSIST" ? "recover" : "back_on_track";
 
   if (!eventType) {
     setText(eventLabel, "DRIFT");
@@ -68,6 +75,17 @@ function showOverlay(payload) {
   resetAlignInput();
   updateEventLabel(payload);
   updatePrimaryLabel(payload);
+
+  // Swap primary emphasis + hint based on the primary Enter action.
+  if (currentPrimaryAction === "recover") {
+    backBtn.classList.remove("primary");
+    recoverBtn.classList.add("primary");
+    if (enterHint) enterHint.textContent = "Enter: Recover schedule";
+  } else {
+    recoverBtn.classList.remove("primary");
+    backBtn.classList.add("primary");
+    if (enterHint) enterHint.textContent = "Enter: Back on track";
+  }
 
   if (payload.choices && Array.isArray(payload.choices)) {
     overlay.dataset.mode = "align";
@@ -161,11 +179,11 @@ window.overlayAPI.onPause(() => {
 });
 
 window.addEventListener("keydown", (event) => {
-  // Don't treat Enter as "Back on track" while the user is typing or interacting with a control.
+  // Don't treat Enter as a global overlay action while the user is typing or interacting with a control.
   if (event.key === "Enter") {
     const ignoreEnter = window.overlayUtils?.shouldIgnoreGlobalEnter?.(event.target);
     if (!ignoreEnter) {
-      sendAction({ action: "back_on_track" });
+      sendAction({ action: currentPrimaryAction || "back_on_track" });
     }
   }
   if (event.key === "Escape") {
