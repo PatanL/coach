@@ -125,6 +125,18 @@ function showOverlay(payload) {
   overlay.dataset.level = payload.level || "B";
   currentPayload = payload;
   shownAt = Date.now();
+
+  // DRIFT_PERSIST is a "pattern-break" moment — bias the default focus toward recovery.
+  // This also makes pressing Enter activate the focused control (and avoids the global Enter handler).
+  if (overlay.dataset.eventType === "DRIFT_PERSIST") {
+    window.requestAnimationFrame(() => {
+      try {
+        recoverBtn.focus();
+      } catch {
+        // Ignore focus failures (e.g. during screenshot rendering).
+      }
+    });
+  }
 }
 
 function sendAction(action) {
