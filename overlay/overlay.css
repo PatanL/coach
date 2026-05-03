@@ -245,6 +245,11 @@ button.primary:hover {
   background: rgba(10, 4, 10, 0.55);
 }
 
+/* Deterministic screenshots: disable animations during capture runs. */
+#overlay[data-screenshot="1"] .card {
+  animation: none !important;
+}
+
 #overlay[data-event-type="DRIFT_PERSIST"] .card {
   animation: driftPersistPulse 1.15s ease-in-out 0s 3;
   border: 2px solid rgba(255, 73, 167, 0.85);

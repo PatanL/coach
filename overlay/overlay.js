@@ -74,8 +74,13 @@ function showOverlay(payload) {
   } else {
     overlay.dataset.mode = "";
   }
+  const eventType = overlay.dataset.eventType || "";
+
   setText(blockName, payload.block_name || "");
-  setText(headline, payload.headline || "Reset.");
+  setText(
+    headline,
+    payload.headline || (eventType === "DRIFT_PERSIST" ? "Pattern break." : "Reset.")
+  );
   setText(humanLine, payload.human_line || "");
   setText(diagnosis, payload.diagnosis || "");
   setText(nextAction, payload.next_action || "");
