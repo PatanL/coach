@@ -40,9 +40,22 @@
     return isTextInputTarget(t) || isInteractiveTarget(t);
   }
 
+  // Decide what the overlay should do when the user hits Enter at the "global" level
+  // (i.e. not while typing or interacting with another control).
+  //
+  // DRIFT_PERSIST is a special-case pattern-break: default to the more actionable "recover"
+  // path instead of passively acknowledging "back on track".
+  function getGlobalEnterAction({ target, eventType }) {
+    if (shouldIgnoreGlobalEnter(target)) return null;
+    const type = String(eventType || "").toUpperCase();
+    if (type === "DRIFT_PERSIST") return "recover";
+    return "back_on_track";
+  }
+
   return {
     isTextInputTarget,
     isInteractiveTarget,
-    shouldIgnoreGlobalEnter
+    shouldIgnoreGlobalEnter,
+    getGlobalEnterAction
   };
 });
