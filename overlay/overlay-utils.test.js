@@ -95,3 +95,15 @@ test("shouldAllowGlobalEnter: never allows when typing/clicking", () => {
     false
   );
 });
+
+test("shouldAllowGlobalEnter: 0 timestamps are treated as real times (do not bypass debounce)", () => {
+  const target = { tagName: "DIV" };
+  assert.equal(
+    shouldAllowGlobalEnter(target, { shownAtMs: 0, nowMs: 200, eventType: "DRIFT" }),
+    false
+  );
+  assert.equal(
+    shouldAllowGlobalEnter(target, { shownAtMs: 0, nowMs: 500, eventType: "DRIFT" }),
+    true
+  );
+});

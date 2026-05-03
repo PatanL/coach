@@ -44,7 +44,8 @@
   // This is especially important for DRIFT_PERSIST, where we want a stronger pattern-break.
   function shouldAllowGlobalEnter(target, { shownAtMs, nowMs, eventType } = {}) {
     if (shouldIgnoreGlobalEnter(target)) return false;
-    if (!shownAtMs || !nowMs) return true;
+    // Treat 0 as a valid timestamp; only bypass debounce when timestamps are truly missing.
+    if (shownAtMs == null || nowMs == null) return true;
 
     const type = String(eventType || "").toUpperCase();
     const debounceMs = type === "DRIFT_PERSIST" ? 800 : 400;
