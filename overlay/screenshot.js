@@ -83,6 +83,16 @@ async function main() {
     next_action: "Stand up, close the distraction, and reopen your task doc."
   });
 
+  await capture("align_mode.png", {
+    ...common,
+    event_type: "DRIFT_PERSIST",
+    headline: "Pick the next best move.",
+    human_line: "Option B: choose a clean, actionable step.",
+    diagnosis: "If you’re not sure what to do next, choose a reset action.",
+    next_action: "Pick one option (or type your own).",
+    choices: ["Close distraction + reopen task", "Stand up (30s) then resume", "Snooze 5 min (intentional)"]
+  });
+
   win.destroy();
   app.quit();
 }
