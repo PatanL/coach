@@ -46,3 +46,12 @@ test("shouldIgnoreGlobalEnter: child of button/link should still block global En
   };
   assert.equal(shouldIgnoreGlobalEnter(spanInsideButton), true);
 });
+
+test("shouldIgnoreGlobalEnter: child of contenteditable should block global Enter", () => {
+  const editable = { tagName: "DIV", isContentEditable: true };
+  const child = {
+    tagName: "SPAN",
+    closest: (selector) => (selector ? editable : null)
+  };
+  assert.equal(shouldIgnoreGlobalEnter(child), true);
+});
