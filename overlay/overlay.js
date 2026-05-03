@@ -43,7 +43,8 @@ function updateEventLabel(payload) {
 
   // Make DRIFT_PERSIST feel more actionable: default the primary "Enter" action to schedule recovery.
   // (We still allow explicit clicks on any button.)
-  currentPrimaryAction = eventType === "DRIFT_PERSIST" ? "recover" : "back_on_track";
+  currentPrimaryAction = window.overlayUtils?.getPrimaryActionForEventType?.(eventType) ||
+    (eventType === "DRIFT_PERSIST" ? "recover" : "back_on_track");
 
   if (!eventType) {
     setText(eventLabel, "DRIFT");
