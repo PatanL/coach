@@ -34,13 +34,19 @@ async function main() {
 
   await win.loadFile(htmlPath);
 
+  // Inject deterministic CSS for screenshot runs.
+  // We want stable pixels even if the overlay uses animations (e.g. DRIFT_PERSIST pulse).
+  await win.webContents.insertCSS(`
+    * { animation: none !important; transition: none !important; }
+  `);
+
   async function capture(name, payload) {
     // Give the DOM a moment to settle, then render the payload.
     await new Promise((r) => setTimeout(r, 50));
     win.webContents.send("overlay:show", payload);
 
-    // Allow any CSS animations to reach a stable frame.
-    await new Promise((r) => setTimeout(r, 250));
+    // Allow layout + paint.
+    await new Promise((r) => setTimeout(r, 80));
 
     const image = await win.capturePage();
     fs.writeFileSync(path.join(OUT_DIR, name), image.toPNG());
@@ -66,6 +72,15 @@ async function main() {
     ...common,
     event_type: "DRIFT_PERSIST",
     headline: "Interrupt the loop."
+  });
+
+  await capture("drift_persist_pattern_break.png", {
+    ...common,
+    event_type: "DRIFT_PERSIST",
+    headline: "Interrupt the loop.",
+    human_line: "Pattern-break: persistent drift needs a stronger snap-back.",
+    diagnosis: "You’ve been off-task for a bit — treat this like an interruption.",
+    next_action: "Stand up, close the distraction, and reopen your task doc."
   });
 
   win.destroy();
