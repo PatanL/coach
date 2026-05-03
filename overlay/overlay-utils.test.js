@@ -1,7 +1,13 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
 
-const { isTextInputTarget, isInteractiveTarget, shouldIgnoreGlobalEnter } = require("./overlay-utils");
+const {
+  isTextInputTarget,
+  isInteractiveTarget,
+  shouldIgnoreGlobalEnter,
+  shouldAllowGlobalEnter,
+  getDefaultEnterAction
+} = require("./overlay-utils");
 
 test("isTextInputTarget: recognizes common typing targets", () => {
   assert.equal(isTextInputTarget({ tagName: "INPUT" }), true);
@@ -45,4 +51,59 @@ test("shouldIgnoreGlobalEnter: child of button/link should still block global En
     }
   };
   assert.equal(shouldIgnoreGlobalEnter(spanInsideButton), true);
+});
+
+test("getDefaultEnterAction: DRIFT_PERSIST prefers recover (pattern-break)", () => {
+  assert.equal(getDefaultEnterAction("DRIFT_PERSIST"), "recover");
+  assert.equal(getDefaultEnterAction("drift_persist"), "recover");
+});
+
+test("getDefaultEnterAction: other events default to back_on_track", () => {
+  assert.equal(getDefaultEnterAction("DRIFT_START"), "back_on_track");
+  assert.equal(getDefaultEnterAction(""), "back_on_track");
+  assert.equal(getDefaultEnterAction(null), "back_on_track");
+});
+
+test("shouldAllowGlobalEnter: debounces immediately after show (default)", () => {
+  const target = { tagName: "DIV" };
+  assert.equal(
+    shouldAllowGlobalEnter(target, { shownAtMs: 1000, nowMs: 1200, eventType: "DRIFT" }),
+    false
+  );
+  assert.equal(
+    shouldAllowGlobalEnter(target, { shownAtMs: 1000, nowMs: 1600, eventType: "DRIFT" }),
+    true
+  );
+});
+
+test("shouldAllowGlobalEnter: stronger debounce for DRIFT_PERSIST", () => {
+  const target = { tagName: "DIV" };
+  assert.equal(
+    shouldAllowGlobalEnter(target, { shownAtMs: 1000, nowMs: 1750, eventType: "DRIFT_PERSIST" }),
+    false
+  );
+  assert.equal(
+    shouldAllowGlobalEnter(target, { shownAtMs: 1000, nowMs: 1800, eventType: "DRIFT_PERSIST" }),
+    true
+  );
+});
+
+test("shouldAllowGlobalEnter: never allows when typing/clicking", () => {
+  const target = { tagName: "INPUT" };
+  assert.equal(
+    shouldAllowGlobalEnter(target, { shownAtMs: 1000, nowMs: 99999, eventType: "DRIFT" }),
+    false
+  );
+});
+
+test("shouldAllowGlobalEnter: 0 timestamps are treated as real times (do not bypass debounce)", () => {
+  const target = { tagName: "DIV" };
+  assert.equal(
+    shouldAllowGlobalEnter(target, { shownAtMs: 0, nowMs: 200, eventType: "DRIFT" }),
+    false
+  );
+  assert.equal(
+    shouldAllowGlobalEnter(target, { shownAtMs: 0, nowMs: 500, eventType: "DRIFT" }),
+    true
+  );
 });

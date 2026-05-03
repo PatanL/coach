@@ -40,9 +40,29 @@
     return isTextInputTarget(t) || isInteractiveTarget(t);
   }
 
+  // Avoid accidental "Enter" actions immediately after the overlay appears.
+  // This is especially important for DRIFT_PERSIST, where we want a stronger pattern-break.
+  function shouldAllowGlobalEnter(target, { shownAtMs, nowMs, eventType } = {}) {
+    if (shouldIgnoreGlobalEnter(target)) return false;
+    // Treat 0 as a valid timestamp; only bypass debounce when timestamps are truly missing.
+    if (shownAtMs == null || nowMs == null) return true;
+
+    const type = String(eventType || "").toUpperCase();
+    const debounceMs = type === "DRIFT_PERSIST" ? 800 : 400;
+    return nowMs - shownAtMs >= debounceMs;
+  }
+
+  function getDefaultEnterAction(eventType) {
+    const type = String(eventType || "").toUpperCase();
+    if (type === "DRIFT_PERSIST") return "recover";
+    return "back_on_track";
+  }
+
   return {
     isTextInputTarget,
     isInteractiveTarget,
-    shouldIgnoreGlobalEnter
+    shouldIgnoreGlobalEnter,
+    shouldAllowGlobalEnter,
+    getDefaultEnterAction
   };
 });
