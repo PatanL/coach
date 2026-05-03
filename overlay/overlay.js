@@ -62,6 +62,22 @@ function resetAlignInput() {
   alignInput.classList.add("hidden");
 }
 
+function applyPrimaryActionHintForEvent(eventType) {
+  // Default: Back on track is the primary action.
+  backBtn.classList.add("primary");
+  recoverBtn.classList.remove("primary");
+
+  // DRIFT_PERSIST is our "pattern-break" moment. Make recovery the most obvious action.
+  if (eventType === "DRIFT_PERSIST") {
+    backBtn.classList.remove("primary");
+    recoverBtn.classList.add("primary");
+
+    // Also move keyboard focus to the recovery action so Enter activates it,
+    // instead of triggering the global "Back on track" handler.
+    recoverBtn.focus({ preventScroll: true });
+  }
+}
+
 function showOverlay(payload) {
   overlay.classList.remove("hidden");
   resetSnooze();
@@ -103,6 +119,9 @@ function showOverlay(payload) {
     choiceButtons.classList.add("hidden");
     alignInput.classList.add("hidden");
   }
+
+  const eventType = overlay.dataset.eventType || "";
+  applyPrimaryActionHintForEvent(eventType);
 
   overlay.dataset.level = payload.level || "B";
   currentPayload = payload;
