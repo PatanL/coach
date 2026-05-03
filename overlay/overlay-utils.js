@@ -28,7 +28,7 @@
     // element that should "own" the keyboard interaction.
     if (typeof target.closest === "function") {
       const hit = target.closest(
-        'input,textarea,select,[contenteditable="true"],button,a,[role="button"],[role="link"]'
+        'input,textarea,select,[contenteditable],[contenteditable="true"],button,a,[role="button"],[role="link"]'
       );
       if (hit) return hit;
     }
