@@ -16,6 +16,7 @@ const backBtn = document.getElementById("backBtn");
 const stuckBtn = document.getElementById("stuckBtn");
 const recoverBtn = document.getElementById("recoverBtn");
 const snoozeBtn = document.getElementById("snoozeBtn");
+const footerEnterHint = document.getElementById("footerEnterHint");
 
 let shownAt = null;
 let currentPayload = null;
@@ -25,6 +26,24 @@ function setText(el, value) {
 }
 
 function updatePrimaryLabel(payload) {
+  const raw = payload?.source_event_type || payload?.event_type || payload?.type || "";
+  const eventType = String(raw).toUpperCase();
+
+  // DRIFT_PERSIST: make the recovery path the default/primary action.
+  if (eventType === "DRIFT_PERSIST") {
+    overlay.dataset.primaryAction = "recover";
+    backBtn.classList.remove("primary");
+    recoverBtn.classList.add("primary");
+    if (footerEnterHint) footerEnterHint.textContent = "Enter: Recover schedule";
+    backBtn.textContent = "Back on track";
+    return;
+  }
+
+  overlay.dataset.primaryAction = "back_on_track";
+  recoverBtn.classList.remove("primary");
+  backBtn.classList.add("primary");
+  if (footerEnterHint) footerEnterHint.textContent = "Enter: Back on track";
+
   if (payload?.block_id && String(payload.block_id).includes("habit")) {
     backBtn.textContent = "Habit completed";
     return;
@@ -165,7 +184,8 @@ window.addEventListener("keydown", (event) => {
   if (event.key === "Enter") {
     const ignoreEnter = window.overlayUtils?.shouldIgnoreGlobalEnter?.(event.target);
     if (!ignoreEnter) {
-      sendAction({ action: "back_on_track" });
+      const action = overlay?.dataset?.primaryAction === "recover" ? "recover" : "back_on_track";
+      sendAction({ action });
     }
   }
   if (event.key === "Escape") {
