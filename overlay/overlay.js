@@ -75,12 +75,27 @@ function resetAlignInput() {
   alignInput.classList.add("hidden");
 }
 
+function retriggerDriftPersistPulse() {
+  // CSS animations don't reliably restart when we re-show the overlay with the same event type.
+  // For DRIFT_PERSIST specifically, we want the visual pattern-break to fire *every time*.
+  if (!card) return;
+  card.style.animation = "none";
+  // Force reflow so the browser applies the style change.
+  // eslint-disable-next-line no-unused-expressions
+  card.offsetHeight;
+  card.style.animation = "";
+}
+
 function showOverlay(payload) {
   overlay.classList.remove("hidden");
   resetSnooze();
   resetAlignInput();
   updateEventLabel(payload);
   updatePrimaryLabel(payload);
+
+  if (overlay.dataset.eventType === "DRIFT_PERSIST") {
+    retriggerDriftPersistPulse();
+  }
 
   if (payload.choices && Array.isArray(payload.choices)) {
     overlay.dataset.mode = "align";
@@ -185,3 +200,6 @@ window.addEventListener("keydown", (event) => {
     snooze.classList.remove("hidden");
   }
 });
+
+// Used by screenshot tooling to avoid racing the IPC handler setup.
+window.__overlayReady = true;
