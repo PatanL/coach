@@ -193,6 +193,23 @@ button.primary:hover {
   background: #ff7a69;
 }
 
+/* Suggested action: strong visual affordance without forcing focus (prevents accidental Enter activation). */
+button.suggested {
+  border: 1px solid rgba(255, 206, 61, 0.78);
+  box-shadow: 0 0 0 3px rgba(255, 206, 61, 0.18), 0 0 18px rgba(255, 206, 61, 0.14);
+}
+
+@keyframes suggestedWiggle {
+  0% { transform: translateY(0); }
+  35% { transform: translateY(-1px); }
+  70% { transform: translateY(0); }
+  100% { transform: translateY(0); }
+}
+
+#overlay[data-event-type="DRIFT_PERSIST"] button.suggested {
+  animation: suggestedWiggle 0.65s ease-in-out 0s 2;
+}
+
 .snooze {
   margin-bottom: 12px;
 }
