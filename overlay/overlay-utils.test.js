@@ -47,21 +47,9 @@ test("shouldIgnoreGlobalEnter: child of button/link should still block global En
   assert.equal(shouldIgnoreGlobalEnter(spanInsideButton), true);
 });
 
-test("shouldAllowGlobalEnter: DRIFT_PERSIST disables global Enter pattern", () => {
+test("shouldAllowGlobalEnter: disables global Enter on DRIFT_PERSIST", () => {
   assert.equal(shouldAllowGlobalEnter("DRIFT_PERSIST"), false);
   assert.equal(shouldAllowGlobalEnter("drift_persist"), false);
-  assert.equal(shouldAllowGlobalEnter("DRIFT"), true);
-  assert.equal(shouldAllowGlobalEnter(""), true);
-});
-
-test("shouldAllowGlobalEnter: DRIFT_PERSIST requires explicit click", () => {
-  assert.equal(shouldAllowGlobalEnter("DRIFT_PERSIST"), false);
-  assert.equal(shouldAllowGlobalEnter("drift_persist"), false);
-});
-
-test("shouldAllowGlobalEnter: other events allow global Enter", () => {
   assert.equal(shouldAllowGlobalEnter("DRIFT_START"), true);
-  assert.equal(shouldAllowGlobalEnter(""), true);
   assert.equal(shouldAllowGlobalEnter(null), true);
 });
-

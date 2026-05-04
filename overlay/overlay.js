@@ -12,6 +12,8 @@ const alignInput = document.getElementById("alignInput");
 const alignText = document.getElementById("alignText");
 const alignSubmit = document.getElementById("alignSubmit");
 
+const enterHint = document.getElementById("enterHint");
+
 const backBtn = document.getElementById("backBtn");
 const stuckBtn = document.getElementById("stuckBtn");
 const recoverBtn = document.getElementById("recoverBtn");
@@ -78,6 +80,12 @@ function showOverlay(payload) {
   resetAlignInput();
   updateEventLabel(payload);
   updatePrimaryLabel(payload);
+
+  const eventType = String(overlay.dataset.eventType || "").toUpperCase();
+  if (enterHint) {
+    // Pattern-break: on persistent drift, require an intentional click instead of an easy Enter reflex.
+    enterHint.textContent = eventType === "DRIFT_PERSIST" ? "Enter: (disabled — click Back on track)" : "Enter: Back on track";
+  }
 
   if (payload.choices && Array.isArray(payload.choices)) {
     overlay.dataset.mode = "align";
