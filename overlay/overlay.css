@@ -16,9 +16,13 @@ html, body {
   background: rgba(6, 8, 10, 0.45);
 }
 
-/* Screenshot runner: disable animations/transitions for deterministic pixel output. */
+/* Screenshot runner / harness: disable animations/transitions for deterministic pixel output. */
 #overlay[data-screenshot="true"],
-#overlay[data-screenshot="true"] * {
+#overlay[data-screenshot="true"] *,
+#overlay[data-screenshot="1"],
+#overlay[data-screenshot="1"] *,
+#overlay[data-animations="off"],
+#overlay[data-animations="off"] * {
   animation: none !important;
   transition: none !important;
 }
