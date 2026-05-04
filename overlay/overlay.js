@@ -69,6 +69,13 @@ function showOverlay(payload) {
   updateEventLabel(payload);
   updatePrimaryLabel(payload);
 
+  // Deterministic rendering for the screenshot runner (avoid capturing mid-animation frames).
+  if (payload?.screenshot_mode) {
+    overlay.dataset.screenshot = "1";
+  } else {
+    delete overlay.dataset.screenshot;
+  }
+
   if (payload.choices && Array.isArray(payload.choices)) {
     overlay.dataset.mode = "align";
   } else {

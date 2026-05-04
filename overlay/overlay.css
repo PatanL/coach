@@ -224,6 +224,13 @@ button.primary:hover {
   color: rgba(246, 244, 239, 0.5);
 }
 
+/* Screenshot mode: disable animations/transitions so captures are deterministic. */
+#overlay[data-screenshot="1"],
+#overlay[data-screenshot="1"] * {
+  animation: none !important;
+  transition: none !important;
+}
+
 /* Visual pattern-break for persistent drift: subtle but unmistakable */
 @keyframes driftPersistPulse {
   0% {
