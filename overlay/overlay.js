@@ -25,10 +25,19 @@ function setText(el, value) {
 }
 
 function updatePrimaryLabel(payload) {
+  const eventType = String(overlay?.dataset?.eventType || "").toUpperCase();
+
   if (payload?.block_id && String(payload.block_id).includes("habit")) {
     backBtn.textContent = "Habit completed";
     return;
   }
+
+  // Option B actionable overlay: when drift persists, make the primary CTA feel like an immediate reset.
+  if (eventType === "DRIFT_PERSIST") {
+    backBtn.textContent = "Reset now";
+    return;
+  }
+
   backBtn.textContent = "Back on track";
 }
 
@@ -66,6 +75,8 @@ function showOverlay(payload) {
   overlay.classList.remove("hidden");
   resetSnooze();
   resetAlignInput();
+  // Ensure screenshot captures are deterministic by disabling animations/transitions.
+  overlay.dataset.screenshot = payload?.cmd_id === "screenshot" ? "true" : "";
   updateEventLabel(payload);
   updatePrimaryLabel(payload);
 
@@ -163,8 +174,12 @@ window.overlayAPI.onPause(() => {
 window.addEventListener("keydown", (event) => {
   // Don't treat Enter as "Back on track" while the user is typing or interacting with a control.
   if (event.key === "Enter") {
-    const ignoreEnter = window.overlayUtils?.shouldIgnoreGlobalEnter?.(event.target);
-    if (!ignoreEnter) {
+    const eventType = overlay?.dataset?.eventType || "";
+    const allowEnter = window.overlayUtils?.shouldAllowGlobalEnter
+      ? window.overlayUtils.shouldAllowGlobalEnter(event.target, eventType)
+      : !window.overlayUtils?.shouldIgnoreGlobalEnter?.(event.target);
+
+    if (allowEnter) {
       sendAction({ action: "back_on_track" });
     }
   }
