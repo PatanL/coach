@@ -40,9 +40,18 @@
     return isTextInputTarget(t) || isInteractiveTarget(t);
   }
 
+  // DRIFT_PERSIST is a pattern-break state: require an explicit click instead of allowing
+  // a stray Enter key to instantly mark "Back on track".
+  function shouldAllowGlobalEnter(eventType, target) {
+    const type = String(eventType || "").toUpperCase();
+    if (type === "DRIFT_PERSIST") return false;
+    return !shouldIgnoreGlobalEnter(target);
+  }
+
   return {
     isTextInputTarget,
     isInteractiveTarget,
-    shouldIgnoreGlobalEnter
+    shouldIgnoreGlobalEnter,
+    shouldAllowGlobalEnter
   };
 });
