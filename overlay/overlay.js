@@ -25,10 +25,19 @@ function setText(el, value) {
 }
 
 function updatePrimaryLabel(payload) {
+  const eventType = String(overlay?.dataset?.eventType || "").toUpperCase();
+
   if (payload?.block_id && String(payload.block_id).includes("habit")) {
     backBtn.textContent = "Habit completed";
     return;
   }
+
+  // Option B actionable overlay: when drift persists, make the primary CTA feel like an immediate reset.
+  if (eventType === "DRIFT_PERSIST") {
+    backBtn.textContent = "Reset now";
+    return;
+  }
+
   backBtn.textContent = "Back on track";
 }
 
