@@ -75,6 +75,8 @@ function showOverlay(payload) {
   overlay.classList.remove("hidden");
   resetSnooze();
   resetAlignInput();
+  // Ensure screenshot captures are deterministic by disabling animations/transitions.
+  overlay.dataset.screenshot = payload?.cmd_id === "screenshot" ? "true" : "";
   updateEventLabel(payload);
   updatePrimaryLabel(payload);
 
