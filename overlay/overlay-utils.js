@@ -40,9 +40,16 @@
     return isTextInputTarget(t) || isInteractiveTarget(t);
   }
 
+  function shouldIgnoreGlobalEscape(target) {
+    // Escape should not trigger global overlay UI (e.g. opening Snooze) while typing or interacting.
+    const t = findHotkeyRelevantTarget(target);
+    return isTextInputTarget(t) || isInteractiveTarget(t);
+  }
+
   return {
     isTextInputTarget,
     isInteractiveTarget,
-    shouldIgnoreGlobalEnter
+    shouldIgnoreGlobalEnter,
+    shouldIgnoreGlobalEscape
   };
 });
