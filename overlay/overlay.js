@@ -128,6 +128,26 @@ function showOverlay(payload) {
     alignInput.classList.add("hidden");
   }
 
+  // Focus management: reduce accidental global hotkeys and make the default action obvious.
+  // - Align mode: focus the text input.
+  // - Otherwise: focus the primary action button (Recover schedule for DRIFT_PERSIST).
+  requestAnimationFrame(() => {
+    try {
+      if (payload.choices && Array.isArray(payload.choices)) {
+        alignText?.focus?.({ preventScroll: true });
+      } else if (eventType === "DRIFT_PERSIST") {
+        recoverBtn?.focus?.({ preventScroll: true });
+      } else {
+        backBtn?.focus?.({ preventScroll: true });
+      }
+    } catch (_) {
+      // Focus is best-effort; avoid crashing the overlay on environments that don't support focus options.
+      if (payload.choices && Array.isArray(payload.choices)) alignText?.focus?.();
+      else if (eventType === "DRIFT_PERSIST") recoverBtn?.focus?.();
+      else backBtn?.focus?.();
+    }
+  });
+
   overlay.dataset.level = payload.level || "B";
   currentPayload = payload;
   shownAt = Date.now();

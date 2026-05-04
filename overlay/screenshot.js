@@ -34,7 +34,7 @@ async function main() {
 
   await win.loadFile(htmlPath);
 
-  async function capture(name, payload, settleMs = 250) {
+  async function capture(name, payload, settleMs = 250, afterShowJs = null) {
     // Give the DOM a moment to settle, then render the payload.
     await new Promise((r) => setTimeout(r, 50));
 
@@ -47,6 +47,11 @@ async function main() {
 
     // Allow any CSS animations to reach a stable frame.
     await new Promise((r) => setTimeout(r, settleMs));
+
+    if (afterShowJs) {
+      await win.webContents.executeJavaScript(afterShowJs);
+      await new Promise((r) => setTimeout(r, 50));
+    }
 
     const image = await win.capturePage();
     fs.writeFileSync(path.join(OUT_DIR, name), image.toPNG());
@@ -76,6 +81,17 @@ async function main() {
       headline: "Interrupt the loop."
     },
     1100
+  );
+
+  await capture(
+    "drift_persist_recover_focused.png",
+    {
+      ...common,
+      event_type: "DRIFT_PERSIST",
+      headline: "Interrupt the loop."
+    },
+    1100,
+    'document.getElementById("recoverBtn")?.focus?.()'
   );
 
   win.destroy();
