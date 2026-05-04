@@ -107,6 +107,20 @@ function showOverlay(payload) {
   overlay.dataset.level = payload.level || "B";
   currentPayload = payload;
   shownAt = Date.now();
+
+  // Keyboard-first: move focus to the most relevant control so Enter behaves deterministically.
+  // - Align mode: focus the text box for immediate typing.
+  // - Default: focus the primary "Back on track" button.
+  try {
+    if (payload.choices && Array.isArray(payload.choices)) {
+      alignText.focus();
+      alignText.select?.();
+    } else {
+      backBtn.focus();
+    }
+  } catch {
+    // Ignore focus errors in non-browser contexts (e.g. tests/screenshot runner quirks).
+  }
 }
 
 function sendAction(action) {
@@ -143,6 +157,13 @@ alignText.addEventListener("keydown", (event) => {
 
 snoozeBtn.addEventListener("click", () => {
   snooze.classList.remove("hidden");
+  // Prevent stray Enter from triggering global actions; keep focus within snooze choices.
+  try {
+    const first = snooze.querySelector?.("button[data-reason]");
+    first?.focus?.();
+  } catch {
+    // noop
+  }
 });
 
 snooze.addEventListener("click", (event) => {
@@ -170,5 +191,11 @@ window.addEventListener("keydown", (event) => {
   }
   if (event.key === "Escape") {
     snooze.classList.remove("hidden");
+    try {
+      const first = snooze.querySelector?.("button[data-reason]");
+      first?.focus?.();
+    } catch {
+      // noop
+    }
   }
 });
