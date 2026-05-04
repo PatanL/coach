@@ -16,6 +16,7 @@ const backBtn = document.getElementById("backBtn");
 const stuckBtn = document.getElementById("stuckBtn");
 const recoverBtn = document.getElementById("recoverBtn");
 const snoozeBtn = document.getElementById("snoozeBtn");
+const enterHint = document.getElementById("enterHint");
 
 let shownAt = null;
 let currentPayload = null;
@@ -69,6 +70,9 @@ function showOverlay(payload) {
   updateEventLabel(payload);
   updatePrimaryLabel(payload);
 
+  // Keep the keyboard hint aligned with the focused/expected primary action.
+  if (enterHint) enterHint.textContent = "Enter: Back on track";
+
   // Deterministic rendering for the screenshot runner (avoid capturing mid-animation frames).
   if (payload?.screenshot_mode) {
     overlay.dataset.screenshot = "1";
@@ -117,11 +121,15 @@ function showOverlay(payload) {
 
   // Keyboard-first: move focus to the most relevant control so Enter behaves deterministically.
   // - Align mode: focus the text box for immediate typing.
+  // - DRIFT_PERSIST: bias toward an actionable recovery step (visual pattern-break + different "primary").
   // - Default: focus the primary "Back on track" button.
   try {
     if (payload.choices && Array.isArray(payload.choices)) {
       alignText.focus();
       alignText.select?.();
+    } else if (overlay.dataset.eventType === "DRIFT_PERSIST") {
+      if (enterHint) enterHint.textContent = "Enter: Recover schedule";
+      recoverBtn.focus();
     } else {
       backBtn.focus();
     }
