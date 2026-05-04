@@ -11,6 +11,7 @@ const choiceButtons = document.getElementById("choiceButtons");
 const alignInput = document.getElementById("alignInput");
 const alignText = document.getElementById("alignText");
 const alignSubmit = document.getElementById("alignSubmit");
+const enterHint = document.getElementById("enterHint");
 
 const backBtn = document.getElementById("backBtn");
 const stuckBtn = document.getElementById("stuckBtn");
@@ -110,9 +111,12 @@ function showOverlay(payload) {
 
   // Encourage the safest next step by default.
   // - In "align" mode, focus the text input so typing is immediate.
-  // - For DRIFT_PERSIST, focus "Recover" to nudge an actionable recovery step.
+  // - For DRIFT_PERSIST, focus "Recover" and disable the Enter hint (pattern-break: explicit click).
   // - Otherwise, focus the primary "Back on track" action.
   const eventType = String(overlay.dataset.eventType || "").toUpperCase();
+  if (enterHint) {
+    enterHint.textContent = eventType === "DRIFT_PERSIST" ? "Enter: (disabled)" : "Enter: Back on track";
+  }
   requestAnimationFrame(() => {
     if (overlay.dataset.mode === "align") {
       alignText?.focus?.();
