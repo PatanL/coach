@@ -34,13 +34,20 @@ async function main() {
 
   await win.loadFile(htmlPath, { query: { screenshot: "1" } });
 
+  // Make screenshots deterministic by disabling CSS animations/transitions.
+  // DRIFT_PERSIST includes an animated pulse as a pattern-break; without this, captured
+  // frames can vary depending on timing.
+  await win.webContents.insertCSS(
+    "*,*::before,*::after{animation:none !important;transition:none !important;}"
+  );
+
   async function capture(name, payload) {
     // Give the DOM a moment to settle, then render the payload.
     await new Promise((r) => setTimeout(r, 50));
     win.webContents.send("overlay:show", payload);
 
-    // Allow any CSS animations to reach a stable frame.
-    await new Promise((r) => setTimeout(r, 250));
+    // Allow layout to settle after content injection.
+    await new Promise((r) => setTimeout(r, 50));
 
     const image = await win.capturePage();
     fs.writeFileSync(path.join(OUT_DIR, name), image.toPNG());
