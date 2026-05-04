@@ -9,6 +9,10 @@
     if (!target) return false;
     const tag = String(target.tagName || "").toLowerCase();
     if (target.isContentEditable) return true;
+
+    const role = String(target.getAttribute?.("role") || "").toLowerCase();
+    if (role === "textbox" || role === "searchbox" || role === "combobox") return true;
+
     return tag === "input" || tag === "textarea" || tag === "select";
   }
 
@@ -28,7 +32,7 @@
     // element that should "own" the keyboard interaction.
     if (typeof target.closest === "function") {
       const hit = target.closest(
-        'input,textarea,select,[contenteditable="true"],button,a,[role="button"],[role="link"]'
+        'input,textarea,select,[contenteditable="true"],button,a,[role="button"],[role="link"],[role="textbox"],[role="searchbox"],[role="combobox"]'
       );
       if (hit) return hit;
     }
