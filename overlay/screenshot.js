@@ -2,6 +2,9 @@ const { app, BrowserWindow } = require("electron");
 const path = require("path");
 const fs = require("fs");
 
+// Deterministic screenshots: disable motion so CSS animation frames don't vary.
+app.commandLine.appendSwitch("force-prefers-reduced-motion", "reduce");
+
 const OUT_DIR = path.join(__dirname, "screenshots");
 
 function ensureDir(dir) {
