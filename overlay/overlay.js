@@ -107,6 +107,23 @@ function showOverlay(payload) {
   overlay.dataset.level = payload.level || "B";
   currentPayload = payload;
   shownAt = Date.now();
+
+  // Encourage the safest next step by default.
+  // - In "align" mode, focus the text input so typing is immediate.
+  // - For DRIFT_PERSIST, focus "Recover" to nudge an actionable recovery step.
+  // - Otherwise, focus the primary "Back on track" action.
+  const eventType = String(overlay.dataset.eventType || "").toUpperCase();
+  requestAnimationFrame(() => {
+    if (overlay.dataset.mode === "align") {
+      alignText?.focus?.();
+      return;
+    }
+    if (eventType === "DRIFT_PERSIST") {
+      recoverBtn?.focus?.();
+      return;
+    }
+    backBtn?.focus?.();
+  });
 }
 
 function sendAction(action) {
