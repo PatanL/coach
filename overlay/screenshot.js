@@ -34,7 +34,7 @@ async function main() {
 
   await win.loadFile(htmlPath);
 
-  async function capture(name, payload) {
+  async function capture(name, payload, settleMs = 250) {
     // Give the DOM a moment to settle, then render the payload.
     await new Promise((r) => setTimeout(r, 50));
 
@@ -46,7 +46,7 @@ async function main() {
     win.webContents.send("overlay:show", payload);
 
     // Allow any CSS animations to reach a stable frame.
-    await new Promise((r) => setTimeout(r, 250));
+    await new Promise((r) => setTimeout(r, settleMs));
 
     const image = await win.capturePage();
     fs.writeFileSync(path.join(OUT_DIR, name), image.toPNG());
@@ -68,11 +68,15 @@ async function main() {
     event_type: "DRIFT_START"
   });
 
-  await capture("drift_persist.png", {
-    ...common,
-    event_type: "DRIFT_PERSIST",
-    headline: "Interrupt the loop."
-  });
+  await capture(
+    "drift_persist.png",
+    {
+      ...common,
+      event_type: "DRIFT_PERSIST",
+      headline: "Interrupt the loop."
+    },
+    1100
+  );
 
   win.destroy();
   app.quit();
