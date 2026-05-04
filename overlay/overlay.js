@@ -17,6 +17,8 @@ const stuckBtn = document.getElementById("stuckBtn");
 const recoverBtn = document.getElementById("recoverBtn");
 const snoozeBtn = document.getElementById("snoozeBtn");
 
+const enterHint = document.getElementById("enterHint");
+
 let shownAt = null;
 let currentPayload = null;
 
@@ -107,6 +109,27 @@ function showOverlay(payload) {
   overlay.dataset.level = payload.level || "B";
   currentPayload = payload;
   shownAt = Date.now();
+
+  // Set a safe default focus + hint so Enter activates the most useful recovery action.
+  // This also prevents the global Enter handler from firing when a button/input is focused.
+  const eventType = String(overlay.dataset.eventType || "").toUpperCase();
+  const inAlignMode = overlay.dataset.mode === "align";
+  let defaultFocus = backBtn;
+  let hint = "Enter: Back on track";
+
+  if (eventType === "DRIFT_PERSIST") {
+    defaultFocus = recoverBtn;
+    hint = "Enter: Recover schedule";
+  }
+
+  if (inAlignMode) {
+    defaultFocus = alignText;
+    hint = "Enter: Submit";
+  }
+
+  if (enterHint) setText(enterHint, hint);
+  // Defer focus until the DOM has applied show/hide changes.
+  requestAnimationFrame(() => defaultFocus?.focus?.());
 }
 
 function sendAction(action) {
