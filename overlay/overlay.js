@@ -62,12 +62,27 @@ function resetAlignInput() {
   alignInput.classList.add("hidden");
 }
 
+function clearSuggestedActions() {
+  [backBtn, stuckBtn, recoverBtn, snoozeBtn].forEach((btn) => btn.classList.remove("suggested"));
+}
+
+function applySuggestedActions(payload) {
+  clearSuggestedActions();
+  const raw = payload?.source_event_type || payload?.event_type || payload?.type || "";
+  const eventType = String(raw).toUpperCase();
+  if (eventType === "DRIFT_PERSIST") {
+    // Make the recovery path visually obvious without auto-focusing a button (reduces accidental activation).
+    recoverBtn.classList.add("suggested");
+  }
+}
+
 function showOverlay(payload) {
   overlay.classList.remove("hidden");
   resetSnooze();
   resetAlignInput();
   updateEventLabel(payload);
   updatePrimaryLabel(payload);
+  applySuggestedActions(payload);
 
   if (payload.choices && Array.isArray(payload.choices)) {
     overlay.dataset.mode = "align";
@@ -99,6 +114,8 @@ function showOverlay(payload) {
     });
     choiceButtons.classList.remove("hidden");
     alignInput.classList.remove("hidden");
+    // Reduce friction: if we're asking for alignment input, put the caret in the text box.
+    alignText.focus();
   } else {
     choiceButtons.classList.add("hidden");
     alignInput.classList.add("hidden");
