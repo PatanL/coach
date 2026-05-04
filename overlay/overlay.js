@@ -161,8 +161,13 @@ window.overlayAPI.onPause(() => {
 });
 
 window.addEventListener("keydown", (event) => {
+  // Only handle hotkeys while the overlay is visible.
+  if (overlay.classList.contains("hidden")) return;
+
   // Don't treat Enter as "Back on track" while the user is typing or interacting with a control.
+  // Also ignore modified Enter (Cmd/Ctrl/Alt) so common OS/app shortcuts don't accidentally confirm.
   if (event.key === "Enter") {
+    if (event.metaKey || event.ctrlKey || event.altKey) return;
     const ignoreEnter = window.overlayUtils?.shouldIgnoreGlobalEnter?.(event.target);
     if (!ignoreEnter) {
       sendAction({ action: "back_on_track" });
