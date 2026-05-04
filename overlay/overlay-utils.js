@@ -40,9 +40,23 @@
     return isTextInputTarget(t) || isInteractiveTarget(t);
   }
 
+  function normalizeEventType(eventType) {
+    return String(eventType || "").toUpperCase();
+  }
+
+  // DRIFT_PERSIST is intentionally a "pattern-break" state.
+  // We disable the global Enter -> back_on_track hotkey to prevent accidental dismissal.
+  function shouldAllowGlobalEnter(target, eventType) {
+    const type = normalizeEventType(eventType);
+    if (type === "DRIFT_PERSIST") return false;
+    return !shouldIgnoreGlobalEnter(target);
+  }
+
   return {
     isTextInputTarget,
     isInteractiveTarget,
-    shouldIgnoreGlobalEnter
+    shouldIgnoreGlobalEnter,
+    normalizeEventType,
+    shouldAllowGlobalEnter
   };
 });
