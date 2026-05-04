@@ -17,6 +17,8 @@ const stuckBtn = document.getElementById("stuckBtn");
 const recoverBtn = document.getElementById("recoverBtn");
 const snoozeBtn = document.getElementById("snoozeBtn");
 
+const enterHint = document.getElementById("enterHint");
+
 let shownAt = null;
 let currentPayload = null;
 
@@ -53,6 +55,16 @@ function updateEventLabel(payload) {
   setText(eventLabel, eventType.replaceAll("_", " "));
 }
 
+function setPrimaryAction(mode) {
+  // mode: "back" | "recover"
+  backBtn.classList.toggle("primary", mode === "back");
+  recoverBtn.classList.toggle("primary", mode === "recover");
+
+  if (enterHint) {
+    enterHint.textContent = mode === "recover" ? "Enter: Recover schedule" : "Enter: Back on track";
+  }
+}
+
 function resetSnooze() {
   snooze.classList.add("hidden");
 }
@@ -68,6 +80,9 @@ function showOverlay(payload) {
   resetAlignInput();
   updateEventLabel(payload);
   updatePrimaryLabel(payload);
+
+  const eventType = String(overlay.dataset.eventType || "").toUpperCase();
+  setPrimaryAction(eventType === "DRIFT_PERSIST" ? "recover" : "back");
 
   if (payload.choices && Array.isArray(payload.choices)) {
     overlay.dataset.mode = "align";
