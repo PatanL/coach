@@ -21,6 +21,7 @@ const enterHint = document.getElementById("enterHint");
 
 let shownAt = null;
 let currentPayload = null;
+let currentEnterAction = "back_on_track";
 
 function setText(el, value) {
   el.textContent = value || "";
@@ -59,6 +60,8 @@ function setPrimaryAction(mode) {
   // mode: "back" | "recover"
   backBtn.classList.toggle("primary", mode === "back");
   recoverBtn.classList.toggle("primary", mode === "recover");
+
+  currentEnterAction = mode === "recover" ? "recover" : "back_on_track";
 
   if (enterHint) {
     enterHint.textContent = mode === "recover" ? "Enter: Recover schedule" : "Enter: Back on track";
@@ -176,11 +179,11 @@ window.overlayAPI.onPause(() => {
 });
 
 window.addEventListener("keydown", (event) => {
-  // Don't treat Enter as "Back on track" while the user is typing or interacting with a control.
+  // Don't treat Enter as a global "primary action" while the user is typing or interacting with a control.
   if (event.key === "Enter") {
     const ignoreEnter = window.overlayUtils?.shouldIgnoreGlobalEnter?.(event.target);
-    if (!ignoreEnter) {
-      sendAction({ action: "back_on_track" });
+    if (!ignoreEnter && !overlay.classList.contains("hidden")) {
+      sendAction({ action: currentEnterAction });
     }
   }
   if (event.key === "Escape") {
