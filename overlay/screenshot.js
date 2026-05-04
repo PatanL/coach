@@ -68,6 +68,14 @@ async function main() {
     headline: "Interrupt the loop."
   });
 
+  // Explicit snapshot of the DRIFT_PERSIST visual pattern-break.
+  // Keeping this as a separate file makes UX diffs easy to spot in PRs.
+  await capture("drift_persist_pattern_break.png", {
+    ...common,
+    event_type: "DRIFT_PERSIST",
+    headline: "Interrupt the loop."
+  });
+
   win.destroy();
   app.quit();
 }

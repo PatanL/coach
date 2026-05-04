@@ -8,7 +8,14 @@
   function isTextInputTarget(target) {
     if (!target) return false;
     const tag = String(target.tagName || "").toLowerCase();
-    if (target.isContentEditable) return true;
+
+    // contenteditable can be expressed as:
+    // - DOM property: element.isContentEditable
+    // - Attribute: contenteditable="" | "true" | "plaintext-only" ("false" disables)
+    const ceAttr = String(target.getAttribute?.("contenteditable") || "").toLowerCase();
+    const hasContentEditableAttr = ceAttr !== "" ? ceAttr !== "false" : false;
+    if (target.isContentEditable || hasContentEditableAttr) return true;
+
     return tag === "input" || tag === "textarea" || tag === "select";
   }
 
@@ -28,7 +35,7 @@
     // element that should "own" the keyboard interaction.
     if (typeof target.closest === "function") {
       const hit = target.closest(
-        'input,textarea,select,[contenteditable="true"],button,a,[role="button"],[role="link"]'
+        'input,textarea,select,[contenteditable],button,a,[role="button"],[role="link"]'
       );
       if (hit) return hit;
     }
@@ -40,9 +47,16 @@
     return isTextInputTarget(t) || isInteractiveTarget(t);
   }
 
+  function shouldIgnoreGlobalEscape(target) {
+    // Escape should not trigger global overlay UI (e.g. opening Snooze) while typing or interacting.
+    const t = findHotkeyRelevantTarget(target);
+    return isTextInputTarget(t) || isInteractiveTarget(t);
+  }
+
   return {
     isTextInputTarget,
     isInteractiveTarget,
-    shouldIgnoreGlobalEnter
+    shouldIgnoreGlobalEnter,
+    shouldIgnoreGlobalEscape
   };
 });
