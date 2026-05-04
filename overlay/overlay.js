@@ -11,6 +11,7 @@ const choiceButtons = document.getElementById("choiceButtons");
 const alignInput = document.getElementById("alignInput");
 const alignText = document.getElementById("alignText");
 const alignSubmit = document.getElementById("alignSubmit");
+const enterHint = document.getElementById("enterHint");
 
 const backBtn = document.getElementById("backBtn");
 const stuckBtn = document.getElementById("stuckBtn");
@@ -40,17 +41,21 @@ function updateEventLabel(payload) {
 
   if (!eventType) {
     setText(eventLabel, "DRIFT");
+    setText(enterHint, "Enter: Back on track");
     return;
   }
   if (eventType === "DRIFT_PERSIST") {
     setText(eventLabel, "DRIFT — PERSIST");
+    setText(enterHint, "Enter: Recover schedule");
     return;
   }
   if (eventType.startsWith("DRIFT")) {
     setText(eventLabel, "DRIFT");
+    setText(enterHint, "Enter: Back on track");
     return;
   }
   setText(eventLabel, eventType.replaceAll("_", " "));
+  setText(enterHint, "Enter: Back on track");
 }
 
 function resetSnooze() {
@@ -161,11 +166,12 @@ window.overlayAPI.onPause(() => {
 });
 
 window.addEventListener("keydown", (event) => {
-  // Don't treat Enter as "Back on track" while the user is typing or interacting with a control.
+  // Don't treat Enter as a global action while the user is typing or interacting with a control.
   if (event.key === "Enter") {
-    const ignoreEnter = window.overlayUtils?.shouldIgnoreGlobalEnter?.(event.target);
-    if (!ignoreEnter) {
-      sendAction({ action: "back_on_track" });
+    const eventType = overlay?.dataset?.eventType || "";
+    const action = window.overlayUtils?.globalEnterActionForEvent?.(eventType, event.target);
+    if (action) {
+      sendAction({ action });
     }
   }
   if (event.key === "Escape") {

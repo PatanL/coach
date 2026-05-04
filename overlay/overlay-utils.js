@@ -40,9 +40,18 @@
     return isTextInputTarget(t) || isInteractiveTarget(t);
   }
 
+  function globalEnterActionForEvent(eventType, target) {
+    if (shouldIgnoreGlobalEnter(target)) return null;
+    const type = String(eventType || "").toUpperCase();
+    // For persistent drift, default to the more recovery-oriented action.
+    if (type === "DRIFT_PERSIST") return "recover";
+    return "back_on_track";
+  }
+
   return {
     isTextInputTarget,
     isInteractiveTarget,
-    shouldIgnoreGlobalEnter
+    shouldIgnoreGlobalEnter,
+    globalEnterActionForEvent
   };
 });
