@@ -7,6 +7,7 @@ const diagnosis = document.getElementById("diagnosis");
 const nextAction = document.getElementById("nextAction");
 const snooze = document.getElementById("snoozeReason");
 const miniPlan = document.getElementById("miniPlan");
+const enterHint = document.getElementById("enterHint");
 const choiceButtons = document.getElementById("choiceButtons");
 const alignInput = document.getElementById("alignInput");
 const alignText = document.getElementById("alignText");
@@ -69,6 +70,14 @@ function showOverlay(payload) {
   updateEventLabel(payload);
   updatePrimaryLabel(payload);
 
+  // Pattern-break: when drift persists, bias the UX toward a concrete recovery action.
+  const eventType = overlay.dataset.eventType || "";
+  const driftPersist = eventType === "DRIFT_PERSIST";
+  recoverBtn.classList.toggle("primary", driftPersist);
+  if (enterHint) {
+    setText(enterHint, driftPersist ? "Enter: Recover schedule" : "Enter: Back on track");
+  }
+
   if (payload.choices && Array.isArray(payload.choices)) {
     overlay.dataset.mode = "align";
   } else {
@@ -102,6 +111,15 @@ function showOverlay(payload) {
   } else {
     choiceButtons.classList.add("hidden");
     alignInput.classList.add("hidden");
+  }
+
+  // Prefer focus on the most actionable button so Enter activates it (and blocks the global Enter handler).
+  if (!overlay.dataset.mode) {
+    if (driftPersist) {
+      recoverBtn.focus();
+    } else {
+      backBtn.focus();
+    }
   }
 
   overlay.dataset.level = payload.level || "B";
@@ -161,11 +179,12 @@ window.overlayAPI.onPause(() => {
 });
 
 window.addEventListener("keydown", (event) => {
-  // Don't treat Enter as "Back on track" while the user is typing or interacting with a control.
+  // Don't treat Enter as a global action while the user is typing or interacting with a control.
   if (event.key === "Enter") {
     const ignoreEnter = window.overlayUtils?.shouldIgnoreGlobalEnter?.(event.target);
     if (!ignoreEnter) {
-      sendAction({ action: "back_on_track" });
+      const eventType = overlay.dataset.eventType || "";
+      sendAction({ action: eventType === "DRIFT_PERSIST" ? "recover" : "back_on_track" });
     }
   }
   if (event.key === "Escape") {
