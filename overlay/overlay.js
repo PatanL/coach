@@ -167,7 +167,31 @@ window.addEventListener("keydown", (event) => {
     if (!ignoreEnter) {
       sendAction({ action: "back_on_track" });
     }
+    return;
   }
+
+  // Single-letter hotkeys for faster recovery (ignored while typing).
+  const ignoreHotkey = window.overlayUtils?.shouldIgnoreGlobalHotkey?.(event.target);
+  if (!ignoreHotkey) {
+    const key = String(event.key || "").toLowerCase();
+    if (key === "r") {
+      sendAction({ action: "recover" });
+      return;
+    }
+    if (key === "k") {
+      sendAction({ action: "stuck" });
+      return;
+    }
+    if (key === "b") {
+      sendAction({ action: "back_on_track" });
+      return;
+    }
+    if (key === "z") {
+      snooze.classList.remove("hidden");
+      return;
+    }
+  }
+
   if (event.key === "Escape") {
     snooze.classList.remove("hidden");
   }
