@@ -9,6 +9,11 @@
     if (!target) return false;
     const tag = String(target.tagName || "").toLowerCase();
     if (target.isContentEditable) return true;
+
+    // Some components (and even plain divs) behave like text inputs via ARIA roles.
+    const role = String(target.getAttribute?.("role") || "").toLowerCase();
+    if (role === "textbox" || role === "searchbox" || role === "combobox") return true;
+
     return tag === "input" || tag === "textarea" || tag === "select";
   }
 
