@@ -168,7 +168,12 @@ window.addEventListener("keydown", (event) => {
       eventType: overlay?.dataset?.eventType,
       target: event.target
     });
-    if (action) sendAction({ action });
+    if (action) {
+      // Avoid double-activation (e.g. default button/submit behavior) when Enter is used as a global hotkey.
+      event.preventDefault();
+      event.stopPropagation();
+      sendAction({ action });
+    }
   }
   if (event.key === "Escape") {
     snooze.classList.remove("hidden");
