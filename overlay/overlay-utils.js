@@ -12,7 +12,7 @@
 
     // Support ARIA patterns used by certain UI libraries (e.g. editable divs).
     const role = String(target.getAttribute?.("role") || "").toLowerCase();
-    if (role === "textbox") return true;
+    if (role === "textbox" || role === "combobox") return true;
 
     return tag === "input" || tag === "textarea" || tag === "select";
   }
@@ -33,7 +33,7 @@
     // element that should "own" the keyboard interaction.
     if (typeof target.closest === "function") {
       const hit = target.closest(
-        'input,textarea,select,[contenteditable="true"],[role="textbox"],button,a,[role="button"],[role="link"]'
+        'input,textarea,select,[contenteditable],[role="textbox"],[role="combobox"],button,a,[role="button"],[role="link"]'
       );
       if (hit) return hit;
     }
