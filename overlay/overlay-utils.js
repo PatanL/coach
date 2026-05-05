@@ -40,9 +40,21 @@
     return isTextInputTarget(t) || isInteractiveTarget(t);
   }
 
+  // Decide what the global Enter hotkey should do.
+  // Rationale: on DRIFT_PERSIST we want a stronger, more action-forward default (Option B overlay),
+  // but we still must never steal Enter while the user is typing or activating a control.
+  function getGlobalEnterAction(eventType, target) {
+    const ignore = shouldIgnoreGlobalEnter(target);
+    if (ignore) return null;
+    const t = String(eventType || "").toUpperCase();
+    if (t === "DRIFT_PERSIST") return "recover";
+    return "back_on_track";
+  }
+
   return {
     isTextInputTarget,
     isInteractiveTarget,
-    shouldIgnoreGlobalEnter
+    shouldIgnoreGlobalEnter,
+    getGlobalEnterAction
   };
 });
