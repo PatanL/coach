@@ -107,6 +107,19 @@ function showOverlay(payload) {
   overlay.dataset.level = payload.level || "B";
   currentPayload = payload;
   shownAt = Date.now();
+
+  // Pattern-break: for persistent drift, put the primary recovery action under the user's fingers.
+  // This is safe because global Enter is ignored when focus is on interactive controls.
+  if (overlay.dataset.eventType === "DRIFT_PERSIST") {
+    recoverBtn.classList.add("pulse");
+    try {
+      recoverBtn.focus({ preventScroll: true });
+    } catch {
+      recoverBtn.focus();
+    }
+  } else {
+    recoverBtn.classList.remove("pulse");
+  }
 }
 
 function sendAction(action) {

@@ -266,3 +266,11 @@ button.primary:hover {
   color: #ff49a7;
   text-shadow: 0 0 10px rgba(255, 73, 167, 0.35);
 }
+
+/* Option B overlay: persistent drift should make the recovery action visually "grab" focus. */
+#overlay[data-event-type="DRIFT_PERSIST"] #recoverBtn.pulse {
+  border-color: rgba(255, 206, 61, 0.95);
+  box-shadow:
+    0 0 0 3px rgba(255, 206, 61, 0.22),
+    0 10px 22px rgba(0, 0, 0, 0.35);
+}
