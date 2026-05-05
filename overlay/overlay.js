@@ -5,6 +5,7 @@ const headline = document.getElementById("headline");
 const humanLine = document.getElementById("humanLine");
 const diagnosis = document.getElementById("diagnosis");
 const nextAction = document.getElementById("nextAction");
+const enterHint = document.getElementById("enterHint");
 const snooze = document.getElementById("snoozeReason");
 const miniPlan = document.getElementById("miniPlan");
 const choiceButtons = document.getElementById("choiceButtons");
@@ -107,6 +108,43 @@ function showOverlay(payload) {
   overlay.dataset.level = payload.level || "B";
   currentPayload = payload;
   shownAt = Date.now();
+
+  // Focus management (keyboard safety + recovery bias).
+  // Centralize the decision logic in overlay-utils so we can unit test it.
+  const focusKey = window.overlayUtils?.getRecommendedFocusKey?.({
+    eventType: overlay.dataset.eventType,
+    mode: overlay.dataset.mode
+  });
+
+  const focusTarget =
+    focusKey === "alignText"
+      ? alignText
+      : focusKey === "recoverBtn"
+        ? recoverBtn
+        : backBtn;
+
+  // Visual emphasis: in DRIFT_PERSIST, bias the user toward "Recover schedule".
+  // Keep this deterministic and tied to the same logic as focus selection.
+  backBtn.classList.toggle("primary", focusKey === "backBtn");
+  recoverBtn.classList.toggle("primary", focusKey === "recoverBtn");
+
+  if (enterHint) {
+    enterHint.textContent =
+      focusKey === "recoverBtn"
+        ? "Enter: Recover schedule"
+        : focusKey === "alignText"
+          ? "Enter: Submit"
+          : "Enter: Back on track";
+  }
+
+  // Defer until after layout so focus lands deterministically (and doesn't scroll).
+  requestAnimationFrame(() => {
+    try {
+      focusTarget?.focus?.({ preventScroll: true });
+    } catch {
+      focusTarget?.focus?.();
+    }
+  });
 }
 
 function sendAction(action) {
