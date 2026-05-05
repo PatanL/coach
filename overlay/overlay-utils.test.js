@@ -33,6 +33,9 @@ test("isInteractiveTarget: ignores non-interactive targets", () => {
 test("shouldIgnoreGlobalEnter: typing or clicking should block global Enter action", () => {
   assert.equal(shouldIgnoreGlobalEnter({ tagName: "INPUT" }), true);
   assert.equal(shouldIgnoreGlobalEnter({ tagName: "BUTTON" }), true);
+  assert.equal(shouldIgnoreGlobalEnter({ tagName: "DIV", getAttribute: (k) => (k === "role" ? "textbox" : null) }), true);
+  assert.equal(shouldIgnoreGlobalEnter({ tagName: "DIV", getAttribute: (k) => (k === "role" ? "searchbox" : null) }), true);
+  assert.equal(shouldIgnoreGlobalEnter({ tagName: "DIV", getAttribute: (k) => (k === "role" ? "link" : null) }), true);
   assert.equal(shouldIgnoreGlobalEnter({ tagName: "DIV" }), false);
 });
 
@@ -47,4 +50,13 @@ test("shouldIgnoreGlobalEnter: child of button/link should still block global En
     }
   };
   assert.equal(shouldIgnoreGlobalEnter(spanInsideButton), true);
+});
+
+test("shouldIgnoreGlobalEnter: child of role=textbox should still block global Enter", () => {
+  const textbox = { tagName: "DIV", getAttribute: (k) => (k === "role" ? "textbox" : null) };
+  const child = {
+    tagName: "SPAN",
+    closest: (selector) => (selector ? textbox : null)
+  };
+  assert.equal(shouldIgnoreGlobalEnter(child), true);
 });
