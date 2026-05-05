@@ -107,6 +107,20 @@ function showOverlay(payload) {
   overlay.dataset.level = payload.level || "B";
   currentPayload = payload;
   shownAt = Date.now();
+
+  // Focus management (input-safety + pattern-break)
+  // - If we're asking for free-text alignment, focus the text box.
+  // - For DRIFT_PERSIST, make the primary "Recover" action the default focus target
+  //   so Enter activates it (instead of accidentally marking "Back on track").
+  // - Otherwise, focus the "Back on track" button.
+  const eventType = String(overlay.dataset.eventType || "").toUpperCase();
+  if (payload.choices && Array.isArray(payload.choices)) {
+    alignText.focus();
+  } else if (eventType === "DRIFT_PERSIST") {
+    recoverBtn.focus();
+  } else {
+    backBtn.focus();
+  }
 }
 
 function sendAction(action) {
@@ -163,7 +177,8 @@ window.overlayAPI.onPause(() => {
 window.addEventListener("keydown", (event) => {
   // Don't treat Enter as "Back on track" while the user is typing or interacting with a control.
   if (event.key === "Enter") {
-    const ignoreEnter = window.overlayUtils?.shouldIgnoreGlobalEnter?.(event.target);
+    const active = document.activeElement || event.target;
+    const ignoreEnter = window.overlayUtils?.shouldIgnoreGlobalEnter?.(active);
     if (!ignoreEnter) {
       sendAction({ action: "back_on_track" });
     }
