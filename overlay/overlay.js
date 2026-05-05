@@ -12,6 +12,10 @@ const alignInput = document.getElementById("alignInput");
 const alignText = document.getElementById("alignText");
 const alignSubmit = document.getElementById("alignSubmit");
 
+const hintEnter = document.getElementById("hintEnter");
+const hintEsc = document.getElementById("hintEsc");
+const hintPause = document.getElementById("hintPause");
+
 const backBtn = document.getElementById("backBtn");
 const stuckBtn = document.getElementById("stuckBtn");
 const recoverBtn = document.getElementById("recoverBtn");
@@ -62,12 +66,26 @@ function resetAlignInput() {
   alignInput.classList.add("hidden");
 }
 
+function updateFooterHints(payload) {
+  const isAlignMode = payload?.choices && Array.isArray(payload.choices);
+  if (isAlignMode) {
+    setText(hintEnter, "Enter: Submit");
+    setText(hintEsc, "Esc: Snooze");
+    setText(hintPause, "Cmd/Ctrl+Shift+P: Pause 15");
+  } else {
+    setText(hintEnter, "Enter: Back on track");
+    setText(hintEsc, "Esc: Snooze");
+    setText(hintPause, "Cmd/Ctrl+Shift+P: Pause 15");
+  }
+}
+
 function showOverlay(payload) {
   overlay.classList.remove("hidden");
   resetSnooze();
   resetAlignInput();
   updateEventLabel(payload);
   updatePrimaryLabel(payload);
+  updateFooterHints(payload);
 
   if (payload.choices && Array.isArray(payload.choices)) {
     overlay.dataset.mode = "align";
