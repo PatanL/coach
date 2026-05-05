@@ -107,6 +107,15 @@ function showOverlay(payload) {
   overlay.dataset.level = payload.level || "B";
   currentPayload = payload;
   shownAt = Date.now();
+
+  // DRIFT_PERSIST is a "pattern-break" moment: default focus should point at recovery,
+  // and we avoid accidental dismissal via the global Enter handler.
+  if (overlay.dataset.eventType === "DRIFT_PERSIST") {
+    // Defer so DOM/layout is ready and the button is focusable.
+    queueMicrotask(() => {
+      recoverBtn?.focus?.();
+    });
+  }
 }
 
 function sendAction(action) {
@@ -163,6 +172,9 @@ window.overlayAPI.onPause(() => {
 window.addEventListener("keydown", (event) => {
   // Don't treat Enter as "Back on track" while the user is typing or interacting with a control.
   if (event.key === "Enter") {
+    // Extra safety for DRIFT_PERSIST: it should not be trivially dismissed by a stray Enter.
+    if (overlay.dataset.eventType === "DRIFT_PERSIST") return;
+
     const ignoreEnter = window.overlayUtils?.shouldIgnoreGlobalEnter?.(event.target);
     if (!ignoreEnter) {
       sendAction({ action: "back_on_track" });
