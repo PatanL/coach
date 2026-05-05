@@ -259,3 +259,9 @@ button.primary:focus-visible {
   color: #ff49a7;
   text-shadow: 0 0 10px rgba(255, 73, 167, 0.35);
 }
+
+#overlay[data-event-type="DRIFT_PERSIST"] #recoverBtn.primary {
+  box-shadow:
+    0 12px 26px rgba(0, 0, 0, 0.35),
+    0 0 0 2px rgba(255, 206, 61, 0.25);
+}

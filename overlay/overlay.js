@@ -125,6 +125,18 @@ function showOverlay(payload) {
   resetAlignInput();
   updateEventLabel(payload);
   updatePrimaryLabel(payload);
+
+  // Pattern-break UX: when drift persists, make the recovery path the obvious next step.
+  const isPersist = overlay.dataset.eventType === "DRIFT_PERSIST";
+  if (isPersist && (payload.level || "B") === "B") {
+    backBtn.classList.remove("primary");
+    recoverBtn.classList.add("primary");
+    setText(enterHint, "Enter: Recover schedule");
+  } else {
+    recoverBtn.classList.remove("primary");
+    backBtn.classList.add("primary");
+    setText(enterHint, "Enter: Back on track");
+  }
   updatePrimaryButton(payload);
   updatePrimaryAction(payload);
 
