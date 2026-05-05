@@ -9,7 +9,11 @@
     if (!target) return false;
     const tag = String(target.tagName || "").toLowerCase();
     if (target.isContentEditable) return true;
-    return tag === "input" || tag === "textarea" || tag === "select";
+    if (tag === "input" || tag === "textarea" || tag === "select") return true;
+
+    // Also treat ARIA textbox-like roles as typing targets (helps with custom components).
+    const role = String(target.getAttribute?.("role") || "").toLowerCase();
+    return role === "textbox" || role === "combobox";
   }
 
   // Treat common interactive elements as "hands-off" for global hotkeys.

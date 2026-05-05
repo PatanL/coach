@@ -40,7 +40,8 @@ async function main() {
     win.webContents.send("overlay:show", payload);
 
     // Allow any CSS animations to reach a stable frame.
-    await new Promise((r) => setTimeout(r, 250));
+    // DRIFT_PERSIST has a 1.15s pulse x3 → ~3.45s.
+    await new Promise((r) => setTimeout(r, 3700));
 
     const image = await win.capturePage();
     fs.writeFileSync(path.join(OUT_DIR, name), image.toPNG());
