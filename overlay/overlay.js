@@ -11,6 +11,7 @@ const choiceButtons = document.getElementById("choiceButtons");
 const alignInput = document.getElementById("alignInput");
 const alignText = document.getElementById("alignText");
 const alignSubmit = document.getElementById("alignSubmit");
+const enterHint = document.getElementById("enterHint");
 
 const backBtn = document.getElementById("backBtn");
 const stuckBtn = document.getElementById("stuckBtn");
@@ -74,6 +75,12 @@ function showOverlay(payload) {
   resetAlignInput();
   updateEventLabel(payload);
   updatePrimaryLabel(payload);
+
+  // DRIFT_PERSIST is a recovery moment: bias toward the recovery path and make the primary affordance obvious.
+  const isDriftPersist = overlay.dataset.eventType === "DRIFT_PERSIST";
+  backBtn.classList.toggle("primary", !isDriftPersist);
+  recoverBtn.classList.toggle("primary", isDriftPersist);
+  if (enterHint) enterHint.textContent = `Enter: ${isDriftPersist ? "Recover schedule" : "Back on track"}`;
 
   if (payload.choices && Array.isArray(payload.choices)) {
     overlay.dataset.mode = "align";

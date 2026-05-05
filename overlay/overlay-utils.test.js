@@ -52,6 +52,13 @@ test("shouldIgnoreGlobalEnter: child of button/link should still block global En
   assert.equal(shouldIgnoreGlobalEnter(spanInsideButton), true);
 });
 
+test("getDefaultEnterActionForEventType: biases DRIFT_PERSIST toward recovery", () => {
+  assert.equal(getDefaultEnterActionForEventType("DRIFT_PERSIST"), "recover");
+  assert.equal(getDefaultEnterActionForEventType("drift_persist"), "recover");
+  assert.equal(getDefaultEnterActionForEventType("DRIFT"), "back_on_track");
+  assert.equal(getDefaultEnterActionForEventType(null), "back_on_track");
+});
+
 test("getDefaultEnterActionForEventType: DRIFT_PERSIST routes to recover", () => {
   assert.equal(getDefaultEnterActionForEventType("DRIFT_PERSIST"), "recover");
   assert.equal(getDefaultEnterActionForEventType("drift_persist"), "recover");
