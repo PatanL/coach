@@ -40,17 +40,18 @@ function updateEventLabel(payload) {
 
   if (!eventType) {
     setText(eventLabel, "DRIFT");
-    return;
+    return eventType;
   }
   if (eventType === "DRIFT_PERSIST") {
     setText(eventLabel, "DRIFT — PERSIST");
-    return;
+    return eventType;
   }
   if (eventType.startsWith("DRIFT")) {
     setText(eventLabel, "DRIFT");
-    return;
+    return eventType;
   }
   setText(eventLabel, eventType.replaceAll("_", " "));
+  return eventType;
 }
 
 function resetSnooze() {
@@ -66,8 +67,16 @@ function showOverlay(payload) {
   overlay.classList.remove("hidden");
   resetSnooze();
   resetAlignInput();
-  updateEventLabel(payload);
+  const eventType = updateEventLabel(payload);
   updatePrimaryLabel(payload);
+
+  // Pattern-break UX: for DRIFT_PERSIST, move focus to an explicit recovery action.
+  // This reduces accidental "Enter" → "Back on track" when the overlay appears.
+  const preferred = window.overlayUtils?.preferredPrimaryAction?.(eventType);
+  if (preferred === "recover") {
+    // Defer until after DOM updates so focus is reliable.
+    setTimeout(() => recoverBtn?.focus?.(), 0);
+  }
 
   if (payload.choices && Array.isArray(payload.choices)) {
     overlay.dataset.mode = "align";

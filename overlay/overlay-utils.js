@@ -40,9 +40,18 @@
     return isTextInputTarget(t) || isInteractiveTarget(t);
   }
 
+  // Overlay UX rule: when DRIFT_PERSIST fires, bias toward an explicit recovery action.
+  // Returning a stable action id keeps focus rules testable.
+  function preferredPrimaryAction(eventType) {
+    const t = String(eventType || "").toUpperCase();
+    if (t === "DRIFT_PERSIST") return "recover";
+    return null;
+  }
+
   return {
     isTextInputTarget,
     isInteractiveTarget,
-    shouldIgnoreGlobalEnter
+    shouldIgnoreGlobalEnter,
+    preferredPrimaryAction
   };
 });
