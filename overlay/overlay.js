@@ -5,6 +5,7 @@ const headline = document.getElementById("headline");
 const humanLine = document.getElementById("humanLine");
 const diagnosis = document.getElementById("diagnosis");
 const nextAction = document.getElementById("nextAction");
+const enterHint = document.getElementById("enterHint");
 const snooze = document.getElementById("snoozeReason");
 const miniPlan = document.getElementById("miniPlan");
 const choiceButtons = document.getElementById("choiceButtons");
@@ -121,6 +122,20 @@ function showOverlay(payload) {
       : focusKey === "recoverBtn"
         ? recoverBtn
         : backBtn;
+
+  // Visual emphasis: in DRIFT_PERSIST, bias the user toward "Recover schedule".
+  // Keep this deterministic and tied to the same logic as focus selection.
+  backBtn.classList.toggle("primary", focusKey === "backBtn");
+  recoverBtn.classList.toggle("primary", focusKey === "recoverBtn");
+
+  if (enterHint) {
+    enterHint.textContent =
+      focusKey === "recoverBtn"
+        ? "Enter: Recover schedule"
+        : focusKey === "alignText"
+          ? "Enter: Submit"
+          : "Enter: Back on track";
+  }
 
   // Defer until after layout so focus lands deterministically (and doesn't scroll).
   requestAnimationFrame(() => {
