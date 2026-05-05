@@ -34,13 +34,24 @@ async function main() {
 
   await win.loadFile(htmlPath);
 
+  // Make screenshot outputs deterministic:
+  // - disable animations/transitions (pattern-break pulses, hover transitions, etc.)
+  // - ensure a stable render frame before capture
+  await win.webContents.insertCSS(`
+    *, *::before, *::after {
+      animation: none !important;
+      transition: none !important;
+      caret-color: transparent !important;
+    }
+  `);
+
   async function capture(name, payload) {
     // Give the DOM a moment to settle, then render the payload.
     await new Promise((r) => setTimeout(r, 50));
     win.webContents.send("overlay:show", payload);
 
-    // Allow any CSS animations to reach a stable frame.
-    await new Promise((r) => setTimeout(r, 250));
+    // Allow layout + paint to settle before capture.
+    await new Promise((r) => setTimeout(r, 100));
 
     const image = await win.capturePage();
     fs.writeFileSync(path.join(OUT_DIR, name), image.toPNG());
