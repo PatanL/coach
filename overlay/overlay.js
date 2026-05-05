@@ -117,7 +117,8 @@ function showOverlay(payload) {
 
   // Pattern-break moment: for persistent drift, bias toward the recovery action.
   // Focusing a button also ensures Enter activates that control (and bypasses the global Enter handler).
-  if (overlay.dataset.eventType === "DRIFT_PERSIST") {
+  // But don't steal focus when we're in "align" mode (user might need to type/choose).
+  if (overlay.dataset.eventType === "DRIFT_PERSIST" && overlay.dataset.mode !== "align") {
     recoverBtn?.focus?.();
   }
 }
