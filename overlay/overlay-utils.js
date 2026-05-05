@@ -42,7 +42,7 @@
 
   function getRecommendedFocusKey({ eventType, mode } = {}) {
     const t = String(eventType || "").toUpperCase();
-    const m = String(mode || "");
+    const m = String(mode || "").toLowerCase();
     if (m === "align") return "alignText";
     if (t === "DRIFT_PERSIST") return "recoverBtn";
     return "backBtn";

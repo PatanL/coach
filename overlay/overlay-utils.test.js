@@ -47,6 +47,21 @@ test("shouldIgnoreGlobalEnter: child of button/link should still block global En
   assert.equal(shouldIgnoreGlobalEnter(spanInsideButton), true);
 });
 
+test("getRecommendedFocusKey: prefers alignment textbox in align mode", () => {
+  assert.equal(getRecommendedFocusKey({ mode: "align" }), "alignText");
+  assert.equal(getRecommendedFocusKey({ mode: "ALIGN" }), "alignText");
+});
+
+test("getRecommendedFocusKey: DRIFT_PERSIST defaults focus to recover", () => {
+  assert.equal(getRecommendedFocusKey({ eventType: "DRIFT_PERSIST" }), "recoverBtn");
+  assert.equal(getRecommendedFocusKey({ eventType: "drift_persist" }), "recoverBtn");
+});
+
+test("getRecommendedFocusKey: default is backBtn", () => {
+  assert.equal(getRecommendedFocusKey({ eventType: "DRIFT" }), "backBtn");
+  assert.equal(getRecommendedFocusKey({}), "backBtn");
+});
+
 test("getRecommendedFocusKey: defaults to backBtn", () => {
   assert.equal(getRecommendedFocusKey(), "backBtn");
   assert.equal(getRecommendedFocusKey({ eventType: "DRIFT" }), "backBtn");
