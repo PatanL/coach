@@ -40,9 +40,17 @@
     return isTextInputTarget(t) || isInteractiveTarget(t);
   }
 
+  // For single-letter hotkeys (r/b/k/etc), we should ignore when the user is typing.
+  // Unlike Enter, we allow hotkeys to work even when focus is on other buttons/links.
+  function shouldIgnoreGlobalHotkey(target) {
+    const t = findHotkeyRelevantTarget(target);
+    return isTextInputTarget(t);
+  }
+
   return {
     isTextInputTarget,
     isInteractiveTarget,
-    shouldIgnoreGlobalEnter
+    shouldIgnoreGlobalEnter,
+    shouldIgnoreGlobalHotkey
   };
 });
