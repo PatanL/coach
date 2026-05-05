@@ -60,3 +60,12 @@ test("shouldIgnoreGlobalEnter: child of role=textbox should still block global E
   };
   assert.equal(shouldIgnoreGlobalEnter(child), true);
 });
+
+test("shouldIgnoreGlobalEnter: child of contenteditable should still block global Enter", () => {
+  const editable = { tagName: "DIV", isContentEditable: true };
+  const child = {
+    tagName: "SPAN",
+    closest: (selector) => (selector ? editable : null)
+  };
+  assert.equal(shouldIgnoreGlobalEnter(child), true);
+});
