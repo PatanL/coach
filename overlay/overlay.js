@@ -17,7 +17,6 @@ const backBtn = document.getElementById("backBtn");
 const stuckBtn = document.getElementById("stuckBtn");
 const recoverBtn = document.getElementById("recoverBtn");
 const snoozeBtn = document.getElementById("snoozeBtn");
-const enterHint = document.getElementById("enterHint");
 
 let shownAt = null;
 let currentPayload = null;
@@ -80,7 +79,6 @@ function showOverlay(payload) {
   const isDriftPersist = overlay.dataset.eventType === "DRIFT_PERSIST";
   backBtn.classList.toggle("primary", !isDriftPersist);
   recoverBtn.classList.toggle("primary", isDriftPersist);
-  if (enterHint) enterHint.textContent = `Enter: ${isDriftPersist ? "Recover schedule" : "Back on track"}`;
 
   if (payload.choices && Array.isArray(payload.choices)) {
     overlay.dataset.mode = "align";
