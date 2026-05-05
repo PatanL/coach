@@ -16,6 +16,7 @@ const backBtn = document.getElementById("backBtn");
 const stuckBtn = document.getElementById("stuckBtn");
 const recoverBtn = document.getElementById("recoverBtn");
 const snoozeBtn = document.getElementById("snoozeBtn");
+const enterHint = document.getElementById("enterHint");
 
 let shownAt = null;
 let currentPayload = null;
@@ -37,6 +38,11 @@ function updateEventLabel(payload) {
   const raw = payload?.source_event_type || payload?.event_type || payload?.type || "";
   const eventType = String(raw).toUpperCase();
   overlay.dataset.eventType = eventType;
+
+  // Keep the keyboard hint aligned with what Enter will do.
+  if (enterHint) {
+    enterHint.textContent = eventType === "DRIFT_PERSIST" ? "Enter: Recover schedule" : "Enter: Back on track";
+  }
 
   if (!eventType) {
     setText(eventLabel, "DRIFT");
@@ -161,11 +167,17 @@ window.overlayAPI.onPause(() => {
 });
 
 window.addEventListener("keydown", (event) => {
-  // Don't treat Enter as "Back on track" while the user is typing or interacting with a control.
+  // Don't treat Enter as a global action while the user is typing or interacting with a control.
   if (event.key === "Enter") {
     const ignoreEnter = window.overlayUtils?.shouldIgnoreGlobalEnter?.(event.target);
     if (!ignoreEnter) {
-      sendAction({ action: "back_on_track" });
+      const eventType = String(overlay?.dataset?.eventType || "").toUpperCase();
+      // Pattern-break: on DRIFT_PERSIST, make the default action the schedule recovery path.
+      if (eventType === "DRIFT_PERSIST") {
+        sendAction({ action: "recover" });
+      } else {
+        sendAction({ action: "back_on_track" });
+      }
     }
   }
   if (event.key === "Escape") {
