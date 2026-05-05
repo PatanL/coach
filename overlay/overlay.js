@@ -113,6 +113,28 @@ function showOverlay(payload) {
   overlay.dataset.level = payload.level || "B";
   currentPayload = payload;
   shownAt = Date.now();
+
+  // Focus management: for DRIFT_PERSIST we want a strong, actionable pattern-break.
+  // If the overlay is in "align" mode, prefer focusing the text box.
+  // Otherwise, focus the primary action so Enter + space behavior is obvious.
+  requestAnimationFrame(() => {
+    const active = document.activeElement;
+    const isTyping = window.overlayUtils?.isTextInputTarget?.(active);
+    if (isTyping) return;
+
+    if (overlay.dataset.mode === "align") {
+      alignText?.focus?.();
+      return;
+    }
+
+    const eventType = String(overlay?.dataset?.eventType || "").toUpperCase();
+    const defaultAction = window.overlayUtils?.getDefaultEnterActionForEventType?.(eventType) || "back_on_track";
+    if (defaultAction === "recover") {
+      recoverBtn?.focus?.();
+    } else {
+      backBtn?.focus?.();
+    }
+  });
 }
 
 function sendAction(action) {
@@ -172,12 +194,8 @@ window.addEventListener("keydown", (event) => {
     const ignoreEnter = window.overlayUtils?.shouldIgnoreGlobalEnter?.(event.target);
     if (!ignoreEnter) {
       const eventType = String(overlay?.dataset?.eventType || "").toUpperCase();
-      // Pattern-break: on DRIFT_PERSIST, make the default action the schedule recovery path.
-      if (eventType === "DRIFT_PERSIST") {
-        sendAction({ action: "recover" });
-      } else {
-        sendAction({ action: "back_on_track" });
-      }
+      const action = window.overlayUtils?.getDefaultEnterActionForEventType?.(eventType) || "back_on_track";
+      sendAction({ action });
     }
   }
   if (event.key === "Escape") {
