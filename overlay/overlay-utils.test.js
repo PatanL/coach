@@ -8,6 +8,8 @@ test("isTextInputTarget: recognizes common typing targets", () => {
   assert.equal(isTextInputTarget({ tagName: "textarea" }), true);
   assert.equal(isTextInputTarget({ tagName: "Select" }), true);
   assert.equal(isTextInputTarget({ tagName: "DIV", isContentEditable: true }), true);
+  assert.equal(isTextInputTarget({ tagName: "DIV", getAttribute: (k) => (k === "role" ? "textbox" : null) }), true);
+  assert.equal(isTextInputTarget({ tagName: "DIV", getAttribute: (k) => (k === "role" ? "combobox" : null) }), true);
 });
 
 test("isTextInputTarget: ignores non-input targets", () => {
@@ -45,4 +47,21 @@ test("shouldIgnoreGlobalEnter: child of button/link should still block global En
     }
   };
   assert.equal(shouldIgnoreGlobalEnter(spanInsideButton), true);
+});
+
+test("shouldIgnoreGlobalEnter: child of role=textbox/combobox should block global Enter", () => {
+  const textbox = { tagName: "DIV", getAttribute: (k) => (k === "role" ? "textbox" : null) };
+  const combobox = { tagName: "DIV", getAttribute: (k) => (k === "role" ? "combobox" : null) };
+
+  const child = (owner) => ({
+    tagName: "SPAN",
+    closest: () => owner
+  });
+
+  assert.equal(shouldIgnoreGlobalEnter(child(textbox)), true);
+  assert.equal(shouldIgnoreGlobalEnter(child(combobox)), true);
+});
+
+test("isInteractiveTarget: recognizes ARIA link role", () => {
+  assert.equal(isInteractiveTarget({ tagName: "DIV", getAttribute: (k) => (k === "role" ? "link" : null) }), true);
 });
