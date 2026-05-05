@@ -40,9 +40,24 @@
     return isTextInputTarget(t) || isInteractiveTarget(t);
   }
 
+  // Decide what the overlay's global Enter hotkey should do.
+  // Returns null when Enter should be ignored (e.g. typing in an input).
+  //
+  // For persistent drift, use a stronger recovery-oriented default action to
+  // create a motivational "pattern-break" (Option B actionable overlay).
+  function decideGlobalEnterAction({ eventType, target } = {}) {
+    if (shouldIgnoreGlobalEnter(target)) return null;
+
+    const normalized = String(eventType || "").toUpperCase();
+    if (normalized === "DRIFT_PERSIST") return "recover";
+
+    return "back_on_track";
+  }
+
   return {
     isTextInputTarget,
     isInteractiveTarget,
-    shouldIgnoreGlobalEnter
+    shouldIgnoreGlobalEnter,
+    decideGlobalEnterAction
   };
 });
