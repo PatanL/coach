@@ -109,13 +109,18 @@ function showOverlay(payload) {
   shownAt = Date.now();
 
   // Focus management (keyboard safety + recovery bias).
-  // - Align mode: focus the free-text input so Enter submits that field.
-  // - DRIFT_PERSIST: focus Recover to create a clear, intentional "next step".
-  // - Default: focus Back on track.
-  const eventType = String(overlay.dataset.eventType || "").toUpperCase();
-  const mode = String(overlay.dataset.mode || "");
+  // Centralize the decision logic in overlay-utils so we can unit test it.
+  const focusKey = window.overlayUtils?.getRecommendedFocusKey?.({
+    eventType: overlay.dataset.eventType,
+    mode: overlay.dataset.mode
+  });
+
   const focusTarget =
-    mode === "align" ? alignText : eventType === "DRIFT_PERSIST" ? recoverBtn : backBtn;
+    focusKey === "alignText"
+      ? alignText
+      : focusKey === "recoverBtn"
+        ? recoverBtn
+        : backBtn;
 
   // Defer until after layout so focus lands deterministically (and doesn't scroll).
   requestAnimationFrame(() => {

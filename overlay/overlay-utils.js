@@ -40,9 +40,18 @@
     return isTextInputTarget(t) || isInteractiveTarget(t);
   }
 
+  function getRecommendedFocusKey({ eventType, mode } = {}) {
+    const t = String(eventType || "").toUpperCase();
+    const m = String(mode || "");
+    if (m === "align") return "alignText";
+    if (t === "DRIFT_PERSIST") return "recoverBtn";
+    return "backBtn";
+  }
+
   return {
     isTextInputTarget,
     isInteractiveTarget,
-    shouldIgnoreGlobalEnter
+    shouldIgnoreGlobalEnter,
+    getRecommendedFocusKey
   };
 });
