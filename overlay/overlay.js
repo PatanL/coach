@@ -16,6 +16,7 @@ const backBtn = document.getElementById("backBtn");
 const stuckBtn = document.getElementById("stuckBtn");
 const recoverBtn = document.getElementById("recoverBtn");
 const snoozeBtn = document.getElementById("snoozeBtn");
+const enterHint = document.getElementById("enterHint");
 
 let shownAt = null;
 let currentPayload = null;
@@ -40,17 +41,34 @@ function updateEventLabel(payload) {
 
   if (!eventType) {
     setText(eventLabel, "DRIFT");
-    return;
+    return eventType;
   }
   if (eventType === "DRIFT_PERSIST") {
     setText(eventLabel, "DRIFT — PERSIST");
-    return;
+    return eventType;
   }
   if (eventType.startsWith("DRIFT")) {
     setText(eventLabel, "DRIFT");
-    return;
+    return eventType;
   }
   setText(eventLabel, eventType.replaceAll("_", " "));
+  return eventType;
+}
+
+function setPrimaryAction(eventType) {
+  const type = String(eventType || "").toUpperCase();
+  const primary = type === "DRIFT_PERSIST" ? "recover" : "back_on_track";
+  overlay.dataset.primaryAction = primary;
+
+  if (primary === "recover") {
+    recoverBtn.classList.add("primary");
+    backBtn.classList.remove("primary");
+    if (enterHint) setText(enterHint, "Enter: Recover schedule");
+  } else {
+    backBtn.classList.add("primary");
+    recoverBtn.classList.remove("primary");
+    if (enterHint) setText(enterHint, "Enter: Back on track");
+  }
 }
 
 function resetSnooze() {
@@ -66,7 +84,8 @@ function showOverlay(payload) {
   overlay.classList.remove("hidden");
   resetSnooze();
   resetAlignInput();
-  updateEventLabel(payload);
+  const eventType = updateEventLabel(payload);
+  setPrimaryAction(eventType);
   updatePrimaryLabel(payload);
 
   if (payload.choices && Array.isArray(payload.choices)) {
@@ -161,11 +180,12 @@ window.overlayAPI.onPause(() => {
 });
 
 window.addEventListener("keydown", (event) => {
-  // Don't treat Enter as "Back on track" while the user is typing or interacting with a control.
+  // Don't treat Enter as a global primary action while the user is typing or interacting with a control.
   if (event.key === "Enter") {
     const ignoreEnter = window.overlayUtils?.shouldIgnoreGlobalEnter?.(event.target);
     if (!ignoreEnter) {
-      sendAction({ action: "back_on_track" });
+      const primary = overlay?.dataset?.primaryAction || "back_on_track";
+      sendAction({ action: primary });
     }
   }
   if (event.key === "Escape") {
