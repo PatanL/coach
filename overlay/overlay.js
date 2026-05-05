@@ -13,8 +13,6 @@ const enterHint = document.getElementById("enterHint");
 const alignText = document.getElementById("alignText");
 const alignSubmit = document.getElementById("alignSubmit");
 
-const enterHint = document.getElementById("enterHint");
-
 const backBtn = document.getElementById("backBtn");
 const stuckBtn = document.getElementById("stuckBtn");
 const recoverBtn = document.getElementById("recoverBtn");
