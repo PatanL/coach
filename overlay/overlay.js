@@ -161,11 +161,14 @@ window.overlayAPI.onPause(() => {
 });
 
 window.addEventListener("keydown", (event) => {
-  // Don't treat Enter as "Back on track" while the user is typing or interacting with a control.
+  // Don't steal Enter while the user is typing or activating a control.
+  // On DRIFT_PERSIST we intentionally default Enter to a more action-forward path (recover),
+  // as a UX pattern-break from the usual "Back on track".
   if (event.key === "Enter") {
-    const ignoreEnter = window.overlayUtils?.shouldIgnoreGlobalEnter?.(event.target);
-    if (!ignoreEnter) {
-      sendAction({ action: "back_on_track" });
+    const eventType = overlay?.dataset?.eventType || currentPayload?.source_event_type || currentPayload?.event_type || null;
+    const action = window.overlayUtils?.getGlobalEnterAction?.(eventType, event.target);
+    if (action) {
+      sendAction({ action });
     }
   }
   if (event.key === "Escape") {
