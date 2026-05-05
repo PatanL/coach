@@ -80,6 +80,11 @@ function showOverlay(payload) {
   backBtn.classList.toggle("primary", !isDriftPersist);
   recoverBtn.classList.toggle("primary", isDriftPersist);
 
+  const defaultEnterAction = window.overlayUtils?.getDefaultEnterActionForEventType?.(overlay.dataset.eventType);
+  if (enterHint) {
+    enterHint.textContent = defaultEnterAction === "recover" ? "Enter: Recover schedule" : "Enter: Back on track";
+  }
+
   if (payload.choices && Array.isArray(payload.choices)) {
     overlay.dataset.mode = "align";
   } else {
