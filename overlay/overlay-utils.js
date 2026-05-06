@@ -40,9 +40,17 @@
     return isTextInputTarget(t) || isInteractiveTarget(t);
   }
 
+  function isOverlayVisible(overlayEl) {
+    if (!overlayEl) return true;
+    // The overlay uses the "hidden" class to fully hide itself.
+    // When hidden, global hotkeys should not trigger actions.
+    return !overlayEl.classList?.contains?.("hidden");
+  }
+
   return {
     isTextInputTarget,
     isInteractiveTarget,
-    shouldIgnoreGlobalEnter
+    shouldIgnoreGlobalEnter,
+    isOverlayVisible
   };
 });
