@@ -11,6 +11,7 @@ const choiceButtons = document.getElementById("choiceButtons");
 const alignInput = document.getElementById("alignInput");
 const alignText = document.getElementById("alignText");
 const alignSubmit = document.getElementById("alignSubmit");
+const enterHint = document.getElementById("enterHint");
 
 const backBtn = document.getElementById("backBtn");
 const stuckBtn = document.getElementById("stuckBtn");
@@ -37,6 +38,10 @@ function updateEventLabel(payload) {
   const raw = payload?.source_event_type || payload?.event_type || payload?.type || "";
   const eventType = String(raw).toUpperCase();
   overlay.dataset.eventType = eventType;
+
+  if (enterHint) {
+    enterHint.textContent = eventType === "DRIFT_PERSIST" ? "Enter: (disabled)" : "Enter: Back on track";
+  }
 
   if (!eventType) {
     setText(eventLabel, "DRIFT");
@@ -161,10 +166,13 @@ window.overlayAPI.onPause(() => {
 });
 
 window.addEventListener("keydown", (event) => {
-  // Don't treat Enter as "Back on track" while the user is typing or interacting with a control.
+  // Global Enter → "Back on track" (except for DRIFT_PERSIST where we require a deliberate click).
   if (event.key === "Enter") {
-    const ignoreEnter = window.overlayUtils?.shouldIgnoreGlobalEnter?.(event.target);
-    if (!ignoreEnter) {
+    const shouldTrigger = window.overlayUtils?.shouldTriggerBackOnTrackOnEnter?.(
+      event.target,
+      overlay.dataset.eventType
+    );
+    if (shouldTrigger) {
       sendAction({ action: "back_on_track" });
     }
   }
