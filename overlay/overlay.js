@@ -107,6 +107,17 @@ function showOverlay(payload) {
   overlay.dataset.level = payload.level || "B";
   currentPayload = payload;
   shownAt = Date.now();
+
+  // Input focus safety:
+  // - In align mode, keep focus in the text box.
+  // - For DRIFT_PERSIST, bias focus toward recovery (pattern-break) but avoid stealing focus if the user is already in a control.
+  const active = document.activeElement;
+  const activeIsBody = !active || active === document.body;
+  if (overlay.dataset.mode === "align") {
+    alignText.focus();
+  } else if (overlay.dataset.eventType === "DRIFT_PERSIST" && activeIsBody) {
+    recoverBtn.focus();
+  }
 }
 
 function sendAction(action) {
@@ -161,12 +172,11 @@ window.overlayAPI.onPause(() => {
 });
 
 window.addEventListener("keydown", (event) => {
-  // Don't treat Enter as "Back on track" while the user is typing or interacting with a control.
   if (event.key === "Enter") {
-    const ignoreEnter = window.overlayUtils?.shouldIgnoreGlobalEnter?.(event.target);
-    if (!ignoreEnter) {
-      sendAction({ action: "back_on_track" });
-    }
+    const eventType = overlay?.dataset?.eventType || "";
+    const mode = overlay?.dataset?.mode || "";
+    const action = window.overlayUtils?.getGlobalEnterAction?.({ eventType, mode, target: event.target });
+    if (action) sendAction({ action });
   }
   if (event.key === "Escape") {
     snooze.classList.remove("hidden");

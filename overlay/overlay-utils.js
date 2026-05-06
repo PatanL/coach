@@ -40,9 +40,26 @@
     return isTextInputTarget(t) || isInteractiveTarget(t);
   }
 
+  // Decide what action (if any) a global Enter press should trigger.
+  // Returns an action string (e.g. "back_on_track", "recover") or null to do nothing.
+  function getGlobalEnterAction({ eventType, mode, target } = {}) {
+    if (shouldIgnoreGlobalEnter(target)) return null;
+    const t = String(eventType || "").toUpperCase();
+    const m = String(mode || "").toLowerCase();
+
+    // In "align" mode we never want global Enter to accidentally confirm an action.
+    if (m === "align") return null;
+
+    // Pattern-break: DRIFT_PERSIST Enter should bias to recovery, not dismissal.
+    if (t === "DRIFT_PERSIST") return "recover";
+
+    return "back_on_track";
+  }
+
   return {
     isTextInputTarget,
     isInteractiveTarget,
-    shouldIgnoreGlobalEnter
+    shouldIgnoreGlobalEnter,
+    getGlobalEnterAction
   };
 });
