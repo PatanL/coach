@@ -9,6 +9,11 @@
     if (!target) return false;
     const tag = String(target.tagName || "").toLowerCase();
     if (target.isContentEditable) return true;
+
+    // Some controls present as non-input elements but advertise textbox-like roles.
+    const role = String(target.getAttribute?.("role") || "").toLowerCase();
+    if (role === "textbox" || role === "searchbox") return true;
+
     return tag === "input" || tag === "textarea" || tag === "select";
   }
 
