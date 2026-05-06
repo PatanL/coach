@@ -110,6 +110,7 @@ function showOverlay(payload) {
 }
 
 function sendAction(action) {
+  if (!currentPayload) return;
   const timeToAction = shownAt ? Date.now() - shownAt : 0;
   window.overlayAPI.sendAction({
     ...action,
@@ -161,6 +162,10 @@ window.overlayAPI.onPause(() => {
 });
 
 window.addEventListener("keydown", (event) => {
+  // Only handle hotkeys while the overlay is actually visible with a payload.
+  // This prevents accidental "Back on track" events while the app is in the background.
+  if (!currentPayload || overlay.classList.contains("hidden")) return;
+
   // Don't treat Enter as "Back on track" while the user is typing or interacting with a control.
   if (event.key === "Enter") {
     const ignoreEnter = window.overlayUtils?.shouldIgnoreGlobalEnter?.(event.target);
