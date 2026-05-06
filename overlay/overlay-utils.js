@@ -40,9 +40,18 @@
     return isTextInputTarget(t) || isInteractiveTarget(t);
   }
 
+  // Global Enter → "Back on track" is convenient, but for high-intensity moments (DRIFT_PERSIST)
+  // we prefer a deliberate click to avoid accidental dismissal.
+  function shouldTriggerBackOnTrackOnEnter(target, eventType) {
+    const type = String(eventType || "").toUpperCase();
+    if (type === "DRIFT_PERSIST") return false;
+    return !shouldIgnoreGlobalEnter(target);
+  }
+
   return {
     isTextInputTarget,
     isInteractiveTarget,
-    shouldIgnoreGlobalEnter
+    shouldIgnoreGlobalEnter,
+    shouldTriggerBackOnTrackOnEnter
   };
 });
