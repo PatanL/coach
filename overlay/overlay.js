@@ -62,6 +62,27 @@ function resetAlignInput() {
   alignInput.classList.add("hidden");
 }
 
+function updatePrimaryActionForEvent(eventType) {
+  // Default: "Back on track" is the primary action.
+  backBtn.classList.add("primary");
+  recoverBtn.classList.remove("primary");
+
+  if (eventType === "DRIFT_PERSIST") {
+    // Pattern-break: make recovery feel like the obvious next step.
+    backBtn.classList.remove("primary");
+    recoverBtn.classList.add("primary");
+  }
+}
+
+function maybeAutoFocusPrimary(eventType, mode) {
+  // Avoid stealing focus when the user is actively answering an alignment question.
+  if (mode === "align") return;
+
+  if (eventType === "DRIFT_PERSIST") {
+    recoverBtn.focus();
+  }
+}
+
 function showOverlay(payload) {
   overlay.classList.remove("hidden");
   resetSnooze();
@@ -74,6 +95,8 @@ function showOverlay(payload) {
   } else {
     overlay.dataset.mode = "";
   }
+
+  updatePrimaryActionForEvent(overlay.dataset.eventType);
   setText(blockName, payload.block_name || "");
   setText(headline, payload.headline || "Reset.");
   setText(humanLine, payload.human_line || "");
@@ -107,6 +130,8 @@ function showOverlay(payload) {
   overlay.dataset.level = payload.level || "B";
   currentPayload = payload;
   shownAt = Date.now();
+
+  maybeAutoFocusPrimary(overlay.dataset.eventType, overlay.dataset.mode);
 }
 
 function sendAction(action) {
