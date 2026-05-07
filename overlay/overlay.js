@@ -107,6 +107,13 @@ function showOverlay(payload) {
   overlay.dataset.level = payload.level || "B";
   currentPayload = payload;
   shownAt = Date.now();
+
+  // Recovery-first: when drift is persisting, guide the user toward the actionable "Recover" path.
+  // Focusing a button is safe because our global Enter handler ignores interactive targets,
+  // and Enter will activate the focused button (intentional action).
+  if (overlay.dataset.eventType === "DRIFT_PERSIST") {
+    recoverBtn?.focus?.();
+  }
 }
 
 function sendAction(action) {
