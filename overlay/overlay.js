@@ -62,6 +62,27 @@ function resetAlignInput() {
   alignInput.classList.add("hidden");
 }
 
+function focusDefaultControl(payload) {
+  // Make overlay keyboard-safe: if the user hits Enter immediately after the overlay appears,
+  // it should activate a deliberate control, not the global "Back on track" shortcut.
+  //
+  // Priority:
+  // 1) If we're in align mode, focus the text input.
+  // 2) For DRIFT_PERSIST, focus Recover to create an obvious action-forward pattern-break.
+  // 3) Otherwise, focus Back on track.
+  const eventType = String(payload?.source_event_type || payload?.event_type || payload?.type || "").toUpperCase();
+
+  if (payload?.choices && Array.isArray(payload.choices)) {
+    alignText.focus();
+    return;
+  }
+  if (eventType === "DRIFT_PERSIST") {
+    recoverBtn.focus();
+    return;
+  }
+  backBtn.focus();
+}
+
 function showOverlay(payload) {
   overlay.classList.remove("hidden");
   resetSnooze();
@@ -107,6 +128,9 @@ function showOverlay(payload) {
   overlay.dataset.level = payload.level || "B";
   currentPayload = payload;
   shownAt = Date.now();
+
+  // Focus after the DOM is updated.
+  focusDefaultControl(payload);
 }
 
 function sendAction(action) {
