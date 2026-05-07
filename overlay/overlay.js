@@ -66,8 +66,23 @@ function showOverlay(payload) {
   overlay.classList.remove("hidden");
   resetSnooze();
   resetAlignInput();
+  // Used to make screenshot captures deterministic (disable animations/transitions in CSS).
+  overlay.dataset.cmdId = payload?.cmd_id || "";
   updateEventLabel(payload);
   updatePrimaryLabel(payload);
+
+  // Recovery-first UX: on persistent drift, put focus on the Recover CTA so Enter activates it.
+  // This also prevents the global Enter handler from firing (it ignores interactive targets).
+  if (overlay.dataset.eventType === "DRIFT_PERSIST") {
+    // Defer to ensure the overlay is visible and button is focusable.
+    setTimeout(() => {
+      try {
+        recoverBtn?.focus?.({ preventScroll: true });
+      } catch {
+        recoverBtn?.focus?.();
+      }
+    }, 0);
+  }
 
   if (payload.choices && Array.isArray(payload.choices)) {
     overlay.dataset.mode = "align";
