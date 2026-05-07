@@ -107,6 +107,17 @@ function showOverlay(payload) {
   overlay.dataset.level = payload.level || "B";
   currentPayload = payload;
   shownAt = Date.now();
+
+  // Focus management: make the next best action feel "ready" without accidental triggers.
+  // - If we're asking an alignment question, put the cursor in the text box.
+  // - Otherwise, default focus to the recovery CTA (Enter activates the focused button).
+  window.requestAnimationFrame(() => {
+    if (overlay.dataset.mode === "align") {
+      alignText?.focus?.();
+      return;
+    }
+    recoverBtn?.focus?.();
+  });
 }
 
 function sendAction(action) {
