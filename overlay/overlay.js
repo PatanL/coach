@@ -62,6 +62,18 @@ function resetAlignInput() {
   alignInput.classList.add("hidden");
 }
 
+function focusInitialControl(payload) {
+  // Reduce accidental actions: ensure a deterministic focus target on show.
+  // - If we're asking an align question, put focus in the text box so the user can type immediately.
+  // - Otherwise, focus the primary "Back on track" button.
+  if (payload?.choices && Array.isArray(payload.choices)) {
+    // Defer to the next tick so the element is visible and focusable.
+    setTimeout(() => alignText?.focus?.(), 0);
+    return;
+  }
+  setTimeout(() => backBtn?.focus?.(), 0);
+}
+
 function showOverlay(payload) {
   overlay.classList.remove("hidden");
   resetSnooze();
@@ -107,6 +119,8 @@ function showOverlay(payload) {
   overlay.dataset.level = payload.level || "B";
   currentPayload = payload;
   shownAt = Date.now();
+
+  focusInitialControl(payload);
 }
 
 function sendAction(action) {
