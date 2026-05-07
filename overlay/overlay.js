@@ -66,6 +66,8 @@ function showOverlay(payload) {
   overlay.classList.remove("hidden");
   resetSnooze();
   resetAlignInput();
+  // Used to make screenshot captures deterministic (disable animations/transitions in CSS).
+  overlay.dataset.cmdId = payload?.cmd_id || "";
   updateEventLabel(payload);
   updatePrimaryLabel(payload);
 
