@@ -46,3 +46,15 @@ test("shouldIgnoreGlobalEnter: child of button/link should still block global En
   };
   assert.equal(shouldIgnoreGlobalEnter(spanInsideButton), true);
 });
+
+test("shouldIgnoreGlobalEnter: child of role=button element should still block global Enter", () => {
+  const roleButton = {
+    tagName: "DIV",
+    getAttribute: (k) => (k === "role" ? "button" : null)
+  };
+  const iconInsideRoleButton = {
+    tagName: "SVG",
+    closest: (selector) => (selector ? roleButton : null)
+  };
+  assert.equal(shouldIgnoreGlobalEnter(iconInsideRoleButton), true);
+});
