@@ -40,9 +40,24 @@
     return isTextInputTarget(t) || isInteractiveTarget(t);
   }
 
+  function shouldTriggerGlobalEnter(event) {
+    if (!event) return false;
+    if (event.key !== "Enter") return false;
+
+    // Avoid accidental repeats (key held down) or IME composition submits.
+    if (event.repeat) return false;
+    if (event.isComposing) return false;
+
+    // If the user is using a modifier chord, don't hijack it.
+    if (event.ctrlKey || event.metaKey || event.altKey) return false;
+
+    return !shouldIgnoreGlobalEnter(event.target);
+  }
+
   return {
     isTextInputTarget,
     isInteractiveTarget,
-    shouldIgnoreGlobalEnter
+    shouldIgnoreGlobalEnter,
+    shouldTriggerGlobalEnter
   };
 });
