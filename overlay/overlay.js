@@ -11,6 +11,7 @@ const choiceButtons = document.getElementById("choiceButtons");
 const alignInput = document.getElementById("alignInput");
 const alignText = document.getElementById("alignText");
 const alignSubmit = document.getElementById("alignSubmit");
+const enterHint = document.getElementById("enterHint");
 
 const backBtn = document.getElementById("backBtn");
 const stuckBtn = document.getElementById("stuckBtn");
@@ -32,10 +33,28 @@ function updatePrimaryLabel(payload) {
   backBtn.textContent = "Back on track";
 }
 
-function updateEventLabel(payload) {
-  // Prefer the originating event type when available (used for visual pattern-breaks like DRIFT_PERSIST).
+function updatePrimaryButton(payload) {
+  // Default: Back is primary.
+  backBtn.classList.add("primary");
+  recoverBtn.classList.remove("primary");
+
   const raw = payload?.source_event_type || payload?.event_type || payload?.type || "";
   const eventType = String(raw).toUpperCase();
+  if (eventType === "DRIFT_PERSIST") {
+    // Persistent drift: make the recovery path the visually-primary action.
+    backBtn.classList.remove("primary");
+    recoverBtn.classList.add("primary");
+  }
+}
+
+function getEventType(payload) {
+  // Prefer the originating event type when available (used for visual pattern-breaks like DRIFT_PERSIST).
+  const raw = payload?.source_event_type || payload?.event_type || payload?.type || "";
+  return String(raw).toUpperCase();
+}
+
+function updateEventLabel(payload) {
+  const eventType = getEventType(payload);
   overlay.dataset.eventType = eventType;
 
   if (!eventType) {
@@ -53,6 +72,24 @@ function updateEventLabel(payload) {
   setText(eventLabel, eventType.replaceAll("_", " "));
 }
 
+function updatePrimaryAction(payload) {
+  const eventType = getEventType(payload);
+
+  // Default: "Back on track" is the primary, low-friction action.
+  backBtn.classList.add("primary");
+  recoverBtn.classList.remove("primary");
+  recoverBtn.textContent = "Recover schedule";
+  if (enterHint) setText(enterHint, "Enter: Back on track");
+
+  // For persistent drift, prioritize an explicit recovery action (Option B actionable overlay).
+  if (eventType === "DRIFT_PERSIST") {
+    backBtn.classList.remove("primary");
+    recoverBtn.classList.add("primary");
+    recoverBtn.textContent = "Recover now";
+    if (enterHint) setText(enterHint, "Enter: Recover now");
+  }
+}
+
 function resetSnooze() {
   snooze.classList.add("hidden");
 }
@@ -62,6 +99,26 @@ function resetAlignInput() {
   alignInput.classList.add("hidden");
 }
 
+function focusDefaultControl(payload) {
+  // Keep keyboard flow safe + predictable: focus the primary control.
+  // - If we're in align mode, focus the text input so typing is immediate.
+  // - Otherwise, focus the primary button so Enter activates that control (and bypasses the global Enter handler).
+  const eventType = getEventType(payload);
+  const isAlign = payload?.choices && Array.isArray(payload.choices);
+
+  const el = isAlign ? alignText : eventType === "DRIFT_PERSIST" ? recoverBtn : backBtn;
+  if (!el || typeof el.focus !== "function") return;
+
+  // Defer until after layout so focus-visible rings render consistently.
+  requestAnimationFrame(() => {
+    try {
+      el.focus({ preventScroll: true });
+    } catch {
+      el.focus();
+    }
+  });
+}
+
 function showOverlay(payload) {
   overlay.classList.remove("hidden");
   resetSnooze();
@@ -69,8 +126,23 @@ function showOverlay(payload) {
   updateEventLabel(payload);
   updatePrimaryLabel(payload);
 
+  // Pattern-break UX: when drift persists, make the recovery path the obvious next step.
+  const isPersist = overlay.dataset.eventType === "DRIFT_PERSIST";
+  if (isPersist && (payload.level || "B") === "B") {
+    backBtn.classList.remove("primary");
+    recoverBtn.classList.add("primary");
+    setText(enterHint, "Enter: Recover schedule");
+  } else {
+    recoverBtn.classList.remove("primary");
+    backBtn.classList.add("primary");
+    setText(enterHint, "Enter: Back on track");
+  }
+  updatePrimaryButton(payload);
+  updatePrimaryAction(payload);
+
   if (payload.choices && Array.isArray(payload.choices)) {
     overlay.dataset.mode = "align";
+    if (enterHint) setText(enterHint, "Enter: Submit");
   } else {
     overlay.dataset.mode = "";
   }
@@ -107,6 +179,8 @@ function showOverlay(payload) {
   overlay.dataset.level = payload.level || "B";
   currentPayload = payload;
   shownAt = Date.now();
+
+  focusDefaultControl(payload);
 }
 
 function sendAction(action) {
@@ -161,11 +235,16 @@ window.overlayAPI.onPause(() => {
 });
 
 window.addEventListener("keydown", (event) => {
-  // Don't treat Enter as "Back on track" while the user is typing or interacting with a control.
+  // Don't treat Enter as a global action while the user is typing or interacting with a control.
   if (event.key === "Enter") {
-    const ignoreEnter = window.overlayUtils?.shouldIgnoreGlobalEnter?.(event.target);
+    const ignoreEnter = window.overlayUtils?.shouldIgnoreGlobalEnter?.(event.target, overlay?.dataset?.mode);
     if (!ignoreEnter) {
-      sendAction({ action: "back_on_track" });
+      const eventType = getEventType(currentPayload);
+      if (eventType === "DRIFT_PERSIST") {
+        sendAction({ action: "recover" });
+      } else {
+        sendAction({ action: "back_on_track" });
+      }
     }
   }
   if (event.key === "Escape") {

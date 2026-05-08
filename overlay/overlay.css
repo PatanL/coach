@@ -30,25 +30,9 @@ html, body {
   backdrop-filter: blur(8px);
 }
 
-/* Visual pattern-break when drift persists: stronger edge + subtle shake pulse. */
-#overlay[data-event-type="DRIFT_PERSIST"] .card {
-  border-color: rgba(241, 108, 91, 0.55);
-  box-shadow: 0 22px 80px rgba(241, 108, 91, 0.12), 0 18px 60px rgba(0, 0, 0, 0.55);
-  animation: driftPersistPulse 900ms ease-in-out 1;
-}
+/* (moved below) */
 
-#overlay[data-event-type="DRIFT_PERSIST"] .label {
-  color: #ffb24a;
-}
-
-@keyframes driftPersistPulse {
-  0% { transform: translateX(0); }
-  18% { transform: translateX(-6px); }
-  36% { transform: translateX(6px); }
-  54% { transform: translateX(-4px); }
-  72% { transform: translateX(4px); }
-  100% { transform: translateX(0); }
-}
+/* (see DRIFT_PERSIST pattern-break styles near the bottom of this file) */
 
 #overlay[data-level="A"] .card {
   width: 320px;
@@ -193,6 +177,15 @@ button.primary:hover {
   background: #ff7a69;
 }
 
+button:focus-visible {
+  outline: 2px solid rgba(255, 206, 61, 0.85);
+  outline-offset: 2px;
+}
+
+button.primary:focus-visible {
+  outline-color: rgba(255, 73, 167, 0.85);
+}
+
 .snooze {
   margin-bottom: 12px;
 }
@@ -265,4 +258,10 @@ button.primary:hover {
 #overlay[data-event-type="DRIFT_PERSIST"] .label {
   color: #ff49a7;
   text-shadow: 0 0 10px rgba(255, 73, 167, 0.35);
+}
+
+#overlay[data-event-type="DRIFT_PERSIST"] #recoverBtn.primary {
+  box-shadow:
+    0 12px 26px rgba(0, 0, 0, 0.35),
+    0 0 0 2px rgba(255, 206, 61, 0.25);
 }

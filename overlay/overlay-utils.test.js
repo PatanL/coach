@@ -34,6 +34,11 @@ test("shouldIgnoreGlobalEnter: typing or clicking should block global Enter acti
   assert.equal(shouldIgnoreGlobalEnter({ tagName: "DIV" }), false);
 });
 
+test("shouldIgnoreGlobalEnter: align mode should always block global Enter", () => {
+  assert.equal(shouldIgnoreGlobalEnter({ tagName: "DIV" }, "align"), true);
+  assert.equal(shouldIgnoreGlobalEnter({ tagName: "INPUT" }, "align"), true);
+});
+
 test("shouldIgnoreGlobalEnter: child of button/link should still block global Enter", () => {
   const button = { tagName: "BUTTON" };
   const spanInsideButton = {
@@ -45,4 +50,13 @@ test("shouldIgnoreGlobalEnter: child of button/link should still block global En
     }
   };
   assert.equal(shouldIgnoreGlobalEnter(spanInsideButton), true);
+});
+
+test("shouldIgnoreGlobalEnter: closest() contenteditable should block global Enter", () => {
+  const editable = { tagName: "DIV", isContentEditable: true };
+  const child = {
+    tagName: "SPAN",
+    closest: () => editable
+  };
+  assert.equal(shouldIgnoreGlobalEnter(child), true);
 });
