@@ -34,6 +34,17 @@ test("shouldIgnoreGlobalEnter: typing or clicking should block global Enter acti
   assert.equal(shouldIgnoreGlobalEnter({ tagName: "DIV" }), false);
 });
 
+test("shouldIgnoreGlobalEnter: role=textbox/searchbox should block global Enter", () => {
+  assert.equal(
+    shouldIgnoreGlobalEnter({ tagName: "DIV", getAttribute: (k) => (k === "role" ? "textbox" : null) }),
+    true
+  );
+  assert.equal(
+    shouldIgnoreGlobalEnter({ tagName: "DIV", getAttribute: (k) => (k === "role" ? "searchbox" : null) }),
+    true
+  );
+});
+
 test("shouldIgnoreGlobalEnter: child of button/link should still block global Enter", () => {
   const button = { tagName: "BUTTON" };
   const spanInsideButton = {
