@@ -162,8 +162,11 @@ window.overlayAPI.onPause(() => {
 
 window.addEventListener("keydown", (event) => {
   // Don't treat Enter as "Back on track" while the user is typing or interacting with a control.
+  // Also: when the Snooze menu is open, Enter should never trigger a global action (it is easy to
+  // accidentally press Enter while deciding/keyboard-navigating).
   if (event.key === "Enter") {
-    const ignoreEnter = window.overlayUtils?.shouldIgnoreGlobalEnter?.(event.target);
+    const snoozeOpen = !snooze.classList.contains("hidden");
+    const ignoreEnter = snoozeOpen || window.overlayUtils?.shouldIgnoreGlobalEnter?.(event.target);
     if (!ignoreEnter) {
       sendAction({ action: "back_on_track" });
     }
