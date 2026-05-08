@@ -162,11 +162,10 @@ window.overlayAPI.onPause(() => {
 
 window.addEventListener("keydown", (event) => {
   // Don't treat Enter as "Back on track" while the user is typing or interacting with a control.
-  if (event.key === "Enter") {
-    const ignoreEnter = window.overlayUtils?.shouldIgnoreGlobalEnter?.(event.target);
-    if (!ignoreEnter) {
-      sendAction({ action: "back_on_track" });
-    }
+  // Also avoid accidental repeats/chords.
+  const shouldTrigger = window.overlayUtils?.shouldTriggerGlobalEnter?.(event);
+  if (shouldTrigger) {
+    sendAction({ action: "back_on_track" });
   }
   if (event.key === "Escape") {
     snooze.classList.remove("hidden");

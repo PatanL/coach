@@ -1,7 +1,7 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
 
-const { isTextInputTarget, isInteractiveTarget, shouldIgnoreGlobalEnter } = require("./overlay-utils");
+const { isTextInputTarget, isInteractiveTarget, shouldIgnoreGlobalEnter, shouldTriggerGlobalEnter } = require("./overlay-utils");
 
 test("isTextInputTarget: recognizes common typing targets", () => {
   assert.equal(isTextInputTarget({ tagName: "INPUT" }), true);
@@ -45,4 +45,33 @@ test("shouldIgnoreGlobalEnter: child of button/link should still block global En
     }
   };
   assert.equal(shouldIgnoreGlobalEnter(spanInsideButton), true);
+});
+
+test("shouldTriggerGlobalEnter: blocks repeats, IME composition, and modifier chords", () => {
+  assert.equal(
+    shouldTriggerGlobalEnter({ key: "Enter", repeat: true, target: { tagName: "DIV" } }),
+    false
+  );
+  assert.equal(
+    shouldTriggerGlobalEnter({ key: "Enter", isComposing: true, target: { tagName: "DIV" } }),
+    false
+  );
+  assert.equal(
+    shouldTriggerGlobalEnter({ key: "Enter", ctrlKey: true, target: { tagName: "DIV" } }),
+    false
+  );
+  assert.equal(
+    shouldTriggerGlobalEnter({ key: "Enter", metaKey: true, target: { tagName: "DIV" } }),
+    false
+  );
+  assert.equal(
+    shouldTriggerGlobalEnter({ key: "Enter", altKey: true, target: { tagName: "DIV" } }),
+    false
+  );
+});
+
+test("shouldTriggerGlobalEnter: triggers only when target is safe", () => {
+  assert.equal(shouldTriggerGlobalEnter({ key: "Enter", target: { tagName: "DIV" } }), true);
+  assert.equal(shouldTriggerGlobalEnter({ key: "Enter", target: { tagName: "INPUT" } }), false);
+  assert.equal(shouldTriggerGlobalEnter({ key: "Escape", target: { tagName: "DIV" } }), false);
 });
