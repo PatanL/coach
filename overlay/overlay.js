@@ -62,6 +62,19 @@ function resetAlignInput() {
   alignInput.classList.add("hidden");
 }
 
+function applyEventDefaults(payload, eventType) {
+  const out = { ...(payload || {}) };
+
+  // When drift persists, we want a strong motivational pattern-break even if the upstream payload
+  // is missing copy (Option B actionable overlay defaults).
+  if (eventType === "DRIFT_PERSIST") {
+    if (!out.headline) out.headline = "Interrupt the loop.";
+    if (!out.human_line) out.human_line = "Take 10 seconds. Choose: Recover now, or Snooze with a reason.";
+  }
+
+  return out;
+}
+
 function showOverlay(payload) {
   overlay.classList.remove("hidden");
   resetSnooze();
@@ -69,27 +82,30 @@ function showOverlay(payload) {
   updateEventLabel(payload);
   updatePrimaryLabel(payload);
 
-  if (payload.choices && Array.isArray(payload.choices)) {
+  const eventType = overlay.dataset.eventType || "";
+  const p = applyEventDefaults(payload, eventType);
+
+  if (p.choices && Array.isArray(p.choices)) {
     overlay.dataset.mode = "align";
   } else {
     overlay.dataset.mode = "";
   }
-  setText(blockName, payload.block_name || "");
-  setText(headline, payload.headline || "Reset.");
-  setText(humanLine, payload.human_line || "");
-  setText(diagnosis, payload.diagnosis || "");
-  setText(nextAction, payload.next_action || "");
+  setText(blockName, p.block_name || "");
+  setText(headline, p.headline || "Reset.");
+  setText(humanLine, p.human_line || "");
+  setText(diagnosis, p.diagnosis || "");
+  setText(nextAction, p.next_action || "");
 
-  if (payload.level === "C") {
+  if (p.level === "C") {
     miniPlan.classList.remove("hidden");
-    setText(miniPlan, payload.mini_plan || "");
+    setText(miniPlan, p.mini_plan || "");
   } else {
     miniPlan.classList.add("hidden");
   }
 
-  if (payload.choices && Array.isArray(payload.choices)) {
+  if (p.choices && Array.isArray(p.choices)) {
     choiceButtons.innerHTML = "";
-    payload.choices.forEach((choice) => {
+    p.choices.forEach((choice) => {
       const button = document.createElement("button");
       button.textContent = choice;
       button.addEventListener("click", () => {
@@ -104,8 +120,8 @@ function showOverlay(payload) {
     alignInput.classList.add("hidden");
   }
 
-  overlay.dataset.level = payload.level || "B";
-  currentPayload = payload;
+  overlay.dataset.level = p.level || "B";
+  currentPayload = p;
   shownAt = Date.now();
 }
 
