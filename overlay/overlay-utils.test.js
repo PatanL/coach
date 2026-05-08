@@ -52,6 +52,19 @@ test("shouldIgnoreGlobalEscape: typing targets should block global Escape", () =
   assert.equal(shouldIgnoreGlobalEscape({ tagName: "DIV", isContentEditable: true }), true);
 });
 
+test("shouldIgnoreGlobalEscape: child of typing target should still block global Escape", () => {
+  const textarea = { tagName: "TEXTAREA" };
+  const spanInsideTextarea = {
+    tagName: "SPAN",
+    closest: (selector) => {
+      // Return the textarea for any closest() selector query.
+      // We don't parse selectors here; we just validate that shouldIgnoreGlobalEscape uses closest.
+      return selector ? textarea : null;
+    }
+  };
+  assert.equal(shouldIgnoreGlobalEscape(spanInsideTextarea), true);
+});
+
 test("shouldIgnoreGlobalEscape: non-typing targets should not block global Escape", () => {
   assert.equal(shouldIgnoreGlobalEscape({ tagName: "BUTTON" }), false);
   assert.equal(shouldIgnoreGlobalEscape({ tagName: "DIV" }), false);
