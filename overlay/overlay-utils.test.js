@@ -54,6 +54,17 @@ test("shouldIgnoreGlobalEnter: child of button/link should still block global En
   assert.equal(shouldIgnoreGlobalEnter(spanInsideButton), true);
 });
 
+test("shouldIgnoreGlobalEnter: child of role=textbox/searchbox should block global Enter", () => {
+  const textbox = { tagName: "DIV", getAttribute: (k) => (k === "role" ? "textbox" : null) };
+  const searchbox = { tagName: "DIV", getAttribute: (k) => (k === "role" ? "searchbox" : null) };
+
+  const spanInTextbox = { tagName: "SPAN", closest: () => textbox };
+  const spanInSearchbox = { tagName: "SPAN", closest: () => searchbox };
+
+  assert.equal(shouldIgnoreGlobalEnter(spanInTextbox), true);
+  assert.equal(shouldIgnoreGlobalEnter(spanInSearchbox), true);
+});
+
 test("decideGlobalEnterAction: DRIFT_PERSIST defaults Enter to recover (pattern-break)", () => {
   assert.equal(decideGlobalEnterAction({ eventType: "DRIFT_PERSIST", target: { tagName: "DIV" } }), "recover");
   assert.equal(decideGlobalEnterAction({ eventType: "drift_persist", target: { tagName: "DIV" } }), "recover");
