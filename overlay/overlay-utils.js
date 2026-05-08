@@ -9,6 +9,11 @@
     if (!target) return false;
     const tag = String(target.tagName || "").toLowerCase();
     if (target.isContentEditable) return true;
+
+    // Some widgets are text inputs via ARIA roles (e.g. custom components).
+    const role = String(target.getAttribute?.("role") || "").toLowerCase();
+    if (role === "textbox" || role === "searchbox") return true;
+
     return tag === "input" || tag === "textarea" || tag === "select";
   }
 
@@ -28,7 +33,7 @@
     // element that should "own" the keyboard interaction.
     if (typeof target.closest === "function") {
       const hit = target.closest(
-        'input,textarea,select,[contenteditable="true"],button,a,[role="button"],[role="link"]'
+        'input,textarea,select,[contenteditable="true"],button,a,[role="button"],[role="link"],[role="textbox"],[role="searchbox"]'
       );
       if (hit) return hit;
     }
@@ -40,9 +45,26 @@
     return isTextInputTarget(t) || isInteractiveTarget(t);
   }
 
+  // Decide what the overlay's global Enter hotkey should do.
+  // Returns null when Enter should be ignored (e.g. typing in an input).
+  //
+  // For persistent drift, use a stronger recovery-oriented default action to
+  // create a motivational "pattern-break" (Option B actionable overlay).
+  function decideGlobalEnterAction({ eventType, target, isRepeat } = {}) {
+    // Holding down Enter shouldn't spam actions.
+    if (isRepeat) return null;
+    if (shouldIgnoreGlobalEnter(target)) return null;
+
+    const normalized = String(eventType || "").toUpperCase();
+    if (normalized === "DRIFT_PERSIST") return "recover";
+
+    return "back_on_track";
+  }
+
   return {
     isTextInputTarget,
     isInteractiveTarget,
-    shouldIgnoreGlobalEnter
+    shouldIgnoreGlobalEnter,
+    decideGlobalEnterAction
   };
 });

@@ -34,6 +34,12 @@ async function main() {
 
   await win.loadFile(htmlPath);
 
+  // Deterministic screenshots: disable animations/transitions.
+  await win.webContents.executeJavaScript(
+    "document.documentElement.classList.add('screenshot');",
+    true
+  );
+
   async function capture(name, payload) {
     // Give the DOM a moment to settle, then render the payload.
     await new Promise((r) => setTimeout(r, 50));
@@ -66,6 +72,15 @@ async function main() {
     ...common,
     event_type: "DRIFT_PERSIST",
     headline: "Interrupt the loop."
+  });
+
+  await capture("align_mode.png", {
+    ...common,
+    event_type: "DRIFT_START",
+    headline: "Name the mismatch.",
+    human_line: "Pick the closest or type your own.",
+    choices: ["Short break", "Task switch", "Unclear next step", "Other"],
+    question_id: "q_screenshot"
   });
 
   win.destroy();

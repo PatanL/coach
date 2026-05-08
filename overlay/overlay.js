@@ -17,6 +17,8 @@ const stuckBtn = document.getElementById("stuckBtn");
 const recoverBtn = document.getElementById("recoverBtn");
 const snoozeBtn = document.getElementById("snoozeBtn");
 
+const enterHint = document.getElementById("enterHint");
+
 let shownAt = null;
 let currentPayload = null;
 
@@ -69,10 +71,37 @@ function showOverlay(payload) {
   updateEventLabel(payload);
   updatePrimaryLabel(payload);
 
-  if (payload.choices && Array.isArray(payload.choices)) {
-    overlay.dataset.mode = "align";
-  } else {
-    overlay.dataset.mode = "";
+  const isAlignMode = payload.choices && Array.isArray(payload.choices);
+  overlay.dataset.mode = isAlignMode ? "align" : "";
+
+  // DRIFT_PERSIST is a stronger intervention moment: promote recovery as the default next step.
+  // BUT: if we're in align mode, don't focus hidden CTAs; focus the input instead.
+  const enterAction = window.overlayUtils?.decideGlobalEnterAction?.({
+    eventType: overlay?.dataset?.eventType,
+    target: null,
+    isRepeat: false
+  });
+
+  if (enterHint) {
+    enterHint.textContent = isAlignMode
+      ? "Enter: submit choice"
+      : enterAction === "recover"
+        ? "Enter: Recover schedule"
+        : "Enter: Back on track";
+  }
+
+  if (!isAlignMode) {
+    if (enterAction === "recover") {
+      recoverBtn.classList.add("primary");
+      backBtn.classList.remove("primary");
+      // Put focus on the recovery CTA so the user can simply hit Enter/Space to take the suggested action
+      // without risking a global hotkey misfire.
+      recoverBtn.focus?.();
+    } else {
+      recoverBtn.classList.remove("primary");
+      backBtn.classList.add("primary");
+      backBtn.focus?.();
+    }
   }
   setText(blockName, payload.block_name || "");
   setText(headline, payload.headline || "Reset.");
@@ -99,6 +128,9 @@ function showOverlay(payload) {
     });
     choiceButtons.classList.remove("hidden");
     alignInput.classList.remove("hidden");
+    // In align mode, the primary interaction is typing/selecting—not the global CTAs.
+    // Focus the text field so the user can immediately type.
+    alignText.focus?.();
   } else {
     choiceButtons.classList.add("hidden");
     alignInput.classList.add("hidden");
@@ -161,11 +193,19 @@ window.overlayAPI.onPause(() => {
 });
 
 window.addEventListener("keydown", (event) => {
-  // Don't treat Enter as "Back on track" while the user is typing or interacting with a control.
+  // Don't treat Enter as a global action while the user is typing or interacting with a control.
+  // For DRIFT_PERSIST, use Enter as a stronger recovery-oriented pattern-break.
   if (event.key === "Enter") {
-    const ignoreEnter = window.overlayUtils?.shouldIgnoreGlobalEnter?.(event.target);
-    if (!ignoreEnter) {
-      sendAction({ action: "back_on_track" });
+    const action = window.overlayUtils?.decideGlobalEnterAction?.({
+      eventType: overlay?.dataset?.eventType,
+      target: event.target,
+      isRepeat: event.repeat
+    });
+    if (action) {
+      // Avoid double-activation (e.g. default button/submit behavior) when Enter is used as a global hotkey.
+      event.preventDefault();
+      event.stopPropagation();
+      sendAction({ action });
     }
   }
   if (event.key === "Escape") {
