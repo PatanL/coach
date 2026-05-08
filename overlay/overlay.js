@@ -107,6 +107,22 @@ function showOverlay(payload) {
   overlay.dataset.level = payload.level || "B";
   currentPayload = payload;
   shownAt = Date.now();
+
+  // Focus safety + Option B overlay ergonomics:
+  // - If we're asking for an alignment choice, focus the text input so typing works immediately.
+  // - Otherwise focus the primary recovery action to reduce accidental "Enter" → Back on track.
+  // Use rAF to ensure elements are visible/enabled before focusing.
+  window.requestAnimationFrame(() => {
+    try {
+      if (payload.choices && Array.isArray(payload.choices)) {
+        alignText.focus();
+        return;
+      }
+      recoverBtn.focus();
+    } catch {
+      // best-effort focus only
+    }
+  });
 }
 
 function sendAction(action) {
