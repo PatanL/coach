@@ -9,6 +9,11 @@
     if (!target) return false;
     const tag = String(target.tagName || "").toLowerCase();
     if (target.isContentEditable) return true;
+
+    // Support ARIA-only inputs (e.g. custom components).
+    const role = String(target.getAttribute?.("role") || "").toLowerCase();
+    if (role === "textbox" || role === "combobox" || role === "searchbox") return true;
+
     return tag === "input" || tag === "textarea" || tag === "select";
   }
 
