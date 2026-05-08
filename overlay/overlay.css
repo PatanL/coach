@@ -16,17 +16,6 @@ html, body {
   background: rgba(6, 8, 10, 0.45);
 }
 
-/* Screenshot runner / harness: disable animations/transitions for deterministic pixel output. */
-#overlay[data-screenshot="true"],
-#overlay[data-screenshot="true"] *,
-#overlay[data-screenshot="1"],
-#overlay[data-screenshot="1"] *,
-#overlay[data-animations="off"],
-#overlay[data-animations="off"] * {
-  animation: none !important;
-  transition: none !important;
-}
-
 .hidden {
   display: none;
 }
@@ -40,7 +29,6 @@ html, body {
   border: 1px solid rgba(255, 255, 255, 0.08);
   backdrop-filter: blur(8px);
 }
-
 
 #overlay[data-level="A"] .card {
   width: 320px;
