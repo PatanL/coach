@@ -44,6 +44,13 @@ function updatePrimaryLabel(payload) {
 
 function updateEnterHint() {
   if (!enterHint) return;
+
+  // If we're in alignment mode (free-form input + submit), Enter is primarily a submit key.
+  if (overlay?.dataset?.mode === "align") {
+    enterHint.textContent = "Enter: Submit";
+    return;
+  }
+
   const label = backBtn?.textContent || "Back on track";
   enterHint.textContent = `Enter: ${label}`;
 }
@@ -83,14 +90,15 @@ function showOverlay(payload) {
   resetSnooze();
   resetAlignInput();
   updateEventLabel(payload);
-  updatePrimaryLabel(payload);
-  updateEnterHint();
 
   if (payload.choices && Array.isArray(payload.choices)) {
     overlay.dataset.mode = "align";
   } else {
     overlay.dataset.mode = "";
   }
+
+  updatePrimaryLabel(payload);
+  updateEnterHint();
   setText(blockName, payload.block_name || "");
   setText(headline, payload.headline || "Reset.");
   setText(humanLine, payload.human_line || "");
