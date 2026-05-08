@@ -17,6 +17,8 @@ const stuckBtn = document.getElementById("stuckBtn");
 const recoverBtn = document.getElementById("recoverBtn");
 const snoozeBtn = document.getElementById("snoozeBtn");
 
+const enterHint = document.getElementById("enterHint");
+
 let shownAt = null;
 let currentPayload = null;
 
@@ -68,6 +70,24 @@ function showOverlay(payload) {
   resetAlignInput();
   updateEventLabel(payload);
   updatePrimaryLabel(payload);
+
+  // DRIFT_PERSIST is a stronger intervention moment: promote recovery as the default next step.
+  const enterAction = window.overlayUtils?.decideGlobalEnterAction?.({
+    eventType: overlay?.dataset?.eventType,
+    target: null
+  });
+
+  if (enterHint) {
+    enterHint.textContent = enterAction === "recover" ? "Enter: Recover schedule" : "Enter: Back on track";
+  }
+
+  if (enterAction === "recover") {
+    recoverBtn.classList.add("primary");
+    backBtn.classList.remove("primary");
+  } else {
+    recoverBtn.classList.remove("primary");
+    backBtn.classList.add("primary");
+  }
 
   if (payload.choices && Array.isArray(payload.choices)) {
     overlay.dataset.mode = "align";

@@ -52,6 +52,21 @@ test("shouldIgnoreGlobalEnter: child of button/link should still block global En
   assert.equal(shouldIgnoreGlobalEnter(spanInsideButton), true);
 });
 
+test("decideGlobalEnterAction: DRIFT_PERSIST defaults Enter to recover (pattern-break)", () => {
+  assert.equal(decideGlobalEnterAction({ eventType: "DRIFT_PERSIST", target: { tagName: "DIV" } }), "recover");
+  assert.equal(decideGlobalEnterAction({ eventType: "drift_persist", target: { tagName: "DIV" } }), "recover");
+});
+
+test("decideGlobalEnterAction: ignores Enter while typing/clicking", () => {
+  assert.equal(decideGlobalEnterAction({ eventType: "DRIFT_PERSIST", target: { tagName: "INPUT" } }), null);
+  assert.equal(decideGlobalEnterAction({ eventType: "DRIFT_PERSIST", target: { tagName: "BUTTON" } }), null);
+});
+
+test("decideGlobalEnterAction: defaults Enter to back_on_track for other events", () => {
+  assert.equal(decideGlobalEnterAction({ eventType: "DRIFT_START", target: { tagName: "DIV" } }), "back_on_track");
+  assert.equal(decideGlobalEnterAction({ eventType: null, target: { tagName: "DIV" } }), "back_on_track");
+});
+
 test("decideGlobalEnterAction: default is back_on_track when safe", () => {
   assert.equal(decideGlobalEnterAction({ eventType: "DRIFT_START", target: { tagName: "DIV" } }), "back_on_track");
 });
