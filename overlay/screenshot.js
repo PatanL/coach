@@ -65,7 +65,9 @@ async function main() {
   await capture("drift_persist.png", {
     ...common,
     event_type: "DRIFT_PERSIST",
-    headline: "Interrupt the loop."
+    // Intentionally omit headline/human_line to exercise overlay defaults for DRIFT_PERSIST.
+    headline: "",
+    human_line: ""
   });
 
   win.destroy();
