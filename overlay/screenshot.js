@@ -34,6 +34,15 @@ async function main() {
 
   await win.loadFile(htmlPath);
 
+  // Make screenshots deterministic: freeze animations/transitions so we don't capture mid-pulse.
+  await win.webContents.insertCSS(`
+    *, *::before, *::after {
+      animation: none !important;
+      transition: none !important;
+      caret-color: transparent !important;
+    }
+  `);
+
   async function capture(name, payload) {
     // Put the overlay into a deterministic "screenshot mode" (disable CSS animations/transitions).
     await win.webContents.executeJavaScript(
