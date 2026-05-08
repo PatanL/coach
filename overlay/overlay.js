@@ -16,6 +16,7 @@ const backBtn = document.getElementById("backBtn");
 const stuckBtn = document.getElementById("stuckBtn");
 const recoverBtn = document.getElementById("recoverBtn");
 const snoozeBtn = document.getElementById("snoozeBtn");
+const enterHint = document.getElementById("enterHint");
 
 let shownAt = null;
 let currentPayload = null;
@@ -29,7 +30,22 @@ function updatePrimaryLabel(payload) {
     backBtn.textContent = "Habit completed";
     return;
   }
+
+  const raw = payload?.source_event_type || payload?.event_type || payload?.type || "";
+  const eventType = String(raw).toUpperCase();
+  if (eventType === "DRIFT_PERSIST") {
+    // Option B: actionable, motivational phrasing.
+    backBtn.textContent = "Reset now (30s)";
+    return;
+  }
+
   backBtn.textContent = "Back on track";
+}
+
+function updateEnterHint() {
+  if (!enterHint) return;
+  const label = backBtn?.textContent || "Back on track";
+  enterHint.textContent = `Enter: ${label}`;
 }
 
 function updateEventLabel(payload) {
@@ -68,6 +84,7 @@ function showOverlay(payload) {
   resetAlignInput();
   updateEventLabel(payload);
   updatePrimaryLabel(payload);
+  updateEnterHint();
 
   if (payload.choices && Array.isArray(payload.choices)) {
     overlay.dataset.mode = "align";
