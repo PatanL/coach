@@ -9,6 +9,11 @@
     if (!target) return false;
     const tag = String(target.tagName || "").toLowerCase();
     if (target.isContentEditable) return true;
+
+    // Some UI libs use ARIA roles instead of native inputs.
+    const role = String(target.getAttribute?.("role") || "").toLowerCase();
+    if (role === "textbox" || role === "combobox" || role === "searchbox") return true;
+
     return tag === "input" || tag === "textarea" || tag === "select";
   }
 
