@@ -85,9 +85,13 @@ function showOverlay(payload) {
   if (enterAction === "recover") {
     recoverBtn.classList.add("primary");
     backBtn.classList.remove("primary");
+    // Put focus on the recovery CTA so the user can simply hit Enter/Space to take the suggested action
+    // without risking a global hotkey misfire.
+    recoverBtn.focus?.();
   } else {
     recoverBtn.classList.remove("primary");
     backBtn.classList.add("primary");
+    backBtn.focus?.();
   }
 
   if (payload.choices && Array.isArray(payload.choices)) {
