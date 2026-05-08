@@ -74,7 +74,8 @@ function showOverlay(payload) {
   // DRIFT_PERSIST is a stronger intervention moment: promote recovery as the default next step.
   const enterAction = window.overlayUtils?.decideGlobalEnterAction?.({
     eventType: overlay?.dataset?.eventType,
-    target: null
+    target: null,
+    isRepeat: false
   });
 
   if (enterHint) {
@@ -186,7 +187,8 @@ window.addEventListener("keydown", (event) => {
   if (event.key === "Enter") {
     const action = window.overlayUtils?.decideGlobalEnterAction?.({
       eventType: overlay?.dataset?.eventType,
-      target: event.target
+      target: event.target,
+      isRepeat: event.repeat
     });
     if (action) {
       // Avoid double-activation (e.g. default button/submit behavior) when Enter is used as a global hotkey.

@@ -62,6 +62,17 @@ test("decideGlobalEnterAction: ignores Enter while typing/clicking", () => {
   assert.equal(decideGlobalEnterAction({ eventType: "DRIFT_PERSIST", target: { tagName: "BUTTON" } }), null);
 });
 
+test("decideGlobalEnterAction: ignores key-repeat (prevents accidental spam)", () => {
+  assert.equal(
+    decideGlobalEnterAction({ eventType: "DRIFT_PERSIST", target: { tagName: "DIV" }, isRepeat: true }),
+    null
+  );
+  assert.equal(
+    decideGlobalEnterAction({ eventType: "DRIFT_START", target: { tagName: "DIV" }, isRepeat: true }),
+    null
+  );
+});
+
 test("decideGlobalEnterAction: defaults Enter to back_on_track for other events", () => {
   assert.equal(decideGlobalEnterAction({ eventType: "DRIFT_START", target: { tagName: "DIV" } }), "back_on_track");
   assert.equal(decideGlobalEnterAction({ eventType: null, target: { tagName: "DIV" } }), "back_on_track");

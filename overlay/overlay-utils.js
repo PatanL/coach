@@ -45,7 +45,9 @@
   //
   // For persistent drift, use a stronger recovery-oriented default action to
   // create a motivational "pattern-break" (Option B actionable overlay).
-  function decideGlobalEnterAction({ eventType, target } = {}) {
+  function decideGlobalEnterAction({ eventType, target, isRepeat } = {}) {
+    // Holding down Enter shouldn't spam actions.
+    if (isRepeat) return null;
     if (shouldIgnoreGlobalEnter(target)) return null;
 
     const normalized = String(eventType || "").toUpperCase();
