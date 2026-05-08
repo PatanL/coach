@@ -62,6 +62,22 @@ function resetAlignInput() {
   alignInput.classList.add("hidden");
 }
 
+function focusDefaultControl(payload) {
+  // Make overlay keyboard-safe: if the user hits Enter immediately after the overlay appears,
+  // it should activate a deliberate control, not the global "Back on track" shortcut.
+  const preferred = window.overlayUtils?.preferredDefaultFocus?.(payload) || "backBtn";
+
+  if (preferred === "alignText") {
+    alignText.focus();
+    return;
+  }
+  if (preferred === "recoverBtn") {
+    recoverBtn.focus();
+    return;
+  }
+  backBtn.focus();
+}
+
 function showOverlay(payload) {
   overlay.classList.remove("hidden");
   resetSnooze();
@@ -107,6 +123,9 @@ function showOverlay(payload) {
   overlay.dataset.level = payload.level || "B";
   currentPayload = payload;
   shownAt = Date.now();
+
+  // Focus after the DOM is updated.
+  focusDefaultControl(payload);
 }
 
 function sendAction(action) {

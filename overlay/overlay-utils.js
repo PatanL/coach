@@ -40,9 +40,21 @@
     return isTextInputTarget(t) || isInteractiveTarget(t);
   }
 
+  // Decide which control should get focus when the overlay appears.
+  // Keeping this pure makes it easy to unit test.
+  function preferredDefaultFocus(payload) {
+    const eventType = String(payload?.source_event_type || payload?.event_type || payload?.type || "").toUpperCase();
+    const hasChoices = payload?.choices && Array.isArray(payload.choices);
+
+    if (hasChoices) return "alignText";
+    if (eventType === "DRIFT_PERSIST") return "recoverBtn";
+    return "backBtn";
+  }
+
   return {
     isTextInputTarget,
     isInteractiveTarget,
-    shouldIgnoreGlobalEnter
+    shouldIgnoreGlobalEnter,
+    preferredDefaultFocus
   };
 });
