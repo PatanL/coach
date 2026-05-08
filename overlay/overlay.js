@@ -71,7 +71,11 @@ function showOverlay(payload) {
   updateEventLabel(payload);
   updatePrimaryLabel(payload);
 
+  const isAlignMode = payload.choices && Array.isArray(payload.choices);
+  overlay.dataset.mode = isAlignMode ? "align" : "";
+
   // DRIFT_PERSIST is a stronger intervention moment: promote recovery as the default next step.
+  // BUT: if we're in align mode, don't focus hidden CTAs; focus the input instead.
   const enterAction = window.overlayUtils?.decideGlobalEnterAction?.({
     eventType: overlay?.dataset?.eventType,
     target: null,
@@ -79,25 +83,25 @@ function showOverlay(payload) {
   });
 
   if (enterHint) {
-    enterHint.textContent = enterAction === "recover" ? "Enter: Recover schedule" : "Enter: Back on track";
+    enterHint.textContent = isAlignMode
+      ? "Enter: submit choice"
+      : enterAction === "recover"
+        ? "Enter: Recover schedule"
+        : "Enter: Back on track";
   }
 
-  if (enterAction === "recover") {
-    recoverBtn.classList.add("primary");
-    backBtn.classList.remove("primary");
-    // Put focus on the recovery CTA so the user can simply hit Enter/Space to take the suggested action
-    // without risking a global hotkey misfire.
-    recoverBtn.focus?.();
-  } else {
-    recoverBtn.classList.remove("primary");
-    backBtn.classList.add("primary");
-    backBtn.focus?.();
-  }
-
-  if (payload.choices && Array.isArray(payload.choices)) {
-    overlay.dataset.mode = "align";
-  } else {
-    overlay.dataset.mode = "";
+  if (!isAlignMode) {
+    if (enterAction === "recover") {
+      recoverBtn.classList.add("primary");
+      backBtn.classList.remove("primary");
+      // Put focus on the recovery CTA so the user can simply hit Enter/Space to take the suggested action
+      // without risking a global hotkey misfire.
+      recoverBtn.focus?.();
+    } else {
+      recoverBtn.classList.remove("primary");
+      backBtn.classList.add("primary");
+      backBtn.focus?.();
+    }
   }
   setText(blockName, payload.block_name || "");
   setText(headline, payload.headline || "Reset.");
@@ -124,6 +128,9 @@ function showOverlay(payload) {
     });
     choiceButtons.classList.remove("hidden");
     alignInput.classList.remove("hidden");
+    // In align mode, the primary interaction is typing/selecting—not the global CTAs.
+    // Focus the text field so the user can immediately type.
+    alignText.focus?.();
   } else {
     choiceButtons.classList.add("hidden");
     alignInput.classList.add("hidden");

@@ -74,6 +74,15 @@ async function main() {
     headline: "Interrupt the loop."
   });
 
+  await capture("align_mode.png", {
+    ...common,
+    event_type: "DRIFT_START",
+    headline: "Name the mismatch.",
+    human_line: "Pick the closest or type your own.",
+    choices: ["Short break", "Task switch", "Unclear next step", "Other"],
+    question_id: "q_screenshot"
+  });
+
   win.destroy();
   app.quit();
 }
