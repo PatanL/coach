@@ -34,13 +34,21 @@ async function main() {
 
   await win.loadFile(htmlPath);
 
+  // Ensure deterministic screenshots: no animations/transitions.
+  await win.webContents.insertCSS(`
+    *, *::before, *::after {
+      animation: none !important;
+      transition: none !important;
+    }
+  `);
+
   async function capture(name, payload) {
     // Give the DOM a moment to settle, then render the payload.
     await new Promise((r) => setTimeout(r, 50));
     win.webContents.send("overlay:show", payload);
 
-    // Allow any CSS animations to reach a stable frame.
-    await new Promise((r) => setTimeout(r, 250));
+    // Let layout/paint settle.
+    await new Promise((r) => setTimeout(r, 80));
 
     const image = await win.capturePage();
     fs.writeFileSync(path.join(OUT_DIR, name), image.toPNG());
@@ -65,6 +73,14 @@ async function main() {
   await capture("drift_persist.png", {
     ...common,
     event_type: "DRIFT_PERSIST",
+    headline: "Interrupt the loop."
+  });
+
+  await capture("drift_persist_pattern_break.png", {
+    ...common,
+    // Pattern-break should prefer the originating event type when provided.
+    source_event_type: "DRIFT_PERSIST",
+    event_type: "DRIFT_START",
     headline: "Interrupt the loop."
   });
 
