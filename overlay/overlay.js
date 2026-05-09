@@ -37,6 +37,7 @@ function updateEventLabel(payload) {
   const raw = payload?.source_event_type || payload?.event_type || payload?.type || "";
   const eventType = String(raw).toUpperCase();
   overlay.dataset.eventType = eventType;
+  return eventType;
 
   if (!eventType) {
     setText(eventLabel, "DRIFT");
@@ -66,7 +67,7 @@ function showOverlay(payload) {
   overlay.classList.remove("hidden");
   resetSnooze();
   resetAlignInput();
-  updateEventLabel(payload);
+  const eventType = updateEventLabel(payload);
   updatePrimaryLabel(payload);
 
   if (payload.choices && Array.isArray(payload.choices)) {
@@ -107,6 +108,19 @@ function showOverlay(payload) {
   overlay.dataset.level = payload.level || "B";
   currentPayload = payload;
   shownAt = Date.now();
+
+  // Pattern-break: when drift persists, default keyboard focus to "Recover" to nudge a concrete next step.
+  // Keep this lightweight: only change focus when nothing is currently focused inside the overlay.
+  try {
+    const active = document.activeElement;
+    const alreadyInside = active && overlay.contains(active);
+    if (!alreadyInside) {
+      const primary = window.overlayUtils?.getInitialPrimaryAction?.(eventType) || "back";
+      (primary === "recover" ? recoverBtn : backBtn)?.focus?.();
+    }
+  } catch (_) {
+    // best-effort only
+  }
 }
 
 function sendAction(action) {
