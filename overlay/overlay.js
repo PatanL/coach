@@ -62,6 +62,17 @@ function resetAlignInput() {
   alignInput.classList.add("hidden");
 }
 
+function isDriftPersist() {
+  return String(overlay?.dataset?.eventType || "").toUpperCase() === "DRIFT_PERSIST";
+}
+
+function focusDefaultAction() {
+  // Pattern-break for DRIFT_PERSIST: default to the more explicit recovery action.
+  // Otherwise keep the lightweight "Back on track" as the fast-path.
+  const target = isDriftPersist() ? recoverBtn : backBtn;
+  if (typeof target?.focus === "function") target.focus();
+}
+
 function showOverlay(payload) {
   overlay.classList.remove("hidden");
   resetSnooze();
@@ -107,6 +118,9 @@ function showOverlay(payload) {
   overlay.dataset.level = payload.level || "B";
   currentPayload = payload;
   shownAt = Date.now();
+
+  // Ensure a deterministic, safe keyboard default.
+  focusDefaultAction();
 }
 
 function sendAction(action) {
@@ -161,11 +175,13 @@ window.overlayAPI.onPause(() => {
 });
 
 window.addEventListener("keydown", (event) => {
-  // Don't treat Enter as "Back on track" while the user is typing or interacting with a control.
+  // Don't treat Enter as a global default while the user is typing or interacting with a control.
   if (event.key === "Enter") {
     const ignoreEnter = window.overlayUtils?.shouldIgnoreGlobalEnter?.(event.target);
     if (!ignoreEnter) {
-      sendAction({ action: "back_on_track" });
+      // Pattern-break for DRIFT_PERSIST: Enter maps to a more explicit recovery action.
+      const action = isDriftPersist() ? "recover" : "back_on_track";
+      sendAction({ action });
     }
   }
   if (event.key === "Escape") {
