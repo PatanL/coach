@@ -69,6 +69,10 @@ function showOverlay(payload) {
   updateEventLabel(payload);
   updatePrimaryLabel(payload);
 
+  // Screenshot runs should be fully deterministic: disable CSS animations/transitions
+  // (especially the DRIFT_PERSIST pulse) so captured frames don't drift.
+  overlay.dataset.screenshot = payload?.cmd_id === "screenshot" ? "1" : "";
+
   if (payload.choices && Array.isArray(payload.choices)) {
     overlay.dataset.mode = "align";
   } else {
