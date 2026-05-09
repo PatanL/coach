@@ -40,9 +40,19 @@
     return isTextInputTarget(t) || isInteractiveTarget(t);
   }
 
+  // Centralize overlay hotkey intent so UX changes stay testable.
+  // Returns: null (ignored) | "back_on_track" | "recover"
+  function resolveGlobalEnterAction(eventType, target) {
+    if (shouldIgnoreGlobalEnter(target)) return null;
+    const type = String(eventType || "").toUpperCase();
+    if (type === "DRIFT_PERSIST") return "recover";
+    return "back_on_track";
+  }
+
   return {
     isTextInputTarget,
     isInteractiveTarget,
-    shouldIgnoreGlobalEnter
+    shouldIgnoreGlobalEnter,
+    resolveGlobalEnterAction
   };
 });
