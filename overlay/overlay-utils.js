@@ -9,6 +9,10 @@
     if (!target) return false;
     const tag = String(target.tagName || "").toLowerCase();
     if (target.isContentEditable) return true;
+    const role = String(target.getAttribute?.("role") || "").toLowerCase();
+    // Some UI toolkits (and future overlay tweaks) may use a div with role="textbox".
+    // Treat it as typing context so global Enter doesn't trigger overlay actions.
+    if (role === "textbox") return true;
     return tag === "input" || tag === "textarea" || tag === "select";
   }
 
