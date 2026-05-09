@@ -34,10 +34,25 @@ async function main() {
 
   await win.loadFile(htmlPath);
 
-  async function capture(name, payload) {
+  // Mark DOM as running under the deterministic screenshot harness.
+  // Used to make focus states reliable across platforms.
+  await win.webContents.executeJavaScript(
+    "document.documentElement.dataset.screenshot = '1';"
+  );
+
+  async function capture(name, payload, opts = {}) {
     // Give the DOM a moment to settle, then render the payload.
     await new Promise((r) => setTimeout(r, 50));
     win.webContents.send("overlay:show", payload);
+
+    // Let overlay.js run its own focus logic.
+    await new Promise((r) => setTimeout(r, 40));
+
+    if (opts.focusRecover) {
+      await win.webContents.executeJavaScript(
+        "document.getElementById('recoverBtn')?.focus();"
+      );
+    }
 
     // Allow any CSS animations to reach a stable frame.
     await new Promise((r) => setTimeout(r, 250));
@@ -67,6 +82,17 @@ async function main() {
     event_type: "DRIFT_PERSIST",
     headline: "Interrupt the loop."
   });
+
+  // Capture a deterministic "pattern-break" state with the biased recovery focus ring visible.
+  await capture(
+    "drift_persist_pattern_break.png",
+    {
+      ...common,
+      event_type: "DRIFT_PERSIST",
+      headline: "Interrupt the loop."
+    },
+    { focusRecover: true }
+  );
 
   win.destroy();
   app.quit();
