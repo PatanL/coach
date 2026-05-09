@@ -66,6 +66,8 @@ function showOverlay(payload) {
   overlay.classList.remove("hidden");
   resetSnooze();
   resetAlignInput();
+  // Deterministic mode for screenshot generation (disable motion/transition).
+  overlay.dataset.screenshot = payload?.cmd_id === "screenshot" ? "true" : "";
   updateEventLabel(payload);
   updatePrimaryLabel(payload);
 

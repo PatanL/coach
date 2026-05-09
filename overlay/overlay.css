@@ -16,6 +16,14 @@ html, body {
   background: rgba(6, 8, 10, 0.45);
 }
 
+/* Deterministic screenshots: disable motion/transition so images are stable in CI + reviews. */
+#overlay[data-screenshot="true"] *,
+#overlay[data-screenshot="true"] *::before,
+#overlay[data-screenshot="true"] *::after {
+  animation: none !important;
+  transition: none !important;
+}
+
 .hidden {
   display: none;
 }
