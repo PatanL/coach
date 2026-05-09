@@ -34,13 +34,27 @@ async function main() {
 
   await win.loadFile(htmlPath);
 
+  // Make screenshots deterministic: freeze animations/transitions so we don't capture mid-pulse.
+  await win.webContents.insertCSS(`
+    *, *::before, *::after {
+      animation: none !important;
+      transition: none !important;
+      caret-color: transparent !important;
+    }
+  `);
+
   async function capture(name, payload) {
+    // Put the overlay into a deterministic "screenshot mode" (disable CSS animations/transitions).
+    await win.webContents.executeJavaScript(
+      'document.documentElement.dataset.screenshot = "true";'
+    );
+
     // Give the DOM a moment to settle, then render the payload.
     await new Promise((r) => setTimeout(r, 50));
     win.webContents.send("overlay:show", payload);
 
-    // Allow any CSS animations to reach a stable frame.
-    await new Promise((r) => setTimeout(r, 250));
+    // Allow layout to settle.
+    await new Promise((r) => setTimeout(r, 50));
 
     const image = await win.capturePage();
     fs.writeFileSync(path.join(OUT_DIR, name), image.toPNG());

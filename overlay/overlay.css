@@ -224,6 +224,14 @@ button.primary:hover {
   color: rgba(246, 244, 239, 0.5);
 }
 
+/* Deterministic rendering for test/screenshot runs */
+html[data-screenshot="true"] *,
+html[data-screenshot="true"] *::before,
+html[data-screenshot="true"] *::after {
+  animation: none !important;
+  transition: none !important;
+}
+
 /* Visual pattern-break for persistent drift: subtle but unmistakable */
 @keyframes driftPersistPulse {
   0% {
