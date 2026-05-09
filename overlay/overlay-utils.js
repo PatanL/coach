@@ -8,7 +8,17 @@
   function isTextInputTarget(target) {
     if (!target) return false;
     const tag = String(target.tagName || "").toLowerCase();
+
+    // Contenteditable is a common place for Enter to have local meaning; treat it like an input.
+    // Some DOMs expose it via `isContentEditable`, others only via the attribute.
     if (target.isContentEditable) return true;
+
+    const rawAttr = target.getAttribute?.("contenteditable");
+    if (rawAttr !== undefined && rawAttr !== null) {
+      const normalized = String(rawAttr).toLowerCase();
+      if (normalized !== "false") return true;
+    }
+
     return tag === "input" || tag === "textarea" || tag === "select";
   }
 
@@ -28,7 +38,7 @@
     // element that should "own" the keyboard interaction.
     if (typeof target.closest === "function") {
       const hit = target.closest(
-        'input,textarea,select,[contenteditable="true"],button,a,[role="button"],[role="link"]'
+        'input,textarea,select,[contenteditable],button,a,[role="button"],[role="link"]'
       );
       if (hit) return hit;
     }
