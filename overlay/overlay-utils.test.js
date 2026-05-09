@@ -10,6 +10,21 @@ test("isTextInputTarget: recognizes common typing targets", () => {
   assert.equal(isTextInputTarget({ tagName: "DIV", isContentEditable: true }), true);
 });
 
+test("isTextInputTarget: recognizes contenteditable via attribute (not just isContentEditable)", () => {
+  assert.equal(
+    isTextInputTarget({ tagName: "DIV", getAttribute: (k) => (k === "contenteditable" ? "" : null) }),
+    true
+  );
+  assert.equal(
+    isTextInputTarget({ tagName: "DIV", getAttribute: (k) => (k === "contenteditable" ? "plaintext-only" : null) }),
+    true
+  );
+  assert.equal(
+    isTextInputTarget({ tagName: "DIV", getAttribute: (k) => (k === "contenteditable" ? "false" : null) }),
+    false
+  );
+});
+
 test("isTextInputTarget: ignores non-input targets", () => {
   assert.equal(isTextInputTarget({ tagName: "BUTTON" }), false);
   assert.equal(isTextInputTarget({ tagName: "DIV" }), false);
@@ -45,4 +60,16 @@ test("shouldIgnoreGlobalEnter: child of button/link should still block global En
     }
   };
   assert.equal(shouldIgnoreGlobalEnter(spanInsideButton), true);
+});
+
+test("shouldIgnoreGlobalEnter: child of contenteditable should still block global Enter", () => {
+  const editable = { tagName: "DIV", getAttribute: (k) => (k === "contenteditable" ? "" : null) };
+  const child = {
+    tagName: "SPAN",
+    closest: (selector) => {
+      // Emulate walking up from a nested span into a contenteditable container.
+      return selector ? editable : null;
+    }
+  };
+  assert.equal(shouldIgnoreGlobalEnter(child), true);
 });
