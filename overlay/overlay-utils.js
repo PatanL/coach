@@ -21,11 +21,6 @@
     if (target.isContentEditable) return true;
 
     if (tag === "input" || tag === "textarea" || tag === "select") return true;
-
-    // Some UIs use non-input elements with ARIA roles for text entry.
-    const role = String(target.getAttribute?.("role") || "").toLowerCase();
-    if (role === "textbox" || role === "combobox") return true;
-
     return false;
   }
 
