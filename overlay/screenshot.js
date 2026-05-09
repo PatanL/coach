@@ -59,13 +59,15 @@ async function main() {
 
   await capture("drift_start.png", {
     ...common,
-    event_type: "DRIFT_START"
+    event_type: "DRIFT_START",
+    screenshot_mode: true
   });
 
   await capture("drift_persist.png", {
     ...common,
     event_type: "DRIFT_PERSIST",
-    headline: "Interrupt the loop."
+    headline: "Interrupt the loop.",
+    screenshot_mode: true
   });
 
   win.destroy();
