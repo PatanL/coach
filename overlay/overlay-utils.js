@@ -40,9 +40,26 @@
     return isTextInputTarget(t) || isInteractiveTarget(t);
   }
 
+  // Decide where focus should land when the overlay appears.
+  // This is part of the "Option B" actionable overlay: make the safest next action the default.
+  function getDefaultFocusId({ eventType, mode } = {}) {
+    const e = String(eventType || "").toUpperCase();
+    const m = String(mode || "");
+
+    // In align mode, user intent is to type/select.
+    if (m === "align") return "alignText";
+
+    // DRIFT_PERSIST should feel like a pattern-break, with an immediate recovery affordance.
+    if (e === "DRIFT_PERSIST") return "recoverBtn";
+
+    // Default: allow quick confirmation without accidental global Enter.
+    return "backBtn";
+  }
+
   return {
     isTextInputTarget,
     isInteractiveTarget,
-    shouldIgnoreGlobalEnter
+    shouldIgnoreGlobalEnter,
+    getDefaultFocusId
   };
 });
