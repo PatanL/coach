@@ -9,6 +9,11 @@
     if (!target) return false;
     const tag = String(target.tagName || "").toLowerCase();
     if (target.isContentEditable) return true;
+
+    // Support custom widgets that behave like inputs.
+    const role = String(target.getAttribute?.("role") || "").toLowerCase();
+    if (role === "textbox") return true;
+
     return tag === "input" || tag === "textarea" || tag === "select";
   }
 
