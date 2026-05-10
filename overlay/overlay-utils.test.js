@@ -10,6 +10,16 @@ test("isTextInputTarget: recognizes common typing targets", () => {
   assert.equal(isTextInputTarget({ tagName: "DIV", isContentEditable: true }), true);
 });
 
+test("isTextInputTarget: treats contenteditable=true attribute as typing target", () => {
+  assert.equal(
+    isTextInputTarget({
+      tagName: "DIV",
+      getAttribute: (k) => (k === "contenteditable" ? "true" : null)
+    }),
+    true
+  );
+});
+
 test("isTextInputTarget: ignores non-input targets", () => {
   assert.equal(isTextInputTarget({ tagName: "BUTTON" }), false);
   assert.equal(isTextInputTarget({ tagName: "DIV" }), false);

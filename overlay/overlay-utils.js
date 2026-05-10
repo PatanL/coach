@@ -8,7 +8,12 @@
   function isTextInputTarget(target) {
     if (!target) return false;
     const tag = String(target.tagName || "").toLowerCase();
-    if (target.isContentEditable) return true;
+
+    // Some environments (tests, synthetic nodes) may not set isContentEditable even when
+    // the attribute is present. Treat explicit contenteditable=true as a typing target.
+    const contentEditableAttr = String(target.getAttribute?.("contenteditable") || "").toLowerCase();
+    if (target.isContentEditable || contentEditableAttr === "true") return true;
+
     return tag === "input" || tag === "textarea" || tag === "select";
   }
 
