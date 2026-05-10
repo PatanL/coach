@@ -34,6 +34,16 @@ async function main() {
 
   await win.loadFile(htmlPath);
 
+  // Deterministic screenshots: disable animations/transitions that can capture mid-pulse frames.
+  // (We prefer this over timing-based waits, since DRIFT_PERSIST uses multi-iteration keyframes.)
+  await win.webContents.insertCSS(`
+    *, *::before, *::after {
+      animation: none !important;
+      transition: none !important;
+      caret-color: transparent !important;
+    }
+  `);
+
   // Make screenshots deterministic: disable CSS animations/transitions during capture.
   await win.webContents.insertCSS('* { animation: none !important; transition: none !important; }');
 
@@ -68,6 +78,14 @@ async function main() {
   await capture("drift_persist.png", {
     ...common,
     event_type: "DRIFT_PERSIST",
+    headline: "Interrupt the loop."
+  });
+
+  await capture("drift_persist_pattern_break.png", {
+    ...common,
+    // Prefer source_event_type to exercise the UI path that sets overlay.dataset.eventType.
+    event_type: "DRIFT_START",
+    source_event_type: "DRIFT_PERSIST",
     headline: "Interrupt the loop."
   });
 
