@@ -224,6 +224,12 @@ button.primary:hover {
   color: rgba(246, 244, 239, 0.5);
 }
 
+/* Screenshot mode: keep captures deterministic (no animations/transitions). */
+html[data-screenshot="true"] * {
+  animation: none !important;
+  transition: none !important;
+}
+
 /* Visual pattern-break: DRIFT_PERSIST should feel unmistakably different.
    Keep it deterministic (no animations) so screenshot snapshots are stable. */
 #overlay[data-event-type="DRIFT_PERSIST"] {
