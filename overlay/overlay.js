@@ -6,6 +6,7 @@ const humanLine = document.getElementById("humanLine");
 const diagnosis = document.getElementById("diagnosis");
 const nextAction = document.getElementById("nextAction");
 const snooze = document.getElementById("snoozeReason");
+const enterHint = document.getElementById("enterHint");
 const miniPlan = document.getElementById("miniPlan");
 const choiceButtons = document.getElementById("choiceButtons");
 const alignInput = document.getElementById("alignInput");
@@ -69,10 +70,17 @@ function showOverlay(payload) {
   updateEventLabel(payload);
   updatePrimaryLabel(payload);
 
-  if (payload.choices && Array.isArray(payload.choices)) {
+  const inAlignMode = payload.choices && Array.isArray(payload.choices);
+  if (inAlignMode) {
     overlay.dataset.mode = "align";
   } else {
     overlay.dataset.mode = "";
+  }
+
+  // Keep the footer hint accurate: Enter is a global "Back on track" shortcut,
+  // but it becomes "submit" while the user is answering an align question.
+  if (enterHint) {
+    enterHint.textContent = inAlignMode ? "Enter: Submit" : "Enter: Back on track";
   }
   setText(blockName, payload.block_name || "");
   setText(headline, payload.headline || "Reset.");
