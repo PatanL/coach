@@ -34,6 +34,15 @@ async function main() {
 
   await win.loadFile(htmlPath);
 
+  // Deterministic screenshots: disable animations/transitions so captures don't depend on timing.
+  await win.webContents.insertCSS(`
+    *, *::before, *::after {
+      animation: none !important;
+      transition: none !important;
+      caret-color: transparent !important;
+    }
+  `);
+
   // Make screenshots deterministic: disable CSS animations/transitions that can land on different frames.
   // (The overlay still animates in production; this only affects the screenshot runner.)
   await win.webContents.insertCSS(`
