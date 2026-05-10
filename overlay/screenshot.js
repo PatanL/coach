@@ -74,6 +74,13 @@ async function main() {
     headline: "Interrupt the loop."
   });
 
+  // Explicit pattern-break snapshot (kept separate so regressions are obvious in review).
+  await capture("drift_persist_pattern_break.png", {
+    ...common,
+    event_type: "DRIFT_PERSIST",
+    headline: "Pattern-break."
+  });
+
   win.destroy();
   app.quit();
 }
