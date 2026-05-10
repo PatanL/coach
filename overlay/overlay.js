@@ -71,6 +71,12 @@ function resetAlignInput() {
 
 function showOverlay(payload) {
   overlay.classList.remove("hidden");
+  // Screenshot harness: disable animations/transitions for deterministic renders.
+  if (payload?.cmd_id === "screenshot") {
+    overlay.dataset.screenshot = "true";
+  } else {
+    delete overlay.dataset.screenshot;
+  }
   resetSnooze();
   resetAlignInput();
   updateEventLabel(payload);
