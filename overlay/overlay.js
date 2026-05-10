@@ -32,6 +32,36 @@ function updatePrimaryLabel(payload) {
   backBtn.textContent = "Back on track";
 }
 
+function setPrimaryAction(eventType) {
+  backBtn.classList.remove("primary");
+  recoverBtn.classList.remove("primary");
+
+  // On persistent drift, bias toward schedule recovery as the most actionable next step.
+  if (eventType === "DRIFT_PERSIST") {
+    recoverBtn.classList.add("primary");
+    return;
+  }
+
+  backBtn.classList.add("primary");
+}
+
+function focusPrimaryControl(eventType, mode) {
+  // Defer focus until after DOM updates/styles settle.
+  window.requestAnimationFrame(() => {
+    if (mode === "align") {
+      alignText.focus();
+      return;
+    }
+
+    if (eventType === "DRIFT_PERSIST") {
+      recoverBtn.focus();
+      return;
+    }
+
+    backBtn.focus();
+  });
+}
+
 function updateEventLabel(payload) {
   // Prefer the originating event type when available (used for visual pattern-breaks like DRIFT_PERSIST).
   const raw = payload?.source_event_type || payload?.event_type || payload?.type || "";
@@ -74,6 +104,9 @@ function showOverlay(payload) {
   } else {
     overlay.dataset.mode = "";
   }
+
+  const eventType = String(overlay.dataset.eventType || "").toUpperCase();
+  setPrimaryAction(eventType);
   setText(blockName, payload.block_name || "");
   setText(headline, payload.headline || "Reset.");
   setText(humanLine, payload.human_line || "");
@@ -107,6 +140,8 @@ function showOverlay(payload) {
   overlay.dataset.level = payload.level || "B";
   currentPayload = payload;
   shownAt = Date.now();
+
+  focusPrimaryControl(eventType, overlay.dataset.mode);
 }
 
 function sendAction(action) {
