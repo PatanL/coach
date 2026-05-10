@@ -105,6 +105,29 @@ function showOverlay(payload) {
   }
 
   overlay.dataset.level = payload.level || "B";
+
+  // Deterministic default focus:
+  // - If we're asking for alignment input, focus the text box.
+  // - For DRIFT_PERSIST, pattern-break by making the recovery path the default.
+  // - Otherwise, keep "Back on track" as the default action.
+  const eventType = String(overlay.dataset.eventType || "").toUpperCase();
+  const shouldFocusAlign = payload.choices && Array.isArray(payload.choices);
+  requestAnimationFrame(() => {
+    try {
+      if (shouldFocusAlign) {
+        alignText.focus();
+        return;
+      }
+      if (eventType === "DRIFT_PERSIST") {
+        recoverBtn.focus();
+        return;
+      }
+      backBtn.focus();
+    } catch (_) {
+      // best-effort
+    }
+  });
+
   currentPayload = payload;
   shownAt = Date.now();
 }
