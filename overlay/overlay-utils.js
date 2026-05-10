@@ -40,9 +40,19 @@
     return isTextInputTarget(t) || isInteractiveTarget(t);
   }
 
+  // Decide what the overlay's *global* Enter shortcut should do.
+  // Default is a quick "Back on track"; for DRIFT_PERSIST we bias toward the more
+  // actionable recovery step.
+  function getGlobalEnterAction(eventType) {
+    const type = String(eventType || "").toUpperCase();
+    if (type === "DRIFT_PERSIST") return "recover";
+    return "back_on_track";
+  }
+
   return {
     isTextInputTarget,
     isInteractiveTarget,
-    shouldIgnoreGlobalEnter
+    shouldIgnoreGlobalEnter,
+    getGlobalEnterAction
   };
 });
