@@ -40,17 +40,18 @@ function updateEventLabel(payload) {
 
   if (!eventType) {
     setText(eventLabel, "DRIFT");
-    return;
+    return "";
   }
   if (eventType === "DRIFT_PERSIST") {
     setText(eventLabel, "DRIFT — PERSIST");
-    return;
+    return eventType;
   }
   if (eventType.startsWith("DRIFT")) {
     setText(eventLabel, "DRIFT");
-    return;
+    return eventType;
   }
   setText(eventLabel, eventType.replaceAll("_", " "));
+  return eventType;
 }
 
 function resetSnooze() {
@@ -66,7 +67,7 @@ function showOverlay(payload) {
   overlay.classList.remove("hidden");
   resetSnooze();
   resetAlignInput();
-  updateEventLabel(payload);
+  const eventType = updateEventLabel(payload);
   updatePrimaryLabel(payload);
 
   if (payload.choices && Array.isArray(payload.choices)) {
@@ -105,6 +106,16 @@ function showOverlay(payload) {
   }
 
   overlay.dataset.level = payload.level || "B";
+
+  // Recovery-first UX: when drift has persisted, bias focus toward the "Recover" action.
+  // This gives a strong, actionable pattern-break without requiring the user to hunt for the right button.
+  if (eventType === "DRIFT_PERSIST" && overlay.dataset.level === "B") {
+    // Defer focus until after the DOM updates so it lands reliably.
+    setTimeout(() => {
+      recoverBtn?.focus?.();
+    }, 0);
+  }
+
   currentPayload = payload;
   shownAt = Date.now();
 }
