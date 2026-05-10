@@ -34,6 +34,12 @@ async function main() {
 
   await win.loadFile(htmlPath);
 
+  // Make screenshots deterministic by disabling animations/transitions.
+  await win.webContents.executeJavaScript(
+    "document.documentElement.dataset.screenshot = 'true';",
+    true
+  );
+
   async function capture(name, payload) {
     // Give the DOM a moment to settle, then render the payload.
     await new Promise((r) => setTimeout(r, 50));
@@ -66,6 +72,13 @@ async function main() {
     ...common,
     event_type: "DRIFT_PERSIST",
     headline: "Interrupt the loop."
+  });
+
+  // Explicit pattern-break snapshot (kept separate so regressions are obvious in review).
+  await capture("drift_persist_pattern_break.png", {
+    ...common,
+    event_type: "DRIFT_PERSIST",
+    headline: "Pattern-break."
   });
 
   win.destroy();
