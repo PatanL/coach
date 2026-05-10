@@ -163,7 +163,9 @@ window.overlayAPI.onPause(() => {
 window.addEventListener("keydown", (event) => {
   // Don't treat Enter as "Back on track" while the user is typing or interacting with a control.
   if (event.key === "Enter") {
-    const ignoreEnter = window.overlayUtils?.shouldIgnoreGlobalEnter?.(event.target);
+    const ignoreEnter =
+      window.overlayUtils?.shouldIgnoreGlobalEnterEvent?.(event.target, shownAt) ??
+      window.overlayUtils?.shouldIgnoreGlobalEnter?.(event.target);
     if (!ignoreEnter) {
       sendAction({ action: "back_on_track" });
     }

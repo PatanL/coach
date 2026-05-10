@@ -40,9 +40,17 @@
     return isTextInputTarget(t) || isInteractiveTarget(t);
   }
 
+  // Guard against "accidental Enter" immediately after the overlay appears.
+  // This can happen if the user was already pressing Enter in another app when the overlay steals attention.
+  function shouldIgnoreGlobalEnterEvent(target, overlayShownAtMs, nowMs = Date.now(), graceMs = 650) {
+    if (overlayShownAtMs && nowMs - overlayShownAtMs < graceMs) return true;
+    return shouldIgnoreGlobalEnter(target);
+  }
+
   return {
     isTextInputTarget,
     isInteractiveTarget,
-    shouldIgnoreGlobalEnter
+    shouldIgnoreGlobalEnter,
+    shouldIgnoreGlobalEnterEvent
   };
 });
