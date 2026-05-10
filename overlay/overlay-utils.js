@@ -40,9 +40,20 @@
     return isTextInputTarget(t) || isInteractiveTarget(t);
   }
 
+  // Decide what (if any) global action should fire on Enter.
+  // - Never fire while typing/clicking an interactive control.
+  // - DRIFT_PERSIST should pattern-break: Enter defaults to recovery, not "back on track".
+  function getGlobalEnterAction(eventType, target) {
+    if (shouldIgnoreGlobalEnter(target)) return null;
+    const type = String(eventType || "").toUpperCase();
+    if (type === "DRIFT_PERSIST") return "recover";
+    return "back_on_track";
+  }
+
   return {
     isTextInputTarget,
     isInteractiveTarget,
-    shouldIgnoreGlobalEnter
+    shouldIgnoreGlobalEnter,
+    getGlobalEnterAction
   };
 });

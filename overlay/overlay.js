@@ -16,6 +16,7 @@ const backBtn = document.getElementById("backBtn");
 const stuckBtn = document.getElementById("stuckBtn");
 const recoverBtn = document.getElementById("recoverBtn");
 const snoozeBtn = document.getElementById("snoozeBtn");
+const enterHint = document.getElementById("enterHint");
 
 let shownAt = null;
 let currentPayload = null;
@@ -32,11 +33,22 @@ function updatePrimaryLabel(payload) {
   backBtn.textContent = "Back on track";
 }
 
+function updateEnterHint(eventType) {
+  const action = window.overlayUtils?.getGlobalEnterAction?.(eventType, null) || "back_on_track";
+  if (!enterHint) return;
+  if (action === "recover") {
+    enterHint.textContent = "Enter: Recover schedule";
+    return;
+  }
+  enterHint.textContent = "Enter: Back on track";
+}
+
 function updateEventLabel(payload) {
   // Prefer the originating event type when available (used for visual pattern-breaks like DRIFT_PERSIST).
   const raw = payload?.source_event_type || payload?.event_type || payload?.type || "";
   const eventType = String(raw).toUpperCase();
   overlay.dataset.eventType = eventType;
+  updateEnterHint(eventType);
 
   if (!eventType) {
     setText(eventLabel, "DRIFT");
@@ -161,12 +173,13 @@ window.overlayAPI.onPause(() => {
 });
 
 window.addEventListener("keydown", (event) => {
-  // Don't treat Enter as "Back on track" while the user is typing or interacting with a control.
   if (event.key === "Enter") {
-    const ignoreEnter = window.overlayUtils?.shouldIgnoreGlobalEnter?.(event.target);
-    if (!ignoreEnter) {
-      sendAction({ action: "back_on_track" });
-    }
+    // If the snooze chooser is open, don't let Enter accidentally fire a global action.
+    if (!snooze.classList.contains("hidden")) return;
+
+    const eventType = overlay?.dataset?.eventType || "";
+    const action = window.overlayUtils?.getGlobalEnterAction?.(eventType, event.target);
+    if (action) sendAction({ action });
   }
   if (event.key === "Escape") {
     snooze.classList.remove("hidden");
