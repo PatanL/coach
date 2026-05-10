@@ -34,8 +34,8 @@ async function main() {
 
   await win.loadFile(htmlPath);
 
-  // Deterministic screenshots: disable animations/transitions that can capture mid-pulse frames.
-  // (We prefer this over timing-based waits, since DRIFT_PERSIST uses multi-iteration keyframes.)
+  // Make screenshots deterministic: disable CSS animations/transitions that can land on different frames.
+  // (The overlay still animates in production; this only affects the screenshot runner.)
   await win.webContents.insertCSS(`
     *, *::before, *::after {
       animation: none !important;
@@ -43,9 +43,6 @@ async function main() {
       caret-color: transparent !important;
     }
   `);
-
-  // Make screenshots deterministic: disable CSS animations/transitions during capture.
-  await win.webContents.insertCSS('* { animation: none !important; transition: none !important; }');
 
   async function capture(name, payload) {
     // Give the DOM a moment to settle, then render the payload.
