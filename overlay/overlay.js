@@ -162,10 +162,16 @@ window.overlayAPI.onPause(() => {
 
 window.addEventListener("keydown", (event) => {
   // Don't treat Enter as "Back on track" while the user is typing or interacting with a control.
+  // For DRIFT_PERSIST (pattern-break), require a deliberate modifier to prevent accidental recovery.
   if (event.key === "Enter") {
     const ignoreEnter = window.overlayUtils?.shouldIgnoreGlobalEnter?.(event.target);
+    const isPersist = String(overlay?.dataset?.eventType || "").toUpperCase() === "DRIFT_PERSIST";
+    const hasDeliberateModifier = event.metaKey || event.ctrlKey;
+
     if (!ignoreEnter) {
-      sendAction({ action: "back_on_track" });
+      if (!isPersist || hasDeliberateModifier) {
+        sendAction({ action: "back_on_track" });
+      }
     }
   }
   if (event.key === "Escape") {
