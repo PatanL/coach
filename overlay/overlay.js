@@ -38,6 +38,14 @@ function updateEventLabel(payload) {
   const eventType = String(raw).toUpperCase();
   overlay.dataset.eventType = eventType;
 
+  // DRIFT_PERSIST: make the recommended "recover" action visually stand out (Option B actionable overlay).
+  // Keep this purely visual (no auto-click / focus steal) to avoid accidental actions.
+  if (eventType === "DRIFT_PERSIST") {
+    recoverBtn.classList.add("emphasis");
+  } else {
+    recoverBtn.classList.remove("emphasis");
+  }
+
   if (!eventType) {
     setText(eventLabel, "DRIFT");
     return;
