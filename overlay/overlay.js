@@ -107,6 +107,20 @@ function showOverlay(payload) {
   overlay.dataset.level = payload.level || "B";
   currentPayload = payload;
   shownAt = Date.now();
+
+  // Focus management:
+  // - For DRIFT_PERSIST we want a strong pattern-break and an immediately actionable recovery path.
+  //   Focusing the Recover button prevents accidental global-Enter "Back on track" actions and
+  //   makes Enter activate recovery by default.
+  // - For other events, keep the default focus on the primary "Back on track" action.
+  if (!payload.choices) {
+    const eventType = String(overlay?.dataset?.eventType || "").toUpperCase();
+    if (eventType === "DRIFT_PERSIST") {
+      recoverBtn?.focus?.();
+    } else {
+      backBtn?.focus?.();
+    }
+  }
 }
 
 function sendAction(action) {
