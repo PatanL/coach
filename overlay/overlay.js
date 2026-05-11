@@ -37,21 +37,21 @@ function updateEventLabel(payload) {
   const raw = payload?.source_event_type || payload?.event_type || payload?.type || "";
   const eventType = String(raw).toUpperCase();
   overlay.dataset.eventType = eventType;
-  return eventType;
 
   if (!eventType) {
     setText(eventLabel, "DRIFT");
-    return;
+    return "";
   }
   if (eventType === "DRIFT_PERSIST") {
     setText(eventLabel, "DRIFT — PERSIST");
-    return;
+    return eventType;
   }
   if (eventType.startsWith("DRIFT")) {
     setText(eventLabel, "DRIFT");
-    return;
+    return eventType;
   }
   setText(eventLabel, eventType.replaceAll("_", " "));
+  return eventType;
 }
 
 function resetSnooze() {
