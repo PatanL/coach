@@ -74,6 +74,17 @@ function showOverlay(payload) {
   } else {
     overlay.dataset.mode = "";
   }
+
+  // For persistent drift, gently steer the user toward the recovery action.
+  // We only do this when we're not in an input/choice mode to avoid accidental keyboard activation.
+  if (overlay.dataset.eventType === "DRIFT_PERSIST" && overlay.dataset.mode !== "align") {
+    try {
+      recoverBtn?.focus?.({ preventScroll: true });
+    } catch {
+      // no-op (older focus() signature)
+      recoverBtn?.focus?.();
+    }
+  }
   setText(blockName, payload.block_name || "");
   setText(headline, payload.headline || "Reset.");
   setText(humanLine, payload.human_line || "");
