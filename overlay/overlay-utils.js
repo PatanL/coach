@@ -42,10 +42,24 @@
 
   // Only allow the global Enter hotkey when the event is coming from a "neutral" surface.
   // This avoids accidental confirmations when focus is on an arbitrary element.
+  //
+  // We treat the overlay chrome itself as neutral (e.g., a click on the card background),
+  // so Enter still works even if focus/target is a non-interactive div inside the overlay.
   function isNeutralHotkeySurface(target) {
     if (!target) return true;
     const tag = String(target.tagName || "").toLowerCase();
-    return tag === "body" || tag === "html";
+    if (tag === "body" || tag === "html") return true;
+
+    // If the event is originating from inside the overlay container, allow global Enter.
+    // Interactive targets are still blocked by shouldIgnoreGlobalEnter().
+    if (typeof target.closest === "function") {
+      const inOverlay = target.closest("#overlay");
+      if (inOverlay) return true;
+    }
+
+    // Fallback for simple mock objects / non-DOM targets.
+    const id = String(target.id || "");
+    return id === "overlay";
   }
 
   function shouldTriggerGlobalEnter(target) {
