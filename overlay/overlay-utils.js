@@ -40,9 +40,22 @@
     return isTextInputTarget(t) || isInteractiveTarget(t);
   }
 
+  // Only allow the global Enter hotkey when the event is coming from a "neutral" surface.
+  // This avoids accidental confirmations when focus is on an arbitrary element.
+  function isNeutralHotkeySurface(target) {
+    if (!target) return true;
+    const tag = String(target.tagName || "").toLowerCase();
+    return tag === "body" || tag === "html";
+  }
+
+  function shouldTriggerGlobalEnter(target) {
+    return !shouldIgnoreGlobalEnter(target) && isNeutralHotkeySurface(target);
+  }
+
   return {
     isTextInputTarget,
     isInteractiveTarget,
-    shouldIgnoreGlobalEnter
+    shouldIgnoreGlobalEnter,
+    shouldTriggerGlobalEnter
   };
 });
