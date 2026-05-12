@@ -19,8 +19,6 @@ const stuckBtn = document.getElementById("stuckBtn");
 const recoverBtn = document.getElementById("recoverBtn");
 const snoozeBtn = document.getElementById("snoozeBtn");
 
-const enterHint = document.getElementById("enterHint");
-
 let shownAt = null;
 let currentPayload = null;
 
@@ -42,12 +40,8 @@ function updateEventLabel(payload) {
   const eventType = String(raw).toUpperCase();
   overlay.dataset.eventType = eventType;
 
-  // Keep the keyboard hint aligned with the primary action.
-  if (enterHint) {
-    enterHint.textContent = eventType === "DRIFT_PERSIST" ? "Enter: Recover schedule" : "Enter: Back on track";
-  }
-
   // UX: DRIFT_PERSIST should push a more actionable recovery path and reduce accidental "I'm fine" exits.
+  // Keep the keyboard hint aligned with the primary action.
   if (enterHint) {
     enterHint.textContent = eventType === "DRIFT_PERSIST" ? "Enter: Recover schedule" : "Enter: Back on track";
   }
