@@ -40,9 +40,17 @@
     return isTextInputTarget(t) || isInteractiveTarget(t);
   }
 
+  function shouldIgnoreGlobalEscape(target) {
+    // Escape is commonly used to cancel text edits / close native suggestion popovers.
+    // Don't steal it while the user is typing or focused on an interactive control.
+    const t = findHotkeyRelevantTarget(target);
+    return isTextInputTarget(t) || isInteractiveTarget(t);
+  }
+
   return {
     isTextInputTarget,
     isInteractiveTarget,
-    shouldIgnoreGlobalEnter
+    shouldIgnoreGlobalEnter,
+    shouldIgnoreGlobalEscape
   };
 });
