@@ -37,10 +37,16 @@ async function main() {
   async function capture(name, payload) {
     // Give the DOM a moment to settle, then render the payload.
     await new Promise((r) => setTimeout(r, 50));
+
+    // Enable deterministic "screenshot mode" (disables animations/transitions).
+    await win.webContents.executeJavaScript(
+      'document.getElementById("overlay")?.setAttribute("data-screenshot","1")'
+    );
+
     win.webContents.send("overlay:show", payload);
 
-    // Allow any CSS animations to reach a stable frame.
-    await new Promise((r) => setTimeout(r, 250));
+    // Allow layout to settle.
+    await new Promise((r) => setTimeout(r, 75));
 
     const image = await win.capturePage();
     fs.writeFileSync(path.join(OUT_DIR, name), image.toPNG());
@@ -66,6 +72,12 @@ async function main() {
     ...common,
     event_type: "DRIFT_PERSIST",
     headline: "Interrupt the loop."
+  });
+
+  await capture("drift_persist_pattern_break.png", {
+    ...common,
+    event_type: "DRIFT_PERSIST",
+    headline: "Pattern-break: commit to one next action."
   });
 
   win.destroy();
