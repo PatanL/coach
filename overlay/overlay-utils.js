@@ -40,9 +40,18 @@
     return isTextInputTarget(t) || isInteractiveTarget(t);
   }
 
+  // Persistent drift is a special case: we want a strong pattern-break and to avoid
+  // accidental dismissal via Enter. Force an explicit click instead.
+  function shouldBlockGlobalEnter(eventType, target) {
+    const type = String(eventType || "").toUpperCase();
+    if (type === "DRIFT_PERSIST") return true;
+    return shouldIgnoreGlobalEnter(target);
+  }
+
   return {
     isTextInputTarget,
     isInteractiveTarget,
-    shouldIgnoreGlobalEnter
+    shouldIgnoreGlobalEnter,
+    shouldBlockGlobalEnter
   };
 });
