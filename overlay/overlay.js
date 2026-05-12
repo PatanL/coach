@@ -69,6 +69,9 @@ function showOverlay(payload) {
   updateEventLabel(payload);
   updatePrimaryLabel(payload);
 
+  // Deterministic screenshots: disable animations/transitions when rendering screenshot payloads.
+  overlay.dataset.screenshot = payload?.cmd_id === "screenshot" ? "true" : "";
+
   if (payload.choices && Array.isArray(payload.choices)) {
     overlay.dataset.mode = "align";
   } else {
