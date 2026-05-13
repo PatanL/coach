@@ -68,6 +68,22 @@ async function main() {
     headline: "Interrupt the loop."
   });
 
+  await capture("drift_persist_pattern_break.png", {
+    ...common,
+    event_type: "DRIFT_PERSIST",
+    headline: "Interrupt the loop.",
+    human_line: "This is the loop. Break it now.",
+    next_action: "Recover schedule (Enter), then close the tab."
+  });
+
+  await capture("drift_persist_recover_focus.png", {
+    ...common,
+    event_type: "DRIFT_PERSIST",
+    headline: "Recover the schedule.",
+    human_line: "Quick reset: we’re doing the next right step.",
+    next_action: "Hit Enter to recover schedule."
+  });
+
   win.destroy();
   app.quit();
 }
