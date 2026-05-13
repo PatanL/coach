@@ -40,9 +40,17 @@
     return isTextInputTarget(t) || isInteractiveTarget(t);
   }
 
+  function shouldIgnoreGlobalEnterEvent(event) {
+    if (!event) return false;
+    // Avoid hijacking common modified Enter shortcuts (e.g. Cmd/Ctrl+Enter).
+    if (event.metaKey || event.ctrlKey || event.altKey) return true;
+    return shouldIgnoreGlobalEnter(event.target);
+  }
+
   return {
     isTextInputTarget,
     isInteractiveTarget,
-    shouldIgnoreGlobalEnter
+    shouldIgnoreGlobalEnter,
+    shouldIgnoreGlobalEnterEvent
   };
 });
