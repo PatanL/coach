@@ -34,28 +34,12 @@ async function main() {
 
   await win.loadFile(htmlPath);
 
-  // Deterministic screenshots: disable animations/transitions so captures don't depend on timing.
-  await win.webContents.insertCSS(`
-    *, *::before, *::after {
-      animation: none !important;
-      transition: none !important;
-      caret-color: transparent !important;
-    }
-  `);
-
-  // Make screenshots deterministic: disable CSS animations/transitions that can land on different frames.
-  await win.webContents.insertCSS(`
-    *, *::before, *::after {
-      animation: none !important;
-      transition: none !important;
-      caret-color: transparent !important;
-    }
-  `);
+  // Deterministic screenshots are handled via payload.screenshot_mode (see overlay.css).
 
   async function capture(name, payload) {
     // Give the DOM a moment to settle, then render the payload.
     await new Promise((r) => setTimeout(r, 50));
-    win.webContents.send("overlay:show", payload);
+    win.webContents.send("overlay:show", { ...payload, screenshot_mode: true });
 
     // Give the UI a moment to lay out (animations are disabled above).
     await new Promise((r) => setTimeout(r, 50));
@@ -81,6 +65,13 @@ async function main() {
   });
 
   await capture("drift_persist.png", {
+    ...common,
+    event_type: "DRIFT_PERSIST",
+    headline: "Interrupt the loop."
+  });
+
+  // Explicitly capture a "screenshot mode" baseline (same payload, but ensures stable visuals).
+  await capture("drift_persist_screenshot_mode.png", {
     ...common,
     event_type: "DRIFT_PERSIST",
     headline: "Interrupt the loop."

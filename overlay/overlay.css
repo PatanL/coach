@@ -37,6 +37,15 @@ html, body {
   animation: driftPersistPulse 900ms ease-in-out 1;
 }
 
+/* Deterministic screenshots: keep the visual style, but disable motion. */
+#overlay[data-screenshot="true"] *,
+#overlay[data-screenshot="true"] *::before,
+#overlay[data-screenshot="true"] *::after {
+  animation: none !important;
+  transition: none !important;
+  caret-color: transparent !important;
+}
+
 #overlay[data-event-type="DRIFT_PERSIST"] .label {
   color: #ffb24a;
 }
