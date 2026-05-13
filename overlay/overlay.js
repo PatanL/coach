@@ -20,6 +20,8 @@ const snoozeBtn = document.getElementById("snoozeBtn");
 let shownAt = null;
 let currentPayload = null;
 
+const footerPrimaryHint = document.querySelector(".footer span");
+
 function setText(el, value) {
   el.textContent = value || "";
 }
@@ -69,6 +71,11 @@ function showOverlay(payload) {
   updateEventLabel(payload);
   updatePrimaryLabel(payload);
 
+  const enterAction = window.overlayUtils?.getPrimaryEnterAction?.(overlay.dataset.eventType) || "back_on_track";
+  if (footerPrimaryHint) {
+    footerPrimaryHint.textContent = enterAction === "recover" ? "Enter: Recover schedule" : "Enter: Back on track";
+  }
+
   if (payload.choices && Array.isArray(payload.choices)) {
     overlay.dataset.mode = "align";
   } else {
@@ -105,6 +112,12 @@ function showOverlay(payload) {
   }
 
   overlay.dataset.level = payload.level || "B";
+
+  // Pattern-break: for DRIFT_PERSIST, put keyboard focus on the recovery action (unless we are in input mode).
+  if (overlay.dataset.eventType === "DRIFT_PERSIST" && overlay.dataset.mode !== "align") {
+    recoverBtn.focus();
+  }
+
   currentPayload = payload;
   shownAt = Date.now();
 }
@@ -165,7 +178,8 @@ window.addEventListener("keydown", (event) => {
   if (event.key === "Enter") {
     const ignoreEnter = window.overlayUtils?.shouldIgnoreGlobalEnter?.(event.target);
     if (!ignoreEnter) {
-      sendAction({ action: "back_on_track" });
+      const enterAction = window.overlayUtils?.getPrimaryEnterAction?.(overlay.dataset.eventType) || "back_on_track";
+      sendAction({ action: enterAction });
     }
   }
   if (event.key === "Escape") {
