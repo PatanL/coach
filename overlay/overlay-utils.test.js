@@ -48,3 +48,15 @@ test("shouldIgnoreGlobalEnter: child of button/link should still block global En
   };
   assert.equal(shouldIgnoreGlobalEnter(spanInsideButton), true);
 });
+
+test("shouldIgnoreGlobalEnter: child of ARIA textbox should block global Enter", () => {
+  const textbox = { tagName: "DIV", getAttribute: (k) => (k === "role" ? "textbox" : null) };
+  const spanInsideTextbox = {
+    tagName: "SPAN",
+    closest: (selector) => {
+      return selector ? textbox : null;
+    }
+  };
+  assert.equal(shouldIgnoreGlobalEnter(spanInsideTextbox), true);
+});
+
