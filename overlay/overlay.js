@@ -105,6 +105,8 @@ function showOverlay(payload) {
   }
 
   overlay.dataset.level = payload.level || "B";
+  // Disable animations/transitions during screenshot runs for determinism.
+  overlay.dataset.screenshot = payload?.cmd_id === "screenshot" ? "1" : "";
   currentPayload = payload;
   shownAt = Date.now();
 }

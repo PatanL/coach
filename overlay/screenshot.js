@@ -68,6 +68,16 @@ async function main() {
     headline: "Interrupt the loop."
   });
 
+  // Pattern-break variant: same DRIFT_PERSIST visual treatment, but with more
+  // action-forward copy to validate CTA layout.
+  await capture("drift_persist_pattern_break.png", {
+    ...common,
+    event_type: "DRIFT_PERSIST",
+    headline: "Interrupt the loop.",
+    human_line: "Pattern-break: take the next tiny step.",
+    next_action: "Close the tab → reopen your task doc → do 2 minutes."
+  });
+
   win.destroy();
   app.quit();
 }
