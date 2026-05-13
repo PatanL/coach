@@ -8,7 +8,14 @@
   function isTextInputTarget(target) {
     if (!target) return false;
     const tag = String(target.tagName || "").toLowerCase();
+
+    // contentEditable elements behave like text inputs for our hotkey suppression purposes.
     if (target.isContentEditable) return true;
+
+    // Some UI libraries implement text inputs via divs + ARIA roles.
+    const role = String(target.getAttribute?.("role") || "").toLowerCase();
+    if (role === "textbox" || role === "searchbox" || role === "combobox") return true;
+
     return tag === "input" || tag === "textarea" || tag === "select";
   }
 
