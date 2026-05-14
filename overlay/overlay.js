@@ -69,6 +69,13 @@ function showOverlay(payload) {
   updateEventLabel(payload);
   updatePrimaryLabel(payload);
 
+  // Ensure screenshot runs are deterministic by disabling animations/transitions.
+  if (payload?.cmd_id === "screenshot") {
+    overlay.dataset.screenshot = "true";
+  } else {
+    delete overlay.dataset.screenshot;
+  }
+
   if (payload.choices && Array.isArray(payload.choices)) {
     overlay.dataset.mode = "align";
   } else {
