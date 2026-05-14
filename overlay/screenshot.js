@@ -68,6 +68,14 @@ async function main() {
     headline: "Interrupt the loop."
   });
 
+  await capture("drift_persist_pattern_break.png", {
+    ...common,
+    event_type: "DRIFT_PERSIST",
+    headline: "Interrupt the loop.",
+    human_line: "This is persistent drift — let’s reset the plan, not just the tab.",
+    next_action: "Recover schedule: pick the smallest next step and restart the block."
+  });
+
   win.destroy();
   app.quit();
 }
