@@ -66,6 +66,11 @@ function showOverlay(payload) {
   overlay.classList.remove("hidden");
   resetSnooze();
   resetAlignInput();
+
+  // Screenshot mode: keep visuals deterministic (no animations/transitions).
+  // Used by `npm --prefix overlay run screenshot`.
+  overlay.dataset.screenshot = payload?.cmd_id === "screenshot" ? "1" : "0";
+
   updateEventLabel(payload);
   updatePrimaryLabel(payload);
 
