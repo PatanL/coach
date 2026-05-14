@@ -30,11 +30,28 @@ html, body {
   backdrop-filter: blur(8px);
 }
 
-/* Visual pattern-break when drift persists: stronger edge + subtle shake pulse. */
+/* Visual pattern-break when drift persists: stronger edge + subtle shake pulse + top stripe. */
+#overlay[data-event-type="DRIFT_PERSIST"] {
+  background: radial-gradient(1000px 600px at 50% 20%, rgba(241, 108, 91, 0.10), rgba(6, 8, 10, 0.45));
+}
+
 #overlay[data-event-type="DRIFT_PERSIST"] .card {
+  position: relative;
+  overflow: hidden;
   border-color: rgba(241, 108, 91, 0.55);
   box-shadow: 0 22px 80px rgba(241, 108, 91, 0.12), 0 18px 60px rgba(0, 0, 0, 0.55);
   animation: driftPersistPulse 900ms ease-in-out 1;
+}
+
+#overlay[data-event-type="DRIFT_PERSIST"] .card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 6px;
+  background: linear-gradient(90deg, rgba(241, 108, 91, 0.0), rgba(241, 108, 91, 0.85), rgba(241, 108, 91, 0.0));
+  opacity: 0.9;
 }
 
 #overlay[data-event-type="DRIFT_PERSIST"] .label {
