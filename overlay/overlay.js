@@ -107,6 +107,23 @@ function showOverlay(payload) {
   overlay.dataset.level = payload.level || "B";
   currentPayload = payload;
   shownAt = Date.now();
+
+  // UX safety: default focus to an explicit action button.
+  // This prevents global Enter from firing "Back on track" when the overlay first appears
+  // (pattern: user hits Enter out of habit to dismiss a modal).
+  //
+  // If we are in align mode, keep focus in the align text box so Enter submits the choice.
+  setTimeout(() => {
+    try {
+      if (overlay.dataset.mode === "align") {
+        alignText?.focus?.();
+        return;
+      }
+      recoverBtn?.focus?.();
+    } catch (_) {
+      // ignore
+    }
+  }, 0);
 }
 
 function sendAction(action) {
