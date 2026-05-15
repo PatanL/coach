@@ -1,7 +1,13 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
 
-const { isTextInputTarget, isInteractiveTarget, shouldIgnoreGlobalEnter } = require("./overlay-utils");
+const {
+  isTextInputTarget,
+  isInteractiveTarget,
+  shouldIgnoreGlobalEnter,
+  pickInitialFocusTarget,
+  pickGlobalEnterAction
+} = require("./overlay-utils");
 
 test("isTextInputTarget: recognizes common typing targets", () => {
   assert.equal(isTextInputTarget({ tagName: "INPUT" }), true);
@@ -45,4 +51,60 @@ test("shouldIgnoreGlobalEnter: child of button/link should still block global En
     }
   };
   assert.equal(shouldIgnoreGlobalEnter(spanInsideButton), true);
+});
+
+test("pickInitialFocusTarget: align mode prioritizes the text input", () => {
+  assert.equal(pickInitialFocusTarget({ hasChoices: true, eventType: "DRIFT_PERSIST" }), "alignText");
+  assert.equal(pickInitialFocusTarget({ hasChoices: true, eventType: "DRIFT_START" }), "alignText");
+});
+
+test("pickInitialFocusTarget: DRIFT_PERSIST biases focus to recover", () => {
+  assert.equal(pickInitialFocusTarget({ hasChoices: false, eventType: "drift_persist" }), "recoverBtn");
+  assert.equal(pickInitialFocusTarget({ hasChoices: false, eventType: "DRIFT_PERSIST" }), "recoverBtn");
+});
+
+test("pickGlobalEnterAction: DRIFT_PERSIST maps Enter to recover", () => {
+  assert.equal(pickGlobalEnterAction({ eventType: "DRIFT_PERSIST" }), "recover");
+  assert.equal(pickGlobalEnterAction({ eventType: "drift_persist" }), "recover");
+});
+
+test("pickGlobalEnterAction: default maps Enter to back_on_track", () => {
+  assert.equal(pickGlobalEnterAction({ eventType: "DRIFT_START" }), "back_on_track");
+  assert.equal(pickGlobalEnterAction({ eventType: "" }), "back_on_track");
+});
+
+test("shouldIgnoreGlobalEnter: child of role=button should block global Enter", () => {
+  const roleButton = { tagName: "DIV", getAttribute: (k) => (k === "role" ? "button" : null) };
+  const iconInsideRoleButton = {
+    tagName: "SVG",
+    closest: () => roleButton
+  };
+  assert.equal(shouldIgnoreGlobalEnter(iconInsideRoleButton), true);
+});
+
+test("pickInitialFocusTarget: alignment question focuses input", () => {
+  assert.equal(pickInitialFocusTarget({ hasChoices: true, eventType: "DRIFT" }), "alignText");
+  assert.equal(pickInitialFocusTarget({ hasChoices: true, eventType: "DRIFT_PERSIST" }), "alignText");
+});
+
+test("pickInitialFocusTarget: DRIFT_PERSIST biases recover", () => {
+  assert.equal(pickInitialFocusTarget({ hasChoices: false, eventType: "DRIFT_PERSIST" }), "recoverBtn");
+  assert.equal(pickInitialFocusTarget({ hasChoices: false, eventType: "drift_persist" }), "recoverBtn");
+});
+
+test("pickInitialFocusTarget: default biases back on track", () => {
+  assert.equal(pickInitialFocusTarget({ hasChoices: false, eventType: "DRIFT" }), "backBtn");
+  assert.equal(pickInitialFocusTarget({ hasChoices: false, eventType: "" }), "backBtn");
+  assert.equal(pickInitialFocusTarget({ hasChoices: false, eventType: null }), "backBtn");
+});
+
+test("pickGlobalEnterAction: DRIFT_PERSIST triggers recovery", () => {
+  assert.equal(pickGlobalEnterAction({ eventType: "DRIFT_PERSIST" }), "recover");
+  assert.equal(pickGlobalEnterAction({ eventType: "drift_persist" }), "recover");
+});
+
+test("pickGlobalEnterAction: default triggers back_on_track", () => {
+  assert.equal(pickGlobalEnterAction({ eventType: "DRIFT" }), "back_on_track");
+  assert.equal(pickGlobalEnterAction({ eventType: "" }), "back_on_track");
+  assert.equal(pickGlobalEnterAction({ eventType: null }), "back_on_track");
 });

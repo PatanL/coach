@@ -16,6 +16,7 @@ const backBtn = document.getElementById("backBtn");
 const stuckBtn = document.getElementById("stuckBtn");
 const recoverBtn = document.getElementById("recoverBtn");
 const snoozeBtn = document.getElementById("snoozeBtn");
+const hotkeyEnterHint = document.getElementById("hotkeyEnterHint");
 
 let shownAt = null;
 let currentPayload = null;
@@ -30,6 +31,24 @@ function updatePrimaryLabel(payload) {
     return;
   }
   backBtn.textContent = "Back on track";
+}
+
+function updatePrimaryAction(payload) {
+  const raw = payload?.source_event_type || payload?.event_type || payload?.type || "";
+  const eventType = String(raw).toUpperCase();
+
+  // Default: "Back on track" is the primary (fast path).
+  backBtn.classList.add("primary");
+  recoverBtn.classList.remove("primary");
+
+  if (hotkeyEnterHint) hotkeyEnterHint.textContent = "Enter: Back on track";
+
+  // Pattern-break: when drift is persisting, bias toward a concrete recovery action.
+  if (eventType === "DRIFT_PERSIST") {
+    backBtn.classList.remove("primary");
+    recoverBtn.classList.add("primary");
+    if (hotkeyEnterHint) hotkeyEnterHint.textContent = "Enter: Recover schedule";
+  }
 }
 
 function updateEventLabel(payload) {
@@ -68,6 +87,8 @@ function showOverlay(payload) {
   resetAlignInput();
   updateEventLabel(payload);
   updatePrimaryLabel(payload);
+  updatePrimaryAction(payload);
+
 
   if (payload.choices && Array.isArray(payload.choices)) {
     overlay.dataset.mode = "align";
@@ -107,6 +128,32 @@ function showOverlay(payload) {
   overlay.dataset.level = payload.level || "B";
   currentPayload = payload;
   shownAt = Date.now();
+
+  // Focus management (pattern-break + safety):
+  // - If we're asking an alignment question, put the caret in the input.
+  // - If drift is persisting, bias toward the recovery action to reduce accidental "Back on track".
+  // - Otherwise, default to the primary "Back on track" button.
+  // Use a microtask/tick so the element is focusable after DOM updates.
+  setTimeout(() => {
+    try {
+      const targetId = window.overlayUtils?.pickInitialFocusTarget?.({
+        hasChoices: Boolean(payload.choices && Array.isArray(payload.choices)),
+        eventType: overlay.dataset.eventType
+      });
+
+      if (targetId === "alignText") {
+        alignText.focus();
+        return;
+      }
+      if (targetId === "recoverBtn") {
+        recoverBtn.focus();
+        return;
+      }
+      backBtn.focus();
+    } catch {
+      // Best-effort focus only.
+    }
+  }, 0);
 }
 
 function sendAction(action) {
@@ -161,11 +208,12 @@ window.overlayAPI.onPause(() => {
 });
 
 window.addEventListener("keydown", (event) => {
-  // Don't treat Enter as "Back on track" while the user is typing or interacting with a control.
+  // Don't treat Enter as a global action while the user is typing or interacting with a control.
   if (event.key === "Enter") {
     const ignoreEnter = window.overlayUtils?.shouldIgnoreGlobalEnter?.(event.target);
     if (!ignoreEnter) {
-      sendAction({ action: "back_on_track" });
+      const action = window.overlayUtils?.pickGlobalEnterAction?.({ eventType: overlay.dataset.eventType });
+      sendAction({ action: action || "back_on_track" });
     }
   }
   if (event.key === "Escape") {

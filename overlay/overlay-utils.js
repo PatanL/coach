@@ -40,9 +40,28 @@
     return isTextInputTarget(t) || isInteractiveTarget(t);
   }
 
+  // Decide which element should receive initial focus when the overlay opens.
+  // Kept here so we can unit test the drift + alignment focus rules.
+  function pickInitialFocusTarget({ hasChoices, eventType }) {
+    if (hasChoices) return "alignText";
+    const t = String(eventType || "").toUpperCase();
+    if (t === "DRIFT_PERSIST") return "recoverBtn";
+    return "backBtn";
+  }
+
+  // Decide which semantic action Enter should trigger when using the global hotkey.
+  // Kept deterministic + testable so DRIFT_PERSIST can cleanly bias toward recovery.
+  function pickGlobalEnterAction({ eventType }) {
+    const t = String(eventType || "").toUpperCase();
+    if (t === "DRIFT_PERSIST") return "recover";
+    return "back_on_track";
+  }
+
   return {
     isTextInputTarget,
     isInteractiveTarget,
-    shouldIgnoreGlobalEnter
+    shouldIgnoreGlobalEnter,
+    pickInitialFocusTarget,
+    pickGlobalEnterAction
   };
 });
