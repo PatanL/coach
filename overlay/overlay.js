@@ -1,4 +1,5 @@
 const overlay = document.getElementById("overlay");
+const card = overlay?.querySelector?.(".card");
 const eventLabel = document.getElementById("eventLabel");
 const blockName = document.getElementById("blockName");
 const headline = document.getElementById("headline");
@@ -37,6 +38,18 @@ function updateEventLabel(payload) {
   const raw = payload?.source_event_type || payload?.event_type || payload?.type || "";
   const eventType = String(raw).toUpperCase();
   overlay.dataset.eventType = eventType;
+
+  // Re-playable visual pattern-break: if we show DRIFT_PERSIST repeatedly, the pulse animation should
+  // trigger each time (CSS animations tied to attributes can otherwise only run once).
+  if (card) {
+    card.classList.remove("drift-persist-pulse");
+    if (eventType === "DRIFT_PERSIST") {
+      // Force a reflow so re-adding the class restarts the animation deterministically.
+      // eslint-disable-next-line no-unused-expressions
+      card.offsetWidth;
+      card.classList.add("drift-persist-pulse");
+    }
+  }
 
   if (!eventType) {
     setText(eventLabel, "DRIFT");
@@ -172,3 +185,6 @@ window.addEventListener("keydown", (event) => {
     snooze.classList.remove("hidden");
   }
 });
+
+// Used by screenshot tooling to avoid racing the IPC handler setup.
+window.__overlayReady = true;
