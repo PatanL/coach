@@ -107,6 +107,19 @@ function showOverlay(payload) {
   overlay.dataset.level = payload.level || "B";
   currentPayload = payload;
   shownAt = Date.now();
+
+  // Put keyboard focus on the most appropriate primary control.
+  // - Align mode: user should be able to immediately type.
+  // - DRIFT_PERSIST: emphasize recovery action (pattern-break + stronger nudge).
+  // - Default: quick "Back on track".
+  const isAlignMode = Boolean(payload.choices && Array.isArray(payload.choices));
+  if (isAlignMode) {
+    alignText.focus();
+  } else if (overlay.dataset.eventType === "DRIFT_PERSIST") {
+    recoverBtn.focus();
+  } else {
+    backBtn.focus();
+  }
 }
 
 function sendAction(action) {
