@@ -1,7 +1,7 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
 
-const { isTextInputTarget, isInteractiveTarget, shouldIgnoreGlobalEnter } = require("./overlay-utils");
+const { isTextInputTarget, isInteractiveTarget, shouldIgnoreGlobalEnter, shouldTriggerGlobalEnter } = require("./overlay-utils");
 
 test("isTextInputTarget: recognizes common typing targets", () => {
   assert.equal(isTextInputTarget({ tagName: "INPUT" }), true);
@@ -45,4 +45,29 @@ test("shouldIgnoreGlobalEnter: child of button/link should still block global En
     }
   };
   assert.equal(shouldIgnoreGlobalEnter(spanInsideButton), true);
+});
+
+test("shouldTriggerGlobalEnter: triggers from neutral surfaces (body/html)", () => {
+  assert.equal(shouldTriggerGlobalEnter({ tagName: "BODY" }), true);
+  assert.equal(shouldTriggerGlobalEnter({ tagName: "HTML" }), true);
+  assert.equal(shouldTriggerGlobalEnter({ tagName: "DIV" }), false);
+  assert.equal(shouldTriggerGlobalEnter({ tagName: "BUTTON" }), false);
+});
+
+test("shouldTriggerGlobalEnter: overlay chrome counts as neutral (non-interactive)", () => {
+  const overlay = { tagName: "DIV", id: "overlay" };
+  const inner = {
+    tagName: "DIV",
+    closest: (selector) => (selector === "#overlay" ? overlay : null)
+  };
+  assert.equal(shouldTriggerGlobalEnter(inner), true);
+});
+
+test("shouldTriggerGlobalEnter: still blocked for interactive targets inside overlay", () => {
+  const overlay = { tagName: "DIV", id: "overlay" };
+  const buttonInsideOverlay = {
+    tagName: "BUTTON",
+    closest: (selector) => (selector === "#overlay" ? overlay : null)
+  };
+  assert.equal(shouldTriggerGlobalEnter(buttonInsideOverlay), false);
 });
