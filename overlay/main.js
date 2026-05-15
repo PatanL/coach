@@ -109,6 +109,7 @@ function showOverlay(payload) {
     type: "OVERLAY_SHOWN",
     cmd_id: lastCmdId,
     source_event_id: payload.source_event_id || null,
+    source_event_type: payload.source_event_type || null,
     level: payload.level || "B",
     action: "shown",
     source: "overlay"
@@ -206,6 +207,7 @@ ipcMain.on("overlay:action", (event, action) => {
     type: "OVERLAY_ACTION",
     cmd_id: lastCmdId,
     source_event_id: currentPayload?.source_event_id || null,
+    source_event_type: currentPayload?.source_event_type || null,
     ...action,
     level: currentPayload?.level || "A",
     block_id: currentPayload?.block_id || null,

@@ -8,6 +8,29 @@ function ensureDir(dir) {
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
 }
 
+async function captureScenario(win, { name, payload, blurActiveElement = false }) {
+  // Mark screenshot mode to disable animations.
+  await win.webContents.executeJavaScript(
+    "document.body.dataset.screenshot='true';",
+    true
+  );
+  win.webContents.send("overlay:show", payload);
+  // Let layout settle deterministically.
+  await new Promise((r) => setTimeout(r, 250));
+
+  if (blurActiveElement) {
+    await win.webContents.executeJavaScript(
+      "document.activeElement && document.activeElement.blur && document.activeElement.blur();",
+      true
+    );
+  }
+
+  const image = await win.capturePage();
+  const outPath = path.join(OUT_DIR, name);
+  fs.writeFileSync(outPath, image.toPNG());
+  return outPath;
+}
+
 async function main() {
   ensureDir(OUT_DIR);
 
@@ -15,66 +38,81 @@ async function main() {
     width: 640,
     height: 360,
     show: false,
-    frame: false,
-    transparent: false,
-    backgroundColor: "#06080A",
-    resizable: false,
-    paintWhenInitiallyHidden: true,
+    transparent: true,
     webPreferences: {
+      preload: path.join(__dirname, "preload.js"),
       contextIsolation: true,
       nodeIntegration: false,
-      preload: path.join(__dirname, "preload.js")
-    }
+    },
   });
 
-  const htmlPath = path.join(__dirname, "overlay.html");
-  if (!fs.existsSync(htmlPath)) {
-    throw new Error(`overlay.html not found at ${htmlPath}`);
-  }
+  await win.loadFile(path.join(__dirname, "overlay.html"));
 
-  await win.loadFile(htmlPath);
-
-  async function capture(name, payload) {
-    // Give the DOM a moment to settle, then render the payload.
-    await new Promise((r) => setTimeout(r, 50));
-    win.webContents.send("overlay:show", payload);
-
-    // Allow any CSS animations to reach a stable frame.
-    await new Promise((r) => setTimeout(r, 250));
-
-    const image = await win.capturePage();
-    fs.writeFileSync(path.join(OUT_DIR, name), image.toPNG());
-  }
-
-  const common = {
+  const basePayload = {
+    ts: "2026-02-04T23:00:00.000Z",
+    cmd_id: "00000000-0000-0000-0000-000000000000",
+    source_event_id: "11111111-1111-1111-1111-111111111111",
+    source: "runner",
     level: "B",
+    style_id: "calm",
+    block_id: "block-123",
     block_name: "Deep Work",
     headline: "Reset.",
-    human_line: "You drifted. Let’s snap back.",
-    diagnosis: "Detected off-task activity.",
-    next_action: "Close the tab and reopen your task doc.",
-    cmd_id: "screenshot",
-    block_id: "block_screenshot"
+    human_line: "You drifted off your intended block.",
+    diagnosis: "Likely a quick context-switch that stuck.",
+    next_action: "Close the tab + resume the next 5 minutes.",
   };
 
-  await capture("drift_start.png", {
-    ...common,
-    event_type: "DRIFT_START"
-  });
+  const outputs = [];
+  outputs.push(
+    await captureScenario(win, {
+      name: "drift_start_level_b.png",
+      payload: { ...basePayload, source_event_type: "DRIFT_START" },
+    })
+  );
 
-  await capture("drift_persist.png", {
-    ...common,
-    event_type: "DRIFT_PERSIST",
-    headline: "Interrupt the loop."
-  });
+  outputs.push(
+    await captureScenario(win, {
+      name: "drift_persist_pattern_break.png",
+      payload: {
+        ...basePayload,
+        source_event_type: "DRIFT_PERSIST",
+        headline: "Pattern break.",
+        human_line: "Same drift again — let’s interrupt it cleanly.",
+        next_action: "Stand up, breathe once, then open the next 5-minute step.",
+      },
+    })
+  );
 
-  win.destroy();
-  app.quit();
+  outputs.push(
+    await captureScenario(win, {
+      name: "align_mode_level_b.png",
+      blurActiveElement: true,
+      payload: {
+        ...basePayload,
+        source_event_type: "DRIFT_START",
+        headline: "Quick check.",
+        human_line: "Name the next action that aligns with your block.",
+        next_action: "Pick one choice or type your own.",
+        question_id: "q-123",
+        choices: ["Close tab", "Open task", "Stand up"]
+      }
+    })
+  );
+
+  await win.close();
+  return outputs;
 }
 
 app.whenReady().then(() => {
-  main().catch((err) => {
-    console.error(err);
-    app.exit(1);
-  });
+  main()
+    .then((outs) => {
+      // Print paths for CI / humans.
+      for (const p of outs) console.log(p);
+      app.quit();
+    })
+    .catch((err) => {
+      console.error(err);
+      app.exit(1);
+    });
 });

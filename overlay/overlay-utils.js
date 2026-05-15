@@ -8,41 +8,61 @@
   function isTextInputTarget(target) {
     if (!target) return false;
     const tag = String(target.tagName || "").toLowerCase();
+
+    const role = String(
+      (typeof target.getAttribute === "function" ? target.getAttribute("role") : target.role) ||
+        ""
+    ).toLowerCase();
+
+    // ARIA-first controls (e.g., custom comboboxes) should be treated as typing targets
+    // so global hotkeys can't accidentally fire while the user is interacting with them.
+    if (role === "textbox" || role === "combobox" || role === "searchbox") return true;
+
     if (target.isContentEditable) return true;
-    return tag === "input" || tag === "textarea" || tag === "select";
+
+    if (tag === "input" || tag === "textarea" || tag === "select") return true;
+    return false;
   }
 
-  // Treat common interactive elements as "hands-off" for global hotkeys.
-  // If focus is on a button/link, Enter should activate that control—not trigger a global overlay action.
-  function isInteractiveTarget(target) {
-    if (!target) return false;
-    const tag = String(target.tagName || "").toLowerCase();
-    if (tag === "button" || tag === "a") return true;
-    const role = String(target.getAttribute?.("role") || "").toLowerCase();
-    return role === "button" || role === "link";
+  /**
+   * Determines whether the overlay should treat Enter as an implicit "Back on track".
+   *
+   * Safety rules:
+   * - Never while typing in a text input.
+   * - Never in align mode (choices / freeform answer use Enter for submit).
+   * - Never while the snooze picker is visible.
+   */
+  function shouldImplicitEnterTriggerBackOnTrack({
+    target,
+    overlayHidden,
+    mode,
+    snoozeVisible,
+  }) {
+    if (overlayHidden) return false;
+    if (mode === "align") return false;
+    if (snoozeVisible) return false;
+    if (isTextInputTarget(target)) return false;
+    return true;
   }
 
-  function findHotkeyRelevantTarget(target) {
-    if (!target) return null;
-    // If event.target is a child (e.g. <span> inside <button>), walk up to the nearest
-    // element that should "own" the keyboard interaction.
-    if (typeof target.closest === "function") {
-      const hit = target.closest(
-        'input,textarea,select,[contenteditable="true"],button,a,[role="button"],[role="link"]'
-      );
-      if (hit) return hit;
-    }
-    return target;
-  }
-
-  function shouldIgnoreGlobalEnter(target) {
-    const t = findHotkeyRelevantTarget(target);
-    return isTextInputTarget(t) || isInteractiveTarget(t);
+  /**
+   * Determines whether Escape should toggle the snooze picker.
+   *
+   * Safety rules:
+   * - Never while typing.
+   * - Never when the overlay is hidden.
+   * - Never in align mode (Escape may be used to cancel text entry / dialog semantics).
+   */
+  function shouldEscapeToggleSnooze({ target, overlayHidden, mode }) {
+    if (overlayHidden) return false;
+    if (mode === "align") return false;
+    if (isTextInputTarget(target)) return false;
+    return true;
   }
 
   return {
     isTextInputTarget,
-    isInteractiveTarget,
-    shouldIgnoreGlobalEnter
+    shouldImplicitEnterTriggerBackOnTrack,
+    shouldEscapeToggleSnooze,
   };
 });

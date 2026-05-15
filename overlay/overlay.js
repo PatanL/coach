@@ -21,12 +21,17 @@ let shownAt = null;
 let currentPayload = null;
 
 function setText(el, value) {
+  if (!el) return;
   el.textContent = value || "";
 }
 
-function updatePrimaryLabel(payload) {
+function updatePrimaryLabel(payload, eventType) {
   if (payload?.block_id && String(payload.block_id).includes("habit")) {
     backBtn.textContent = "Habit completed";
+    return;
+  }
+  if (eventType === "DRIFT_PERSIST") {
+    backBtn.textContent = "Do the next 5 min";
     return;
   }
   backBtn.textContent = "Back on track";
@@ -62,6 +67,15 @@ function resetAlignInput() {
   alignInput.classList.add("hidden");
 }
 
+function labelForEventType(eventType) {
+  if (eventType === "DRIFT_PERSIST") return "DRIFT (AGAIN)";
+  if (eventType === "DRIFT_START") return "DRIFT";
+  if (eventType === "OFF_SCHEDULE") return "OFF-SCHEDULE";
+  if (eventType === "HABIT_ESCALATE") return "HABIT";
+  if (eventType === "RECOVER_TRIGGER") return "RECOVER";
+  return "DRIFT";
+}
+
 function showOverlay(payload) {
   overlay.classList.remove("hidden");
   resetSnooze();
@@ -74,7 +88,11 @@ function showOverlay(payload) {
   } else {
     overlay.dataset.mode = "";
   }
+  const eventType = payload.source_event_type || payload.event_type || "";
+  overlay.dataset.eventType = eventType;
+  setText(eventLabel, labelForEventType(eventType));
   setText(blockName, payload.block_name || "");
+  updatePrimaryLabel(payload, eventType);
   setText(headline, payload.headline || "Reset.");
   setText(humanLine, payload.human_line || "");
   setText(diagnosis, payload.diagnosis || "");
@@ -107,6 +125,20 @@ function showOverlay(payload) {
   overlay.dataset.level = payload.level || "B";
   currentPayload = payload;
   shownAt = Date.now();
+
+  // Put focus on an overlay element to reduce accidental "Enter" keypresses
+  // triggering something unintended somewhere else.
+  requestAnimationFrame(() => {
+    try {
+      if (overlay.dataset.mode === "align") {
+        alignText?.focus?.();
+      } else {
+        backBtn?.focus?.();
+      }
+    } catch {
+      // no-op
+    }
+  });
 }
 
 function sendAction(action) {
@@ -165,10 +197,27 @@ window.addEventListener("keydown", (event) => {
   if (event.key === "Enter") {
     const ignoreEnter = window.overlayUtils?.shouldIgnoreGlobalEnter?.(event.target);
     if (!ignoreEnter) {
+  if (event.key === "Enter") {
+    const shouldTrigger = window.overlayUtils?.shouldImplicitEnterTriggerBackOnTrack?.({
+      target: event.target,
+      overlayHidden: overlay.classList.contains("hidden"),
+      mode: overlay.dataset.mode || "",
+      snoozeVisible: !snooze.classList.contains("hidden")
+    });
+
+    if (shouldTrigger) {
       sendAction({ action: "back_on_track" });
     }
   }
+
+  // Esc should never interrupt typing (or align mode). Outside typing, toggle the snooze panel.
   if (event.key === "Escape") {
-    snooze.classList.remove("hidden");
+    const shouldToggle = window.overlayUtils?.shouldEscapeToggleSnooze?.({
+      target: event.target,
+      overlayHidden: overlay.classList.contains("hidden"),
+      mode: overlay.dataset.mode || ""
+    });
+
+    if (shouldToggle) snooze.classList.toggle("hidden");
   }
 });

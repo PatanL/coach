@@ -1120,6 +1120,7 @@ def main() -> int:
                 "ts": now.isoformat(),
                 "cmd_id": ensure_uuid(),
                 "source_event_id": None,
+                "source_event_type": "ALIGN_REQUIRED",
                 "source": "runner",
                 "level": "B",
                 "style_id": "calm",
