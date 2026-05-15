@@ -105,6 +105,7 @@ function showOverlay(payload) {
   }
 
   overlay.dataset.level = payload.level || "B";
+  overlay.dataset.screenshot = payload?.screenshot ? "true" : "";
   currentPayload = payload;
   shownAt = Date.now();
 }
