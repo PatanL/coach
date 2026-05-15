@@ -34,13 +34,23 @@ async function main() {
 
   await win.loadFile(htmlPath);
 
+  // Make screenshots deterministic: disable CSS animations/transitions that can land on different frames.
+  // (The overlay still animates in production; this only affects the screenshot runner.)
+  await win.webContents.insertCSS(`
+    *, *::before, *::after {
+      animation: none !important;
+      transition: none !important;
+      caret-color: transparent !important;
+    }
+  `);
+
   async function capture(name, payload) {
     // Give the DOM a moment to settle, then render the payload.
     await new Promise((r) => setTimeout(r, 50));
     win.webContents.send("overlay:show", payload);
 
-    // Allow any CSS animations to reach a stable frame.
-    await new Promise((r) => setTimeout(r, 250));
+    // Allow any JS-driven layout to settle.
+    await new Promise((r) => setTimeout(r, 50));
 
     const image = await win.capturePage();
     fs.writeFileSync(path.join(OUT_DIR, name), image.toPNG());
@@ -65,6 +75,14 @@ async function main() {
   await capture("drift_persist.png", {
     ...common,
     event_type: "DRIFT_PERSIST",
+    headline: "Interrupt the loop."
+  });
+
+  await capture("drift_persist_pattern_break.png", {
+    ...common,
+    // Prefer source_event_type to exercise the UI path that sets overlay.dataset.eventType.
+    event_type: "DRIFT_START",
+    source_event_type: "DRIFT_PERSIST",
     headline: "Interrupt the loop."
   });
 
