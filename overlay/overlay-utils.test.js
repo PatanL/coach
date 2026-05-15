@@ -1,7 +1,7 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
 
-const { isTextInputTarget, isInteractiveTarget, shouldIgnoreGlobalEnter } = require("./overlay-utils");
+const { isTextInputTarget, isInteractiveTarget, shouldIgnoreGlobalEnter, shouldIgnoreGlobalEscape } = require("./overlay-utils");
 
 test("isTextInputTarget: recognizes common typing targets", () => {
   assert.equal(isTextInputTarget({ tagName: "INPUT" }), true);
@@ -45,4 +45,28 @@ test("shouldIgnoreGlobalEnter: child of button/link should still block global En
     }
   };
   assert.equal(shouldIgnoreGlobalEnter(spanInsideButton), true);
+});
+
+test("shouldIgnoreGlobalEscape: typing targets should block global Escape", () => {
+  assert.equal(shouldIgnoreGlobalEscape({ tagName: "TEXTAREA" }), true);
+  assert.equal(shouldIgnoreGlobalEscape({ tagName: "DIV", isContentEditable: true }), true);
+});
+
+test("shouldIgnoreGlobalEscape: child of typing target should still block global Escape", () => {
+  const textarea = { tagName: "TEXTAREA" };
+  const spanInsideTextarea = {
+    tagName: "SPAN",
+    closest: (selector) => {
+      // Return the textarea for any closest() selector query.
+      // We don't parse selectors here; we just validate that shouldIgnoreGlobalEscape uses closest.
+      return selector ? textarea : null;
+    }
+  };
+  assert.equal(shouldIgnoreGlobalEscape(spanInsideTextarea), true);
+});
+
+test("shouldIgnoreGlobalEscape: non-typing targets should not block global Escape", () => {
+  assert.equal(shouldIgnoreGlobalEscape({ tagName: "BUTTON" }), false);
+  assert.equal(shouldIgnoreGlobalEscape({ tagName: "DIV" }), false);
+  assert.equal(shouldIgnoreGlobalEscape(null), false);
 });

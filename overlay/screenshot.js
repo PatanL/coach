@@ -2,6 +2,10 @@ const { app, BrowserWindow } = require("electron");
 const path = require("path");
 const fs = require("fs");
 
+// Rendering determinism: avoid GPU/hardware acceleration to reduce run-to-run diffs.
+app.disableHardwareAcceleration();
+app.commandLine.appendSwitch("disable-gpu");
+
 const OUT_DIR = path.join(__dirname, "screenshots");
 
 function ensureDir(dir) {
@@ -34,13 +38,32 @@ async function main() {
 
   await win.loadFile(htmlPath);
 
+  // Make screenshots deterministic: freeze animations/transitions so we always capture the same frame.
+  await win.webContents.insertCSS(`
+    *, *::before, *::after {
+      animation: none !important;
+      transition: none !important;
+      caret-color: transparent !important;
+    }
+  `);
+
+  // Explicitly lock zoom.
+  win.webContents.setZoomFactor(1);
+
   async function capture(name, payload) {
-    // Give the DOM a moment to settle, then render the payload.
-    await new Promise((r) => setTimeout(r, 50));
     win.webContents.send("overlay:show", payload);
 
-    // Allow any CSS animations to reach a stable frame.
-    await new Promise((r) => setTimeout(r, 250));
+    // Wait until the overlay has applied the payload (avoid flaky timing-based screenshots).
+    const want = String(payload.event_type || payload.source_event_type || "").toUpperCase();
+    const deadline = Date.now() + 2000;
+    while (Date.now() < deadline) {
+      const have = await win.webContents.executeJavaScript(
+        "document.getElementById('overlay')?.dataset?.eventType || ''",
+        true
+      );
+      if (String(have).toUpperCase() === want) break;
+      await new Promise((r) => setTimeout(r, 25));
+    }
 
     const image = await win.capturePage();
     fs.writeFileSync(path.join(OUT_DIR, name), image.toPNG());
