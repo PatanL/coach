@@ -11,6 +11,7 @@ const choiceButtons = document.getElementById("choiceButtons");
 const alignInput = document.getElementById("alignInput");
 const alignText = document.getElementById("alignText");
 const alignSubmit = document.getElementById("alignSubmit");
+const enterHint = document.getElementById("enterHint");
 
 const backBtn = document.getElementById("backBtn");
 const stuckBtn = document.getElementById("stuckBtn");
@@ -37,6 +38,11 @@ function updateEventLabel(payload) {
   const raw = payload?.source_event_type || payload?.event_type || payload?.type || "";
   const eventType = String(raw).toUpperCase();
   overlay.dataset.eventType = eventType;
+
+  // Keep hotkey hints honest: DRIFT_PERSIST requires an explicit modifier for Enter.
+  if (enterHint) {
+    enterHint.textContent = eventType === "DRIFT_PERSIST" ? "Cmd/Ctrl+Enter: Back on track" : "Enter: Back on track";
+  }
 
   if (!eventType) {
     setText(eventLabel, "DRIFT");
