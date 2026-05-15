@@ -107,6 +107,19 @@ function showOverlay(payload) {
   overlay.dataset.level = payload.level || "B";
   currentPayload = payload;
   shownAt = Date.now();
+
+  // Focus management: ensure keyboard activation lands on an intentional action.
+  // For DRIFT_PERSIST, steer toward recovery (pattern-break + actionable default).
+  // In align mode, keep focus on the text input.
+  const mode = overlay.dataset.mode;
+  if (mode === "align") {
+    // Allow the DOM to settle before focusing.
+    setTimeout(() => alignText?.focus?.(), 0);
+  } else {
+    const eventType = String(payload?.source_event_type || payload?.event_type || payload?.type || "").toUpperCase();
+    const defaultBtn = eventType === "DRIFT_PERSIST" ? recoverBtn : backBtn;
+    setTimeout(() => defaultBtn?.focus?.(), 0);
+  }
 }
 
 function sendAction(action) {
