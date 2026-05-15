@@ -40,9 +40,18 @@
     return isTextInputTarget(t) || isInteractiveTarget(t);
   }
 
+  // The overlay uses a global Enter hotkey as a convenience to mark "Back on track".
+  // For high-salience interventions like DRIFT_PERSIST, require an explicit click instead.
+  function shouldTriggerGlobalEnter(target, eventType) {
+    const type = String(eventType || "").toUpperCase();
+    if (type === "DRIFT_PERSIST") return false;
+    return !shouldIgnoreGlobalEnter(target);
+  }
+
   return {
     isTextInputTarget,
     isInteractiveTarget,
-    shouldIgnoreGlobalEnter
+    shouldIgnoreGlobalEnter,
+    shouldTriggerGlobalEnter
   };
 });

@@ -11,6 +11,7 @@ const choiceButtons = document.getElementById("choiceButtons");
 const alignInput = document.getElementById("alignInput");
 const alignText = document.getElementById("alignText");
 const alignSubmit = document.getElementById("alignSubmit");
+const enterHint = document.getElementById("enterHint");
 
 const backBtn = document.getElementById("backBtn");
 const stuckBtn = document.getElementById("stuckBtn");
@@ -32,11 +33,26 @@ function updatePrimaryLabel(payload) {
   backBtn.textContent = "Back on track";
 }
 
-function updateEventLabel(payload) {
+function getEventType(payload) {
   // Prefer the originating event type when available (used for visual pattern-breaks like DRIFT_PERSIST).
   const raw = payload?.source_event_type || payload?.event_type || payload?.type || "";
-  const eventType = String(raw).toUpperCase();
+  return String(raw).toUpperCase();
+}
+
+function updateEventLabel(payload) {
+  const eventType = getEventType(payload);
   overlay.dataset.eventType = eventType;
+
+  // DRIFT_PERSIST: emphasize the recovery path. Keep it deliberate (no focus steal).
+  if (eventType === "DRIFT_PERSIST") {
+    recoverBtn.classList.add("primary");
+    backBtn.classList.remove("primary");
+    setText(enterHint, "Enter: Recover schedule");
+  } else {
+    recoverBtn.classList.remove("primary");
+    backBtn.classList.add("primary");
+    setText(enterHint, "Enter: Back on track");
+  }
 
   if (!eventType) {
     setText(eventLabel, "DRIFT");
@@ -161,11 +177,19 @@ window.overlayAPI.onPause(() => {
 });
 
 window.addEventListener("keydown", (event) => {
-  // Don't treat Enter as "Back on track" while the user is typing or interacting with a control.
+  // Don't treat Enter as a global action while the user is typing or interacting with a control.
   if (event.key === "Enter") {
-    const ignoreEnter = window.overlayUtils?.shouldIgnoreGlobalEnter?.(event.target);
-    if (!ignoreEnter) {
-      sendAction({ action: "back_on_track" });
+    const eventType = overlay?.dataset?.eventType || "";
+    const shouldTrigger = window.overlayUtils?.shouldTriggerGlobalEnter
+      ? window.overlayUtils.shouldTriggerGlobalEnter(event.target, eventType)
+      : !(window.overlayUtils?.shouldIgnoreGlobalEnter?.(event.target));
+
+    if (shouldTrigger) {
+      if (eventType === "DRIFT_PERSIST") {
+        sendAction({ action: "recover" });
+      } else {
+        sendAction({ action: "back_on_track" });
+      }
     }
   }
   if (event.key === "Escape") {
