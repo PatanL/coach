@@ -40,9 +40,18 @@
     return isTextInputTarget(t) || isInteractiveTarget(t);
   }
 
+  // Focus hint for the overlay so persistent drift "pattern-break" nudges recovery.
+  // Returns one of: "recover" | "back".
+  function getInitialPrimaryAction(eventType) {
+    const t = String(eventType || "").toUpperCase();
+    if (t === "DRIFT_PERSIST") return "recover";
+    return "back";
+  }
+
   return {
     isTextInputTarget,
     isInteractiveTarget,
-    shouldIgnoreGlobalEnter
+    shouldIgnoreGlobalEnter,
+    getInitialPrimaryAction
   };
 });
