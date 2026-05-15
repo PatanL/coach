@@ -9,6 +9,12 @@
     if (!target) return false;
     const tag = String(target.tagName || "").toLowerCase();
     if (target.isContentEditable) return true;
+
+    // Some apps (and some future overlay components) use ARIA roles instead of native inputs.
+    // Treat role=textbox as typing context so global hotkeys (Enter) don't accidentally fire.
+    const role = String(target.getAttribute?.("role") || "").toLowerCase();
+    if (role === "textbox") return true;
+
     return tag === "input" || tag === "textarea" || tag === "select";
   }
 
