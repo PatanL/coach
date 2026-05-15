@@ -30,24 +30,14 @@ html, body {
   backdrop-filter: blur(8px);
 }
 
-/* Visual pattern-break when drift persists: stronger edge + subtle shake pulse. */
-#overlay[data-event-type="DRIFT_PERSIST"] .card {
-  border-color: rgba(241, 108, 91, 0.55);
-  box-shadow: 0 22px 80px rgba(241, 108, 91, 0.12), 0 18px 60px rgba(0, 0, 0, 0.55);
-  animation: driftPersistPulse 900ms ease-in-out 1;
-}
+/* DRIFT_PERSIST visual pattern-break is defined later in this file.
+   Keep it in one place to avoid conflicting animations/colors. */
 
-#overlay[data-event-type="DRIFT_PERSIST"] .label {
-  color: #ffb24a;
-}
-
-@keyframes driftPersistPulse {
-  0% { transform: translateX(0); }
-  18% { transform: translateX(-6px); }
-  36% { transform: translateX(6px); }
-  54% { transform: translateX(-4px); }
-  72% { transform: translateX(4px); }
-  100% { transform: translateX(0); }
+/* Screenshot runs should be fully deterministic (no motion/transition variance). */
+#overlay[data-screenshot="true"] *,
+#overlay[data-screenshot="true"] {
+  animation: none !important;
+  transition: none !important;
 }
 
 #overlay[data-level="A"] .card {

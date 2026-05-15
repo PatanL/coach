@@ -11,6 +11,7 @@ const choiceButtons = document.getElementById("choiceButtons");
 const alignInput = document.getElementById("alignInput");
 const alignText = document.getElementById("alignText");
 const alignSubmit = document.getElementById("alignSubmit");
+const enterHint = document.getElementById("enterHint");
 
 const backBtn = document.getElementById("backBtn");
 const stuckBtn = document.getElementById("stuckBtn");
@@ -66,6 +67,10 @@ function showOverlay(payload) {
   overlay.classList.remove("hidden");
   resetSnooze();
   resetAlignInput();
+
+  // Deterministic rendering for screenshot runs: disable CSS motion.
+  overlay.dataset.screenshot = payload?.cmd_id === "screenshot" ? "true" : "";
+
   updateEventLabel(payload);
   updatePrimaryLabel(payload);
 
@@ -107,6 +112,31 @@ function showOverlay(payload) {
   overlay.dataset.level = payload.level || "B";
   currentPayload = payload;
   shownAt = Date.now();
+
+  // Focus + hotkey hint:
+  // - For DRIFT_PERSIST, we want a strong pattern-break and a safer default than "Enter → Back on track".
+  // - For align mode, focus the text input so Enter submits the typed choice.
+  const eventType = String(overlay.dataset.eventType || "").toUpperCase();
+  const isAlignMode = overlay.dataset.mode === "align";
+
+  if (enterHint) {
+    if (isAlignMode) setText(enterHint, "Enter: Submit");
+    else if (eventType === "DRIFT_PERSIST") setText(enterHint, "Enter: Recover schedule");
+    else setText(enterHint, "Enter: Back on track");
+  }
+
+  // Defer focus until after the DOM updates are painted.
+  window.requestAnimationFrame(() => {
+    if (isAlignMode) {
+      alignText?.focus?.();
+      return;
+    }
+    if (eventType === "DRIFT_PERSIST") {
+      recoverBtn?.focus?.();
+      return;
+    }
+    backBtn?.focus?.();
+  });
 }
 
 function sendAction(action) {
@@ -162,10 +192,13 @@ window.overlayAPI.onPause(() => {
 
 window.addEventListener("keydown", (event) => {
   // Don't treat Enter as "Back on track" while the user is typing or interacting with a control.
+  // Also ignore modified Enter (Cmd/Ctrl/Alt+Enter) to avoid surprising behavior.
   if (event.key === "Enter") {
+    if (event.metaKey || event.ctrlKey || event.altKey) return;
     const ignoreEnter = window.overlayUtils?.shouldIgnoreGlobalEnter?.(event.target);
     if (!ignoreEnter) {
-      sendAction({ action: "back_on_track" });
+      const action = window.overlayUtils?.getGlobalEnterAction?.(overlay?.dataset?.eventType) || "back_on_track";
+      sendAction({ action });
     }
   }
   if (event.key === "Escape") {
