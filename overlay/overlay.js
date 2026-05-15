@@ -69,11 +69,19 @@ function showOverlay(payload) {
   updateEventLabel(payload);
   updatePrimaryLabel(payload);
 
-  if (payload.choices && Array.isArray(payload.choices)) {
+  const hasChoices = payload.choices && Array.isArray(payload.choices);
+  if (hasChoices) {
     overlay.dataset.mode = "align";
   } else {
     overlay.dataset.mode = "";
   }
+
+  // DRIFT_PERSIST should feel like a pattern-break and be immediately actionable.
+  // Move focus to the Recover button so Enter activates the focused control (and doesn't trigger a global "Back on track").
+  if (overlay.dataset.eventType === "DRIFT_PERSIST" && !hasChoices) {
+    setTimeout(() => recoverBtn?.focus?.(), 0);
+  }
+
   setText(blockName, payload.block_name || "");
   setText(headline, payload.headline || "Reset.");
   setText(humanLine, payload.human_line || "");
