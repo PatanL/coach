@@ -63,11 +63,16 @@ function resetAlignInput() {
 }
 
 function showOverlay(payload) {
-  overlay.classList.remove("hidden");
+  overlay.dataset.eventType = payload?.source_event_type || "";
+  overlay.dataset.styleId = payload?.style_id || "";
+  // Used by screenshot tooling to disable animations for deterministic captures.
+  overlay.dataset.screenshot = payload?.screenshot ? "1" : "";
   resetSnooze();
   resetAlignInput();
+  // Set data attributes + labels before showing to avoid a 1-frame style flash.
   updateEventLabel(payload);
   updatePrimaryLabel(payload);
+  overlay.classList.remove("hidden");
 
   if (payload.choices && Array.isArray(payload.choices)) {
     overlay.dataset.mode = "align";
@@ -161,14 +166,16 @@ window.overlayAPI.onPause(() => {
 });
 
 window.addEventListener("keydown", (event) => {
-  // Don't treat Enter as "Back on track" while the user is typing or interacting with a control.
+  // Enter is a global "Back on track" hotkey only when the user isn't typing or interacting
+  // with a control (e.g. focused button/link).
   if (event.key === "Enter") {
     const ignoreEnter = window.overlayUtils?.shouldIgnoreGlobalEnter?.(event.target);
-    if (!ignoreEnter) {
-      sendAction({ action: "back_on_track" });
-    }
+    if (!ignoreEnter) sendAction({ action: "back_on_track" });
   }
+
   if (event.key === "Escape") {
-    snooze.classList.remove("hidden");
+    // Don't pop open Snooze while the user is typing a custom alignment answer.
+    const ignoreEscape = window.overlayUtils?.shouldIgnoreGlobalEscape?.(event.target);
+    if (!ignoreEscape) snooze.classList.remove("hidden");
   }
 });
