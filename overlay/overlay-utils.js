@@ -40,9 +40,19 @@
     return isTextInputTarget(t) || isInteractiveTarget(t);
   }
 
+  // Decide what the global Enter key should do when it is *not* ignored.
+  // Returns an action string (e.g. "recover") or null if Enter should be ignored.
+  function getGlobalEnterAction(eventType, target) {
+    if (shouldIgnoreGlobalEnter(target)) return null;
+    const et = String(eventType || "").toUpperCase();
+    if (et === "DRIFT_PERSIST") return "recover";
+    return "back_on_track";
+  }
+
   return {
     isTextInputTarget,
     isInteractiveTarget,
-    shouldIgnoreGlobalEnter
+    shouldIgnoreGlobalEnter,
+    getGlobalEnterAction
   };
 });

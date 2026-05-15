@@ -34,6 +34,9 @@ async function main() {
 
   await win.loadFile(htmlPath);
 
+  // Ensure deterministic screenshots (no motion blur / mid-animation captures).
+  await win.webContents.executeJavaScript('document.documentElement.dataset.screenshot = "true";');
+
   async function capture(name, payload) {
     // Give the DOM a moment to settle, then render the payload.
     await new Promise((r) => setTimeout(r, 50));
@@ -59,11 +62,13 @@ async function main() {
 
   await capture("drift_start.png", {
     ...common,
+    screenshot: true,
     event_type: "DRIFT_START"
   });
 
   await capture("drift_persist.png", {
     ...common,
+    screenshot: true,
     event_type: "DRIFT_PERSIST",
     headline: "Interrupt the loop."
   });
