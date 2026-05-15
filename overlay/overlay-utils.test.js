@@ -1,13 +1,26 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
 
-const { isTextInputTarget, isInteractiveTarget, shouldIgnoreGlobalEnter } = require("./overlay-utils");
+const {
+  isTextInputTarget,
+  isInteractiveTarget,
+  shouldIgnoreGlobalEnter,
+  normalizeEventType,
+  getPreferredInitialFocus,
+  getPrimaryEnterAction,
+  getEnterHintText,
+  getPrimaryButtonId
+} = require("./overlay-utils");
 
 test("isTextInputTarget: recognizes common typing targets", () => {
   assert.equal(isTextInputTarget({ tagName: "INPUT" }), true);
   assert.equal(isTextInputTarget({ tagName: "textarea" }), true);
   assert.equal(isTextInputTarget({ tagName: "Select" }), true);
   assert.equal(isTextInputTarget({ tagName: "DIV", isContentEditable: true }), true);
+
+  assert.equal(isTextInputTarget({ tagName: "DIV", getAttribute: (k) => (k === "role" ? "textbox" : null) }), true);
+  assert.equal(isTextInputTarget({ tagName: "DIV", getAttribute: (k) => (k === "role" ? "searchbox" : null) }), true);
+  assert.equal(isTextInputTarget({ tagName: "DIV", getAttribute: (k) => (k === "role" ? "combobox" : null) }), true);
 });
 
 test("isTextInputTarget: ignores non-input targets", () => {
@@ -45,4 +58,51 @@ test("shouldIgnoreGlobalEnter: child of button/link should still block global En
     }
   };
   assert.equal(shouldIgnoreGlobalEnter(spanInsideButton), true);
+});
+
+test("normalizeEventType: uppercases and trims", () => {
+  assert.equal(normalizeEventType(" drift_persist "), "DRIFT_PERSIST");
+  assert.equal(normalizeEventType(null), "");
+});
+
+test("getPreferredInitialFocus: align mode focuses text input", () => {
+  assert.equal(getPreferredInitialFocus({ eventType: "DRIFT_PERSIST", mode: "align" }), "alignText");
+  assert.equal(getPreferredInitialFocus({ eventType: "DRIFT", mode: "align" }), "alignText");
+});
+
+test("getPreferredInitialFocus: DRIFT_PERSIST focuses recover", () => {
+  assert.equal(getPreferredInitialFocus({ eventType: "DRIFT_PERSIST" }), "recoverBtn");
+  assert.equal(getPreferredInitialFocus({ eventType: "drift_persist" }), "recoverBtn");
+});
+
+test("getPreferredInitialFocus: default focuses back", () => {
+  assert.equal(getPreferredInitialFocus({ eventType: "DRIFT" }), "backBtn");
+  assert.equal(getPreferredInitialFocus({ eventType: "" }), "backBtn");
+});
+
+test("getPrimaryEnterAction: align mode maps Enter to align_submit", () => {
+  assert.equal(getPrimaryEnterAction({ eventType: "DRIFT", mode: "align" }), "align_submit");
+  assert.equal(getPrimaryEnterAction({ eventType: "DRIFT_PERSIST", mode: "align" }), "align_submit");
+});
+
+test("getPrimaryEnterAction: DRIFT_PERSIST maps Enter to recover", () => {
+  assert.equal(getPrimaryEnterAction({ eventType: "DRIFT_PERSIST" }), "recover");
+  assert.equal(getPrimaryEnterAction({ eventType: "drift_persist" }), "recover");
+});
+
+test("getPrimaryEnterAction: default maps Enter to back_on_track", () => {
+  assert.equal(getPrimaryEnterAction({ eventType: "DRIFT" }), "back_on_track");
+  assert.equal(getPrimaryEnterAction({ eventType: "" }), "back_on_track");
+});
+
+test("getEnterHintText: aligns hint with mode/event", () => {
+  assert.equal(getEnterHintText({ eventType: "DRIFT_PERSIST" }), "Enter: Recover schedule");
+  assert.equal(getEnterHintText({ eventType: "DRIFT", mode: "align" }), "Enter: Submit");
+});
+
+test("getPrimaryButtonId: aligns primary styling with mode/event", () => {
+  assert.equal(getPrimaryButtonId({ eventType: "DRIFT", mode: "align" }), "alignSubmit");
+  assert.equal(getPrimaryButtonId({ eventType: "DRIFT_PERSIST" }), "recoverBtn");
+  assert.equal(getPrimaryButtonId({ eventType: "drift_persist" }), "recoverBtn");
+  assert.equal(getPrimaryButtonId({ eventType: "DRIFT" }), "backBtn");
 });

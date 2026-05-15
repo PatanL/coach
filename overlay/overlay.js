@@ -11,6 +11,7 @@ const choiceButtons = document.getElementById("choiceButtons");
 const alignInput = document.getElementById("alignInput");
 const alignText = document.getElementById("alignText");
 const alignSubmit = document.getElementById("alignSubmit");
+const enterHint = document.getElementById("enterHint");
 
 const backBtn = document.getElementById("backBtn");
 const stuckBtn = document.getElementById("stuckBtn");
@@ -53,6 +54,27 @@ function updateEventLabel(payload) {
   setText(eventLabel, eventType.replaceAll("_", " "));
 }
 
+function updateEnterHint() {
+  if (!enterHint) return;
+  const mode = overlay.dataset.mode || "";
+  const eventType = overlay.dataset.eventType || "";
+  const text = window.overlayUtils?.getEnterHintText?.({ eventType, mode }) || "Enter: Back on track";
+  enterHint.textContent = text;
+}
+
+function applyPrimaryButtonStyle() {
+  const mode = overlay.dataset.mode || "";
+  const eventType = overlay.dataset.eventType || "";
+  const preferred = window.overlayUtils?.getPrimaryButtonId?.({ eventType, mode }) || "backBtn";
+
+  // Clear existing primary styles first.
+  [backBtn, recoverBtn, alignSubmit].forEach((el) => el?.classList?.remove("primary"));
+
+  const el =
+    preferred === "recoverBtn" ? recoverBtn : preferred === "alignSubmit" ? alignSubmit : backBtn;
+  el?.classList?.add("primary");
+}
+
 function resetSnooze() {
   snooze.classList.add("hidden");
 }
@@ -60,6 +82,40 @@ function resetSnooze() {
 function resetAlignInput() {
   alignText.value = "";
   alignInput.classList.add("hidden");
+}
+
+function tryFocus(el) {
+  if (!el) return false;
+  if (el.disabled) return false;
+  // offsetParent === null covers display:none and some hidden states.
+  if (el.offsetParent === null) return false;
+  el.focus({ preventScroll: true });
+  return true;
+}
+
+function applyInitialFocus() {
+  const mode = overlay.dataset.mode || "";
+  const eventType = overlay.dataset.eventType || "";
+  const preferred = window.overlayUtils?.getPreferredInitialFocus?.({ eventType, mode }) || "backBtn";
+
+  // Defer until after layout so visibility checks are accurate.
+  requestAnimationFrame(() => {
+    if (preferred === "alignText") {
+      if (!tryFocus(alignText)) {
+        tryFocus(backBtn);
+      }
+      return;
+    }
+
+    if (preferred === "recoverBtn") {
+      if (!tryFocus(recoverBtn)) {
+        tryFocus(backBtn);
+      }
+      return;
+    }
+
+    tryFocus(backBtn);
+  });
 }
 
 function showOverlay(payload) {
@@ -74,6 +130,8 @@ function showOverlay(payload) {
   } else {
     overlay.dataset.mode = "";
   }
+  updateEnterHint();
+  applyPrimaryButtonStyle();
   setText(blockName, payload.block_name || "");
   setText(headline, payload.headline || "Reset.");
   setText(humanLine, payload.human_line || "");
@@ -107,6 +165,8 @@ function showOverlay(payload) {
   overlay.dataset.level = payload.level || "B";
   currentPayload = payload;
   shownAt = Date.now();
+
+  applyInitialFocus();
 }
 
 function sendAction(action) {
@@ -165,7 +225,17 @@ window.addEventListener("keydown", (event) => {
   if (event.key === "Enter") {
     const ignoreEnter = window.overlayUtils?.shouldIgnoreGlobalEnter?.(event.target);
     if (!ignoreEnter) {
-      sendAction({ action: "back_on_track" });
+      const eventType = overlay.dataset.eventType || "";
+      const mode = overlay.dataset.mode || "";
+      const action =
+        window.overlayUtils?.getPrimaryEnterAction?.({ eventType, mode }) ||
+        "back_on_track";
+
+      if (action === "align_submit") {
+        alignSubmit.click();
+      } else {
+        sendAction({ action });
+      }
     }
   }
   if (event.key === "Escape") {

@@ -9,6 +9,11 @@
     if (!target) return false;
     const tag = String(target.tagName || "").toLowerCase();
     if (target.isContentEditable) return true;
+
+    // Some UIs use ARIA roles rather than native inputs.
+    const role = String(target.getAttribute?.("role") || "").toLowerCase();
+    if (role === "textbox" || role === "searchbox" || role === "combobox") return true;
+
     return tag === "input" || tag === "textarea" || tag === "select";
   }
 
@@ -40,9 +45,54 @@
     return isTextInputTarget(t) || isInteractiveTarget(t);
   }
 
+  function normalizeEventType(raw) {
+    return String(raw || "").trim().toUpperCase();
+  }
+
+  // Centralize focus rules so overlay.js stays dumb and we can unit test the behavior.
+  // Returns one of: "alignText" | "recoverBtn" | "backBtn".
+  function getPreferredInitialFocus({ eventType, mode } = {}) {
+    const t = normalizeEventType(eventType);
+    if (mode === "align") return "alignText";
+    if (t === "DRIFT_PERSIST") return "recoverBtn";
+    return "backBtn";
+  }
+
+  // Decide what the global Enter key should do when not focused in an interactive control.
+  // Returns an overlay action string, e.g. "recover" | "back_on_track".
+  function getPrimaryEnterAction({ eventType, mode } = {}) {
+    const t = normalizeEventType(eventType);
+    // In align mode, Enter should prefer submitting the answer rather than dismissing the overlay.
+    // overlay.js will route this to alignSubmit.click(), which is a no-op if the input is empty.
+    if (mode === "align") return "align_submit";
+    if (t === "DRIFT_PERSIST") return "recover";
+    return "back_on_track";
+  }
+
+  function getEnterHintText({ eventType, mode } = {}) {
+    const t = normalizeEventType(eventType);
+    if (mode === "align") return "Enter: Submit";
+    if (t === "DRIFT_PERSIST") return "Enter: Recover schedule";
+    return "Enter: Back on track";
+  }
+
+  // Decide which button should be visually primary.
+  // Returns one of: "alignSubmit" | "recoverBtn" | "backBtn".
+  function getPrimaryButtonId({ eventType, mode } = {}) {
+    const t = normalizeEventType(eventType);
+    if (mode === "align") return "alignSubmit";
+    if (t === "DRIFT_PERSIST") return "recoverBtn";
+    return "backBtn";
+  }
+
   return {
     isTextInputTarget,
     isInteractiveTarget,
-    shouldIgnoreGlobalEnter
+    shouldIgnoreGlobalEnter,
+    normalizeEventType,
+    getPreferredInitialFocus,
+    getPrimaryEnterAction,
+    getEnterHintText,
+    getPrimaryButtonId
   };
 });
