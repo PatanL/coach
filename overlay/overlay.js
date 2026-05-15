@@ -62,6 +62,21 @@ function resetAlignInput() {
   alignInput.classList.add("hidden");
 }
 
+function focusDefaultControl(payload) {
+  // Focus is a safety feature:
+  // - Prevent accidental global Enter from immediately marking "Back on track".
+  // - Enable keyboard-first recovery (Option B actionable overlay).
+  // We defer focus until the DOM is updated.
+  window.requestAnimationFrame(() => {
+    if (payload?.choices && Array.isArray(payload.choices)) {
+      alignText?.focus?.();
+      return;
+    }
+    // Default to Recover as the most "active" corrective action.
+    recoverBtn?.focus?.();
+  });
+}
+
 function showOverlay(payload) {
   overlay.classList.remove("hidden");
   resetSnooze();
@@ -107,6 +122,7 @@ function showOverlay(payload) {
   overlay.dataset.level = payload.level || "B";
   currentPayload = payload;
   shownAt = Date.now();
+  focusDefaultControl(payload);
 }
 
 function sendAction(action) {
@@ -167,8 +183,25 @@ window.addEventListener("keydown", (event) => {
     if (!ignoreEnter) {
       sendAction({ action: "back_on_track" });
     }
+    return;
   }
-  if (event.key === "Escape") {
+
+  const ignoreHotkey = window.overlayUtils?.shouldIgnoreGlobalHotkey?.(event.target);
+  if (ignoreHotkey) return;
+
+  // Actionable overlay hotkeys (Option B): fast recovery without mouse.
+  // Keep these mnemonic + single-key.
+  const key = String(event.key || "").toLowerCase();
+  if (key === "r") {
+    sendAction({ action: "recover" });
+    return;
+  }
+  if (key === "s") {
+    sendAction({ action: "stuck" });
+    return;
+  }
+  if (key === "z" || event.key === "Escape") {
+    // "Z" for snooze, Esc for discoverability.
     snooze.classList.remove("hidden");
   }
 });

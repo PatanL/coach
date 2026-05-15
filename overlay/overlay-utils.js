@@ -40,9 +40,16 @@
     return isTextInputTarget(t) || isInteractiveTarget(t);
   }
 
+  // For letter hotkeys (r/s/z/etc.), we should ignore when typing or interacting with a control.
+  // (Same rule as Enter, but exposed as a clearer API for callers.)
+  function shouldIgnoreGlobalHotkey(target) {
+    return shouldIgnoreGlobalEnter(target);
+  }
+
   return {
     isTextInputTarget,
     isInteractiveTarget,
-    shouldIgnoreGlobalEnter
+    shouldIgnoreGlobalEnter,
+    shouldIgnoreGlobalHotkey
   };
 });
