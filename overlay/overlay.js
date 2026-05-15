@@ -7,6 +7,7 @@ const diagnosis = document.getElementById("diagnosis");
 const nextAction = document.getElementById("nextAction");
 const snooze = document.getElementById("snoozeReason");
 const miniPlan = document.getElementById("miniPlan");
+const enterHint = document.getElementById("enterHint");
 const choiceButtons = document.getElementById("choiceButtons");
 const alignInput = document.getElementById("alignInput");
 const alignText = document.getElementById("alignText");
@@ -68,6 +69,20 @@ function showOverlay(payload) {
   resetAlignInput();
   updateEventLabel(payload);
   updatePrimaryLabel(payload);
+
+  // DRIFT_PERSIST should feel different and reduce accidental "dismiss" actions.
+  const isPersist = overlay.dataset.eventType === "DRIFT_PERSIST";
+  if (enterHint) {
+    enterHint.textContent = isPersist ? "Enter: (disabled) choose an action" : "Enter: Back on track";
+  }
+  if (isPersist) {
+    backBtn.classList.remove("primary");
+    recoverBtn.classList.add("primary");
+    recoverBtn.focus();
+  } else {
+    recoverBtn.classList.remove("primary");
+    backBtn.classList.add("primary");
+  }
 
   if (payload.choices && Array.isArray(payload.choices)) {
     overlay.dataset.mode = "align";
@@ -162,7 +177,9 @@ window.overlayAPI.onPause(() => {
 
 window.addEventListener("keydown", (event) => {
   // Don't treat Enter as "Back on track" while the user is typing or interacting with a control.
+  // For DRIFT_PERSIST, we disable the global Enter shortcut entirely to force an explicit choice.
   if (event.key === "Enter") {
+    if (overlay.dataset.eventType === "DRIFT_PERSIST") return;
     const ignoreEnter = window.overlayUtils?.shouldIgnoreGlobalEnter?.(event.target);
     if (!ignoreEnter) {
       sendAction({ action: "back_on_track" });

@@ -8,6 +8,14 @@ test("isTextInputTarget: recognizes common typing targets", () => {
   assert.equal(isTextInputTarget({ tagName: "textarea" }), true);
   assert.equal(isTextInputTarget({ tagName: "Select" }), true);
   assert.equal(isTextInputTarget({ tagName: "DIV", isContentEditable: true }), true);
+  assert.equal(
+    isTextInputTarget({ tagName: "DIV", getAttribute: (k) => (k === "role" ? "textbox" : null) }),
+    true
+  );
+  assert.equal(
+    isTextInputTarget({ tagName: "DIV", getAttribute: (k) => (k === "role" ? "combobox" : null) }),
+    true
+  );
 });
 
 test("isTextInputTarget: ignores non-input targets", () => {
@@ -45,4 +53,17 @@ test("shouldIgnoreGlobalEnter: child of button/link should still block global En
     }
   };
   assert.equal(shouldIgnoreGlobalEnter(spanInsideButton), true);
+});
+
+test("shouldIgnoreGlobalEnter: contenteditable elements should block global Enter even when attribute isn't 'true'", () => {
+  const editable = { tagName: "DIV", isContentEditable: true };
+  const spanInsideEditable = {
+    tagName: "SPAN",
+    closest: (selector) => {
+      // Simulate walking up to a contenteditable parent.
+      return selector ? editable : null;
+    }
+  };
+
+  assert.equal(shouldIgnoreGlobalEnter(spanInsideEditable), true);
 });

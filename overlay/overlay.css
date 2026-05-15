@@ -224,6 +224,18 @@ button.primary:hover {
   color: rgba(246, 244, 239, 0.5);
 }
 
+#overlay[data-event-type="DRIFT_PERSIST"] #enterHint {
+  color: rgba(255, 206, 61, 0.85);
+}
+
+/* Screenshot mode: keep renders deterministic for regression diffs. */
+html.screenshot *,
+html.screenshot *::before,
+html.screenshot *::after {
+  animation: none !important;
+  transition: none !important;
+}
+
 /* Visual pattern-break for persistent drift: subtle but unmistakable */
 @keyframes driftPersistPulse {
   0% {
