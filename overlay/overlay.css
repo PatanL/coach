@@ -266,3 +266,11 @@ button.primary:hover {
   color: #ff49a7;
   text-shadow: 0 0 10px rgba(255, 73, 167, 0.35);
 }
+
+/* Make the recovery CTA pop on persistent drift (Option B: actionable overlay). */
+#overlay[data-event-type="DRIFT_PERSIST"] #recoverBtn {
+  border-color: rgba(255, 206, 61, 0.9);
+  box-shadow:
+    0 0 0 2px rgba(255, 206, 61, 0.18),
+    0 10px 26px rgba(0, 0, 0, 0.5);
+}

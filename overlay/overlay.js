@@ -32,6 +32,21 @@ function updatePrimaryLabel(payload) {
   backBtn.textContent = "Back on track";
 }
 
+function setPrimaryButton(primary, secondary) {
+  // Ensure only one button is styled as primary at a time.
+  primary?.classList?.add("primary");
+  secondary?.classList?.remove("primary");
+}
+
+function updatePrimaryCTA(eventType) {
+  // Option B actionable overlay: for persistent drift, nudge toward recovery.
+  if (eventType === "DRIFT_PERSIST") {
+    setPrimaryButton(recoverBtn, backBtn);
+    return;
+  }
+  setPrimaryButton(backBtn, recoverBtn);
+}
+
 function updateEventLabel(payload) {
   // Prefer the originating event type when available (used for visual pattern-breaks like DRIFT_PERSIST).
   const raw = payload?.source_event_type || payload?.event_type || payload?.type || "";
@@ -40,17 +55,18 @@ function updateEventLabel(payload) {
 
   if (!eventType) {
     setText(eventLabel, "DRIFT");
-    return;
+    return "";
   }
   if (eventType === "DRIFT_PERSIST") {
     setText(eventLabel, "DRIFT — PERSIST");
-    return;
+    return eventType;
   }
   if (eventType.startsWith("DRIFT")) {
     setText(eventLabel, "DRIFT");
-    return;
+    return eventType;
   }
   setText(eventLabel, eventType.replaceAll("_", " "));
+  return eventType;
 }
 
 function resetSnooze() {
@@ -66,13 +82,25 @@ function showOverlay(payload) {
   overlay.classList.remove("hidden");
   resetSnooze();
   resetAlignInput();
-  updateEventLabel(payload);
+  const eventType = updateEventLabel(payload);
   updatePrimaryLabel(payload);
+  updatePrimaryCTA(eventType);
 
   if (payload.choices && Array.isArray(payload.choices)) {
     overlay.dataset.mode = "align";
   } else {
     overlay.dataset.mode = "";
+  }
+
+  // For persistent drift, gently steer the user toward the recovery action.
+  // We only do this when we're not in an input/choice mode to avoid accidental keyboard activation.
+  if (overlay.dataset.eventType === "DRIFT_PERSIST" && overlay.dataset.mode !== "align") {
+    try {
+      recoverBtn?.focus?.({ preventScroll: true });
+    } catch {
+      // no-op (older focus() signature)
+      recoverBtn?.focus?.();
+    }
   }
   setText(blockName, payload.block_name || "");
   setText(headline, payload.headline || "Reset.");
