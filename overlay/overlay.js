@@ -167,8 +167,25 @@ window.addEventListener("keydown", (event) => {
     if (!ignoreEnter) {
       sendAction({ action: "back_on_track" });
     }
+    return;
   }
-  if (event.key === "Escape") {
+
+  const ignoreHotkey = window.overlayUtils?.shouldIgnoreGlobalHotkey?.(event.target);
+  if (ignoreHotkey) return;
+
+  // Actionable overlay hotkeys (Option B): fast recovery without mouse.
+  // Keep these mnemonic + single-key.
+  const key = String(event.key || "").toLowerCase();
+  if (key === "r") {
+    sendAction({ action: "recover" });
+    return;
+  }
+  if (key === "s") {
+    sendAction({ action: "stuck" });
+    return;
+  }
+  if (key === "z" || event.key === "Escape") {
+    // "Z" for snooze, Esc for discoverability.
     snooze.classList.remove("hidden");
   }
 });
