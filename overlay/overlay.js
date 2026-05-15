@@ -11,6 +11,7 @@ const choiceButtons = document.getElementById("choiceButtons");
 const alignInput = document.getElementById("alignInput");
 const alignText = document.getElementById("alignText");
 const alignSubmit = document.getElementById("alignSubmit");
+const enterHint = document.getElementById("enterHint");
 
 const backBtn = document.getElementById("backBtn");
 const stuckBtn = document.getElementById("stuckBtn");
@@ -37,6 +38,11 @@ function updateEventLabel(payload) {
   const raw = payload?.source_event_type || payload?.event_type || payload?.type || "";
   const eventType = String(raw).toUpperCase();
   overlay.dataset.eventType = eventType;
+
+  // Keep hotkey hints honest: DRIFT_PERSIST requires an explicit modifier for Enter.
+  if (enterHint) {
+    enterHint.textContent = eventType === "DRIFT_PERSIST" ? "Cmd/Ctrl+Enter: Back on track" : "Enter: Back on track";
+  }
 
   if (!eventType) {
     setText(eventLabel, "DRIFT");
@@ -161,10 +167,15 @@ window.overlayAPI.onPause(() => {
 });
 
 window.addEventListener("keydown", (event) => {
-  // Don't treat Enter as "Back on track" while the user is typing or interacting with a control.
   if (event.key === "Enter") {
+    const eventType = overlay?.dataset?.eventType || "";
+    const shouldTrigger = window.overlayUtils?.shouldTriggerGlobalEnter?.(event, event.target, eventType);
+
+    // Back-compat: if helper isn't available, fall back to the old behavior.
     const ignoreEnter = window.overlayUtils?.shouldIgnoreGlobalEnter?.(event.target);
-    if (!ignoreEnter) {
+    const legacyShouldTrigger = !ignoreEnter;
+
+    if (typeof shouldTrigger === "boolean" ? shouldTrigger : legacyShouldTrigger) {
       sendAction({ action: "back_on_track" });
     }
   }
