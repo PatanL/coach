@@ -107,6 +107,17 @@ function showOverlay(payload) {
   overlay.dataset.level = payload.level || "B";
   currentPayload = payload;
   shownAt = Date.now();
+
+  // Focus a primary, explicit control by default so Enter behaves predictably and
+  // doesn't accidentally trigger the global handler while focus is on the page.
+  // (Enter on a focused button will click it; the global handler will ignore it.)
+  setTimeout(() => {
+    try {
+      backBtn.focus();
+    } catch {
+      // noop
+    }
+  }, 0);
 }
 
 function sendAction(action) {
@@ -143,6 +154,16 @@ alignText.addEventListener("keydown", (event) => {
 
 snoozeBtn.addEventListener("click", () => {
   snooze.classList.remove("hidden");
+
+  // Move focus into the snooze dialog so keyboard actions stay within it.
+  setTimeout(() => {
+    try {
+      const firstReason = snooze.querySelector("button[data-reason]");
+      firstReason?.focus?.();
+    } catch {
+      // noop
+    }
+  }, 0);
 });
 
 snooze.addEventListener("click", (event) => {
@@ -170,5 +191,14 @@ window.addEventListener("keydown", (event) => {
   }
   if (event.key === "Escape") {
     snooze.classList.remove("hidden");
+
+    setTimeout(() => {
+      try {
+        const firstReason = snooze.querySelector("button[data-reason]");
+        firstReason?.focus?.();
+      } catch {
+        // noop
+      }
+    }, 0);
   }
 });
