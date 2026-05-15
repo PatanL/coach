@@ -34,6 +34,16 @@ async function main() {
 
   await win.loadFile(htmlPath);
 
+  // Make screenshots deterministic by disabling animations/transitions.
+  // (Electron renders at slightly different frames depending on timing; we want stable pixels.)
+  await win.webContents.insertCSS(`
+    *, *::before, *::after {
+      animation: none !important;
+      transition: none !important;
+      caret-color: transparent !important;
+    }
+  `);
+
   async function capture(name, payload) {
     // Give the DOM a moment to settle, then render the payload.
     await new Promise((r) => setTimeout(r, 50));
@@ -47,6 +57,7 @@ async function main() {
   }
 
   const common = {
+    screenshot: true,
     level: "B",
     block_name: "Deep Work",
     headline: "Reset.",
