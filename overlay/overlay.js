@@ -12,6 +12,8 @@ const alignInput = document.getElementById("alignInput");
 const alignText = document.getElementById("alignText");
 const alignSubmit = document.getElementById("alignSubmit");
 
+const enterHint = document.getElementById("enterHint");
+
 const backBtn = document.getElementById("backBtn");
 const stuckBtn = document.getElementById("stuckBtn");
 const recoverBtn = document.getElementById("recoverBtn");
@@ -37,6 +39,15 @@ function updateEventLabel(payload) {
   const raw = payload?.source_event_type || payload?.event_type || payload?.type || "";
   const eventType = String(raw).toUpperCase();
   overlay.dataset.eventType = eventType;
+
+  // Pattern-break UX: DRIFT_PERSIST should require an explicit click (no "Enter to dismiss").
+  if (enterHint) {
+    if (eventType === "DRIFT_PERSIST") {
+      setText(enterHint, "Enter: (disabled) — choose a button");
+    } else {
+      setText(enterHint, "Enter: Back on track");
+    }
+  }
 
   if (!eventType) {
     setText(eventLabel, "DRIFT");
@@ -68,6 +79,12 @@ function showOverlay(payload) {
   resetAlignInput();
   updateEventLabel(payload);
   updatePrimaryLabel(payload);
+
+  const eventType = String(overlay.dataset.eventType || "").toUpperCase();
+  if (enterHint) {
+    // Pattern-break: on persistent drift, require an intentional click instead of an easy Enter reflex.
+    enterHint.textContent = eventType === "DRIFT_PERSIST" ? "Enter: (disabled — click Back on track)" : "Enter: Back on track";
+  }
 
   if (payload.choices && Array.isArray(payload.choices)) {
     overlay.dataset.mode = "align";
@@ -162,9 +179,11 @@ window.overlayAPI.onPause(() => {
 
 window.addEventListener("keydown", (event) => {
   // Don't treat Enter as "Back on track" while the user is typing or interacting with a control.
+  // Also, DRIFT_PERSIST is a deliberate pattern-break: require a click/tap to acknowledge.
   if (event.key === "Enter") {
     const ignoreEnter = window.overlayUtils?.shouldIgnoreGlobalEnter?.(event.target);
-    if (!ignoreEnter) {
+    const allowGlobalEnter = window.overlayUtils?.shouldAllowGlobalEnter?.(overlay?.dataset?.eventType);
+    if (!ignoreEnter && allowGlobalEnter !== false) {
       sendAction({ action: "back_on_track" });
     }
   }
