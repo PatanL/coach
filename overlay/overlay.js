@@ -11,6 +11,7 @@ const choiceButtons = document.getElementById("choiceButtons");
 const alignInput = document.getElementById("alignInput");
 const alignText = document.getElementById("alignText");
 const alignSubmit = document.getElementById("alignSubmit");
+const enterHint = document.getElementById("enterHint");
 
 const backBtn = document.getElementById("backBtn");
 const stuckBtn = document.getElementById("stuckBtn");
@@ -37,6 +38,11 @@ function updateEventLabel(payload) {
   const raw = payload?.source_event_type || payload?.event_type || payload?.type || "";
   const eventType = String(raw).toUpperCase();
   overlay.dataset.eventType = eventType;
+
+  // Keep the keyboard hint aligned with what Enter will do.
+  if (enterHint) {
+    enterHint.textContent = eventType === "DRIFT_PERSIST" ? "Enter: Recover schedule" : "Enter: Back on track";
+  }
 
   if (!eventType) {
     setText(eventLabel, "DRIFT");
@@ -68,6 +74,16 @@ function showOverlay(payload) {
   resetAlignInput();
   updateEventLabel(payload);
   updatePrimaryLabel(payload);
+
+  // DRIFT_PERSIST is a recovery moment: bias toward the recovery path and make the primary affordance obvious.
+  const isDriftPersist = overlay.dataset.eventType === "DRIFT_PERSIST";
+  backBtn.classList.toggle("primary", !isDriftPersist);
+  recoverBtn.classList.toggle("primary", isDriftPersist);
+
+  const defaultEnterAction = window.overlayUtils?.getDefaultEnterActionForEventType?.(overlay.dataset.eventType);
+  if (enterHint) {
+    enterHint.textContent = defaultEnterAction === "recover" ? "Enter: Recover schedule" : "Enter: Back on track";
+  }
 
   if (payload.choices && Array.isArray(payload.choices)) {
     overlay.dataset.mode = "align";
@@ -107,6 +123,28 @@ function showOverlay(payload) {
   overlay.dataset.level = payload.level || "B";
   currentPayload = payload;
   shownAt = Date.now();
+
+  // Focus management: for DRIFT_PERSIST we want a strong, actionable pattern-break.
+  // If the overlay is in "align" mode, prefer focusing the text box.
+  // Otherwise, focus the primary action so Enter + space behavior is obvious.
+  requestAnimationFrame(() => {
+    const active = document.activeElement;
+    const isTyping = window.overlayUtils?.isTextInputTarget?.(active);
+    if (isTyping) return;
+
+    if (overlay.dataset.mode === "align") {
+      alignText?.focus?.();
+      return;
+    }
+
+    const eventType = String(overlay?.dataset?.eventType || "").toUpperCase();
+    const defaultAction = window.overlayUtils?.getDefaultEnterActionForEventType?.(eventType) || "back_on_track";
+    if (defaultAction === "recover") {
+      recoverBtn?.focus?.();
+    } else {
+      backBtn?.focus?.();
+    }
+  });
 }
 
 function sendAction(action) {
@@ -161,11 +199,13 @@ window.overlayAPI.onPause(() => {
 });
 
 window.addEventListener("keydown", (event) => {
-  // Don't treat Enter as "Back on track" while the user is typing or interacting with a control.
+  // Don't treat Enter as a global action while the user is typing or interacting with a control.
   if (event.key === "Enter") {
     const ignoreEnter = window.overlayUtils?.shouldIgnoreGlobalEnter?.(event.target);
     if (!ignoreEnter) {
-      sendAction({ action: "back_on_track" });
+      const eventType = String(overlay?.dataset?.eventType || "").toUpperCase();
+      const action = window.overlayUtils?.getDefaultEnterActionForEventType?.(eventType) || "back_on_track";
+      sendAction({ action });
     }
   }
   if (event.key === "Escape") {

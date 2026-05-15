@@ -1,7 +1,12 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
 
-const { isTextInputTarget, isInteractiveTarget, shouldIgnoreGlobalEnter } = require("./overlay-utils");
+const {
+  isTextInputTarget,
+  isInteractiveTarget,
+  shouldIgnoreGlobalEnter,
+  getDefaultEnterActionForEventType
+} = require("./overlay-utils");
 
 test("isTextInputTarget: recognizes common typing targets", () => {
   assert.equal(isTextInputTarget({ tagName: "INPUT" }), true);
@@ -45,4 +50,32 @@ test("shouldIgnoreGlobalEnter: child of button/link should still block global En
     }
   };
   assert.equal(shouldIgnoreGlobalEnter(spanInsideButton), true);
+});
+
+test("getDefaultEnterActionForEventType: defaults to back_on_track", () => {
+  assert.equal(getDefaultEnterActionForEventType(undefined), "back_on_track");
+  assert.equal(getDefaultEnterActionForEventType("DRIFT_START"), "back_on_track");
+});
+
+test("getDefaultEnterActionForEventType: DRIFT_PERSIST biases to recover", () => {
+  assert.equal(getDefaultEnterActionForEventType("DRIFT_PERSIST"), "recover");
+  assert.equal(getDefaultEnterActionForEventType("drift_persist"), "recover");
+});
+
+test("getDefaultEnterActionForEventType: biases DRIFT_PERSIST toward recovery", () => {
+  assert.equal(getDefaultEnterActionForEventType("DRIFT_PERSIST"), "recover");
+  assert.equal(getDefaultEnterActionForEventType("drift_persist"), "recover");
+  assert.equal(getDefaultEnterActionForEventType("DRIFT"), "back_on_track");
+  assert.equal(getDefaultEnterActionForEventType(null), "back_on_track");
+});
+
+test("getDefaultEnterActionForEventType: DRIFT_PERSIST routes to recover", () => {
+  assert.equal(getDefaultEnterActionForEventType("DRIFT_PERSIST"), "recover");
+  assert.equal(getDefaultEnterActionForEventType("drift_persist"), "recover");
+});
+
+test("getDefaultEnterActionForEventType: all other event types default to back_on_track", () => {
+  assert.equal(getDefaultEnterActionForEventType("DRIFT_START"), "back_on_track");
+  assert.equal(getDefaultEnterActionForEventType(""), "back_on_track");
+  assert.equal(getDefaultEnterActionForEventType(null), "back_on_track");
 });

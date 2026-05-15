@@ -40,9 +40,17 @@
     return isTextInputTarget(t) || isInteractiveTarget(t);
   }
 
+  function getDefaultEnterActionForEventType(eventType) {
+    const t = String(eventType || "").toUpperCase();
+    // Pattern-break: on DRIFT_PERSIST, make the default action the schedule recovery path.
+    if (t === "DRIFT_PERSIST") return "recover";
+    return "back_on_track";
+  }
+
   return {
     isTextInputTarget,
     isInteractiveTarget,
-    shouldIgnoreGlobalEnter
+    shouldIgnoreGlobalEnter,
+    getDefaultEnterActionForEventType
   };
 });
