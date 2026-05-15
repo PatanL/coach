@@ -11,6 +11,7 @@ const choiceButtons = document.getElementById("choiceButtons");
 const alignInput = document.getElementById("alignInput");
 const alignText = document.getElementById("alignText");
 const alignSubmit = document.getElementById("alignSubmit");
+const enterHint = document.getElementById("enterHint");
 
 const backBtn = document.getElementById("backBtn");
 const stuckBtn = document.getElementById("stuckBtn");
@@ -107,6 +108,26 @@ function showOverlay(payload) {
   overlay.dataset.level = payload.level || "B";
   currentPayload = payload;
   shownAt = Date.now();
+
+  // Encourage the safest next step by default.
+  // - In "align" mode, focus the text input so typing is immediate.
+  // - For DRIFT_PERSIST, focus "Recover" and disable the Enter hint (pattern-break: explicit click).
+  // - Otherwise, focus the primary "Back on track" action.
+  const eventType = String(overlay.dataset.eventType || "").toUpperCase();
+  if (enterHint) {
+    enterHint.textContent = eventType === "DRIFT_PERSIST" ? "Enter: (disabled)" : "Enter: Back on track";
+  }
+  requestAnimationFrame(() => {
+    if (overlay.dataset.mode === "align") {
+      alignText?.focus?.();
+      return;
+    }
+    if (eventType === "DRIFT_PERSIST") {
+      recoverBtn?.focus?.();
+      return;
+    }
+    backBtn?.focus?.();
+  });
 }
 
 function sendAction(action) {
@@ -162,9 +183,14 @@ window.overlayAPI.onPause(() => {
 
 window.addEventListener("keydown", (event) => {
   // Don't treat Enter as "Back on track" while the user is typing or interacting with a control.
+  // DRIFT_PERSIST is a deliberate pattern-break: require an explicit click.
   if (event.key === "Enter") {
-    const ignoreEnter = window.overlayUtils?.shouldIgnoreGlobalEnter?.(event.target);
-    if (!ignoreEnter) {
+    const eventType = overlay?.dataset?.eventType || "";
+    const allowEnter = window.overlayUtils?.shouldAllowGlobalEnter
+      ? window.overlayUtils.shouldAllowGlobalEnter(eventType, event.target)
+      : !window.overlayUtils?.shouldIgnoreGlobalEnter?.(event.target);
+
+    if (allowEnter) {
       sendAction({ action: "back_on_track" });
     }
   }
