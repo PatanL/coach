@@ -62,6 +62,21 @@ function resetAlignInput() {
   alignInput.classList.add("hidden");
 }
 
+function focusDefaultControl(payload) {
+  // Focus is a safety feature:
+  // - Prevent accidental global Enter from immediately marking "Back on track".
+  // - Enable keyboard-first recovery (Option B actionable overlay).
+  // We defer focus until the DOM is updated.
+  window.requestAnimationFrame(() => {
+    if (payload?.choices && Array.isArray(payload.choices)) {
+      alignText?.focus?.();
+      return;
+    }
+    // Default to Recover as the most "active" corrective action.
+    recoverBtn?.focus?.();
+  });
+}
+
 function showOverlay(payload) {
   overlay.classList.remove("hidden");
   resetSnooze();
@@ -107,6 +122,7 @@ function showOverlay(payload) {
   overlay.dataset.level = payload.level || "B";
   currentPayload = payload;
   shownAt = Date.now();
+  focusDefaultControl(payload);
 }
 
 function sendAction(action) {
