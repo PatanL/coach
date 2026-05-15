@@ -34,6 +34,16 @@ async function main() {
 
   await win.loadFile(htmlPath);
 
+  // Deterministic screenshots: freeze animations/transitions so captures don't depend on timing.
+  await win.webContents.executeJavaScript(
+    "(() => {" +
+      "const style = document.createElement('style');" +
+      "style.id = 'screenshot-freeze';" +
+      "style.textContent = '*{animation:none !important; transition:none !important;}';" +
+      "document.head.appendChild(style);" +
+    "})()"
+  );
+
   async function capture(name, payload) {
     // Give the DOM a moment to settle, then render the payload.
     await new Promise((r) => setTimeout(r, 50));
