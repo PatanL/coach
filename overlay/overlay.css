@@ -189,6 +189,11 @@ button:hover {
   background: rgba(255, 255, 255, 0.16);
 }
 
+button:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.55);
+  outline-offset: 2px;
+}
+
 button.primary:hover {
   background: #ff7a69;
 }
@@ -265,4 +270,10 @@ button.primary:hover {
 #overlay[data-event-type="DRIFT_PERSIST"] .label {
   color: #ff49a7;
   text-shadow: 0 0 10px rgba(255, 73, 167, 0.35);
+}
+
+/* Make the default recovery action visually obvious when focused. */
+#overlay[data-event-type="DRIFT_PERSIST"] #recoverBtn:focus-visible {
+  outline-color: rgba(255, 206, 61, 0.95);
+  box-shadow: 0 0 0 4px rgba(255, 206, 61, 0.22);
 }
