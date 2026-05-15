@@ -7,6 +7,7 @@ const diagnosis = document.getElementById("diagnosis");
 const nextAction = document.getElementById("nextAction");
 const snooze = document.getElementById("snoozeReason");
 const miniPlan = document.getElementById("miniPlan");
+const enterHint = document.getElementById("enterHint");
 const choiceButtons = document.getElementById("choiceButtons");
 const alignInput = document.getElementById("alignInput");
 const alignText = document.getElementById("alignText");
@@ -78,8 +79,14 @@ function showOverlay(payload) {
 
   // DRIFT_PERSIST should feel like a pattern-break and be immediately actionable.
   // Move focus to the Recover button so Enter activates the focused control (and doesn't trigger a global "Back on track").
-  if (overlay.dataset.eventType === "DRIFT_PERSIST" && !hasChoices) {
+  const isDriftPersist = overlay.dataset.eventType === "DRIFT_PERSIST";
+  if (isDriftPersist && !hasChoices) {
     setTimeout(() => recoverBtn?.focus?.(), 0);
+  }
+
+  // Keep the hotkey hint truthful (especially for DRIFT_PERSIST, where we intentionally focus Recover).
+  if (enterHint) {
+    enterHint.textContent = isDriftPersist && !hasChoices ? "Enter: Recover schedule" : "Enter: Back on track";
   }
 
   setText(blockName, payload.block_name || "");
