@@ -40,7 +40,10 @@ async function main() {
     win.webContents.send("overlay:show", payload);
 
     // Allow any CSS animations to reach a stable frame.
-    await new Promise((r) => setTimeout(r, 250));
+    // DRIFT_PERSIST runs a longer multi-iteration pattern-break animation.
+    const eventType = String(payload?.source_event_type || payload?.event_type || payload?.type || "").toUpperCase();
+    const settleMs = eventType === "DRIFT_PERSIST" ? 3800 : 250;
+    await new Promise((r) => setTimeout(r, settleMs));
 
     const image = await win.capturePage();
     fs.writeFileSync(path.join(OUT_DIR, name), image.toPNG());
