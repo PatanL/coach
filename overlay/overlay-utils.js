@@ -9,7 +9,12 @@
     if (!target) return false;
     const tag = String(target.tagName || "").toLowerCase();
     if (target.isContentEditable) return true;
-    return tag === "input" || tag === "textarea" || tag === "select";
+
+    if (tag === "input" || tag === "textarea" || tag === "select") return true;
+
+    // ARIA roles used by custom input widgets.
+    const role = String(target.getAttribute?.("role") || "").toLowerCase();
+    return role === "textbox" || role === "searchbox" || role === "combobox";
   }
 
   // Treat common interactive elements as "hands-off" for global hotkeys.
@@ -28,7 +33,7 @@
     // element that should "own" the keyboard interaction.
     if (typeof target.closest === "function") {
       const hit = target.closest(
-        'input,textarea,select,[contenteditable="true"],button,a,[role="button"],[role="link"]'
+        'input,textarea,select,[contenteditable="true"],button,a,[role="button"],[role="link"],[role="textbox"],[role="searchbox"],[role="combobox"]'
       );
       if (hit) return hit;
     }
