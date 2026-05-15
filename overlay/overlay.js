@@ -161,6 +161,10 @@ window.overlayAPI.onPause(() => {
 });
 
 window.addEventListener("keydown", (event) => {
+  // Ignore global hotkeys when the overlay isn't visible.
+  // This protects against accidental actions when users hit Enter in another app.
+  if (overlay.classList.contains("hidden")) return;
+
   // Don't treat Enter as "Back on track" while the user is typing or interacting with a control.
   if (event.key === "Enter") {
     const ignoreEnter = window.overlayUtils?.shouldIgnoreGlobalEnter?.(event.target);

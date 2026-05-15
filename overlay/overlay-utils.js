@@ -8,7 +8,12 @@
   function isTextInputTarget(target) {
     if (!target) return false;
     const tag = String(target.tagName || "").toLowerCase();
-    if (target.isContentEditable) return true;
+
+    // jsdom + some environments don't reliably reflect the contenteditable attribute
+    // onto `isContentEditable`, so check both.
+    const contentEditableAttr = String(target.getAttribute?.("contenteditable") || "").toLowerCase();
+    if (target.isContentEditable || contentEditableAttr === "true") return true;
+
     return tag === "input" || tag === "textarea" || tag === "select";
   }
 
