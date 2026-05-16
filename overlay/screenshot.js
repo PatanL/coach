@@ -34,13 +34,19 @@ async function main() {
 
   await win.loadFile(htmlPath);
 
+  // Make screenshots deterministic by disabling motion/animations.
+  // (Useful when the overlay uses pulse/shine effects for pattern-breaks like DRIFT_PERSIST.)
+  await win.webContents.executeJavaScript(`
+    document.documentElement.dataset.screenshot = 'true';
+  `);
+
   async function capture(name, payload) {
     // Give the DOM a moment to settle, then render the payload.
     await new Promise((r) => setTimeout(r, 50));
     win.webContents.send("overlay:show", payload);
 
-    // Allow any CSS animations to reach a stable frame.
-    await new Promise((r) => setTimeout(r, 250));
+    // Allow the DOM to apply styles/layout.
+    await new Promise((r) => setTimeout(r, 50));
 
     const image = await win.capturePage();
     fs.writeFileSync(path.join(OUT_DIR, name), image.toPNG());
