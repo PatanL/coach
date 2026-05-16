@@ -9,6 +9,12 @@
     if (!target) return false;
     const tag = String(target.tagName || "").toLowerCase();
     if (target.isContentEditable) return true;
+
+    // ARIA: treat textbox-like roles as typing targets.
+    // This protects against global Enter triggering overlay actions while the user is typing.
+    const role = String(target.getAttribute?.("role") || "").toLowerCase();
+    if (role === "textbox" || role === "searchbox") return true;
+
     return tag === "input" || tag === "textarea" || tag === "select";
   }
 
@@ -28,7 +34,7 @@
     // element that should "own" the keyboard interaction.
     if (typeof target.closest === "function") {
       const hit = target.closest(
-        'input,textarea,select,[contenteditable="true"],button,a,[role="button"],[role="link"]'
+        'input,textarea,select,[contenteditable="true"],button,a,[role="button"],[role="link"],[role="textbox"],[role="searchbox"]'
       );
       if (hit) return hit;
     }
