@@ -161,6 +161,10 @@ window.overlayAPI.onPause(() => {
 });
 
 window.addEventListener("keydown", (event) => {
+  // Guard against accidental actions when the overlay isn't visible.
+  // (This can happen if key events bubble while the overlay window is hidden.)
+  if (overlay.classList.contains("hidden")) return;
+
   // Don't treat Enter as "Back on track" while the user is typing or interacting with a control.
   if (event.key === "Enter") {
     const ignoreEnter = window.overlayUtils?.shouldIgnoreGlobalEnter?.(event.target);
