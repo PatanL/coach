@@ -107,6 +107,22 @@ function showOverlay(payload) {
   overlay.dataset.level = payload.level || "B";
   currentPayload = payload;
   shownAt = Date.now();
+
+  // Focus management: make the "Enter" hint deterministic by focusing a control inside the overlay.
+  // - Align mode: focus the text input so users can immediately type.
+  // - Otherwise: focus the primary "Back on track" action.
+  // This also prevents the body from being the default target for keydown handlers.
+  queueMicrotask(() => {
+    try {
+      if (overlay.dataset.mode === "align" && !alignInput.classList.contains("hidden")) {
+        alignText?.focus?.({ preventScroll: true });
+      } else {
+        backBtn?.focus?.({ preventScroll: true });
+      }
+    } catch {
+      // no-op: focus isn't supported in some screenshot/test environments
+    }
+  });
 }
 
 function sendAction(action) {
