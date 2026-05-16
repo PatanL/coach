@@ -34,13 +34,29 @@ async function main() {
 
   await win.loadFile(htmlPath);
 
-  async function capture(name, payload) {
+  // Deterministic screenshots: disable animations/transitions so timing jitter doesn't change pixels.
+  // (DRIFT_PERSIST has a pulse animation that otherwise may be captured mid-frame.)
+  await win.webContents.insertCSS(`
+    *, *::before, *::after {
+      animation: none !important;
+      transition: none !important;
+      caret-color: transparent !important;
+    }
+  `);
+
+  async function capture(name, payload, afterShow) {
     // Give the DOM a moment to settle, then render the payload.
     await new Promise((r) => setTimeout(r, 50));
     win.webContents.send("overlay:show", payload);
 
-    // Allow any CSS animations to reach a stable frame.
-    await new Promise((r) => setTimeout(r, 250));
+    // Let layout apply after the IPC render.
+    await new Promise((r) => setTimeout(r, 50));
+
+    if (afterShow) {
+      await afterShow();
+      // Allow any follow-up DOM changes to settle (e.g. opening a panel).
+      await new Promise((r) => setTimeout(r, 50));
+    }
 
     const image = await win.capturePage();
     fs.writeFileSync(path.join(OUT_DIR, name), image.toPNG());
@@ -67,6 +83,22 @@ async function main() {
     event_type: "DRIFT_PERSIST",
     headline: "Interrupt the loop."
   });
+
+  await capture(
+    "drift_snooze_open.png",
+    {
+      ...common,
+      event_type: "DRIFT_START",
+      headline: "Reset."
+    },
+    async () => {
+      // Open the snooze panel for a deterministic UI state screenshot.
+      await win.webContents.executeJavaScript(
+        "document.getElementById('snoozeBtn')?.click();",
+        true
+      );
+    }
+  );
 
   win.destroy();
   app.quit();
