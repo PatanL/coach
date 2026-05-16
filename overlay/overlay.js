@@ -162,7 +162,12 @@ window.overlayAPI.onPause(() => {
 
 window.addEventListener("keydown", (event) => {
   // Don't treat Enter as "Back on track" while the user is typing or interacting with a control.
+  // Also: never fire a primary action while a secondary panel (like Snooze) is open.
   if (event.key === "Enter") {
+    if (overlay.classList.contains("hidden")) return;
+    if (!snooze.classList.contains("hidden")) return;
+    if (!alignInput.classList.contains("hidden")) return;
+
     const ignoreEnter = window.overlayUtils?.shouldIgnoreGlobalEnter?.(event.target);
     if (!ignoreEnter) {
       sendAction({ action: "back_on_track" });

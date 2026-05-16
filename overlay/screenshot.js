@@ -44,13 +44,19 @@ async function main() {
     }
   `);
 
-  async function capture(name, payload) {
+  async function capture(name, payload, afterShow) {
     // Give the DOM a moment to settle, then render the payload.
     await new Promise((r) => setTimeout(r, 50));
     win.webContents.send("overlay:show", payload);
 
     // Let layout apply after the IPC render.
     await new Promise((r) => setTimeout(r, 50));
+
+    if (afterShow) {
+      await afterShow();
+      // Allow any follow-up DOM changes to settle (e.g. opening a panel).
+      await new Promise((r) => setTimeout(r, 50));
+    }
 
     const image = await win.capturePage();
     fs.writeFileSync(path.join(OUT_DIR, name), image.toPNG());
@@ -77,6 +83,22 @@ async function main() {
     event_type: "DRIFT_PERSIST",
     headline: "Interrupt the loop."
   });
+
+  await capture(
+    "drift_snooze_open.png",
+    {
+      ...common,
+      event_type: "DRIFT_START",
+      headline: "Reset."
+    },
+    async () => {
+      // Open the snooze panel for a deterministic UI state screenshot.
+      await win.webContents.executeJavaScript(
+        "document.getElementById('snoozeBtn')?.click();",
+        true
+      );
+    }
+  );
 
   win.destroy();
   app.quit();
