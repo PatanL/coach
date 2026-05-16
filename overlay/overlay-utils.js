@@ -9,6 +9,12 @@
     if (!target) return false;
     const tag = String(target.tagName || "").toLowerCase();
     if (target.isContentEditable) return true;
+
+    // ARIA roles that represent a typing surface. This protects against treating Enter as a
+    // global "Back on track" hotkey while the user is interacting with custom inputs.
+    const role = String(target.getAttribute?.("role") || "").toLowerCase();
+    if (["textbox", "searchbox", "combobox", "spinbutton"].includes(role)) return true;
+
     return tag === "input" || tag === "textarea" || tag === "select";
   }
 
@@ -28,7 +34,7 @@
     // element that should "own" the keyboard interaction.
     if (typeof target.closest === "function") {
       const hit = target.closest(
-        'input,textarea,select,[contenteditable="true"],button,a,[role="button"],[role="link"]'
+        'input,textarea,select,[contenteditable="true"],button,a,[role="button"],[role="link"],[role="textbox"],[role="searchbox"],[role="combobox"],[role="spinbutton"]'
       );
       if (hit) return hit;
     }
