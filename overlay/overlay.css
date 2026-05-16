@@ -234,6 +234,13 @@ html[data-screenshot="true"] *::after,
   }
 }
 
+/* Deterministic screenshots: disable CSS animations/transitions when requested. */
+#overlay[data-disable-animations="true"],
+#overlay[data-disable-animations="true"] * {
+  animation: none !important;
+  transition: none !important;
+}
+
 /* Visual pattern-break: DRIFT_PERSIST should feel unmistakably different. */
 #overlay[data-event-type="DRIFT_PERSIST"] {
   background: rgba(10, 4, 10, 0.55);

@@ -92,6 +92,12 @@ function showOverlay(payload) {
   updateEventLabel(payload);
   updatePrimaryLabel(payload);
 
+  if (payload?.disable_animations) {
+    overlay.dataset.disableAnimations = "true";
+  } else {
+    delete overlay.dataset.disableAnimations;
+  }
+
   if (payload.choices && Array.isArray(payload.choices)) {
     overlay.dataset.mode = "align";
   } else {
