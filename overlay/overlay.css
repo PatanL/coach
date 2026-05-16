@@ -225,6 +225,15 @@ button.primary:hover {
 }
 
 /* Visual pattern-break for persistent drift: subtle but unmistakable */
+
+/* Screenshot mode: keep renders deterministic (no animations/transitions). */
+:root[data-screenshot="true"] *,
+:root[data-screenshot="true"] *::before,
+:root[data-screenshot="true"] *::after {
+  animation: none !important;
+  transition: none !important;
+}
+
 @keyframes driftPersistPulse {
   0% {
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45), 0 0 0 rgba(241, 108, 91, 0);
