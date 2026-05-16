@@ -40,9 +40,25 @@
     return isTextInputTarget(t) || isInteractiveTarget(t);
   }
 
+  function shouldTriggerBackOnTrack(eventType, keyboardEvent) {
+    const type = String(eventType || "").toUpperCase();
+    const evt = keyboardEvent || {};
+    if (evt.key !== "Enter") return false;
+    if (shouldIgnoreGlobalEnter(evt.target)) return false;
+
+    // Pattern-break + safety: for DRIFT_PERSIST, make the "Back on track" action intentional.
+    // Avoid accidental Enter when the overlay grabs attention.
+    if (type === "DRIFT_PERSIST") {
+      return !!evt.shiftKey;
+    }
+
+    return true;
+  }
+
   return {
     isTextInputTarget,
     isInteractiveTarget,
-    shouldIgnoreGlobalEnter
+    shouldIgnoreGlobalEnter,
+    shouldTriggerBackOnTrack
   };
 });

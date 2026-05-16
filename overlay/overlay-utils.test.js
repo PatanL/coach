@@ -1,7 +1,12 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
 
-const { isTextInputTarget, isInteractiveTarget, shouldIgnoreGlobalEnter } = require("./overlay-utils");
+const {
+  isTextInputTarget,
+  isInteractiveTarget,
+  shouldIgnoreGlobalEnter,
+  shouldTriggerBackOnTrack
+} = require("./overlay-utils");
 
 test("isTextInputTarget: recognizes common typing targets", () => {
   assert.equal(isTextInputTarget({ tagName: "INPUT" }), true);
@@ -45,4 +50,18 @@ test("shouldIgnoreGlobalEnter: child of button/link should still block global En
     }
   };
   assert.equal(shouldIgnoreGlobalEnter(spanInsideButton), true);
+});
+
+test("shouldTriggerBackOnTrack: default Enter triggers when safe", () => {
+  assert.equal(shouldTriggerBackOnTrack("DRIFT_START", { key: "Enter", target: { tagName: "DIV" } }), true);
+});
+
+test("shouldTriggerBackOnTrack: ignores Enter while typing or on interactive control", () => {
+  assert.equal(shouldTriggerBackOnTrack("DRIFT_START", { key: "Enter", target: { tagName: "INPUT" } }), false);
+  assert.equal(shouldTriggerBackOnTrack("DRIFT_START", { key: "Enter", target: { tagName: "BUTTON" } }), false);
+});
+
+test("shouldTriggerBackOnTrack: DRIFT_PERSIST requires Shift+Enter", () => {
+  assert.equal(shouldTriggerBackOnTrack("DRIFT_PERSIST", { key: "Enter", shiftKey: false, target: { tagName: "DIV" } }), false);
+  assert.equal(shouldTriggerBackOnTrack("DRIFT_PERSIST", { key: "Enter", shiftKey: true, target: { tagName: "DIV" } }), true);
 });
