@@ -38,6 +38,15 @@ function updateEventLabel(payload) {
   const eventType = String(raw).toUpperCase();
   overlay.dataset.eventType = eventType;
 
+  // Action emphasis: for persistent drift, we want the "Recover schedule" path to stand out.
+  if (eventType === "DRIFT_PERSIST") {
+    backBtn.classList.remove("primary");
+    recoverBtn.classList.add("primary");
+  } else {
+    backBtn.classList.add("primary");
+    recoverBtn.classList.remove("primary");
+  }
+
   if (!eventType) {
     setText(eventLabel, "DRIFT");
     return;
