@@ -66,6 +66,11 @@ function showOverlay(payload) {
   overlay.classList.remove("hidden");
   resetSnooze();
   resetAlignInput();
+
+  // Screenshot mode: disable animations/transitions for deterministic captures.
+  // (Set by overlay/screenshot.js via payload.screenshot.)
+  overlay.dataset.screenshot = payload?.screenshot ? "true" : "";
+
   updateEventLabel(payload);
   updatePrimaryLabel(payload);
 
