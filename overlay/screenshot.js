@@ -34,13 +34,20 @@ async function main() {
 
   await win.loadFile(htmlPath);
 
+  // Mark screenshot mode so CSS can disable animations/transitions for deterministic renders.
+  await win.webContents.executeJavaScript(
+    "document.getElementById('overlay')?.setAttribute('data-screenshot','true');"
+  );
+
+  // Deterministic screenshots are handled via payload.screenshot_mode (see overlay.css).
+
   async function capture(name, payload) {
     // Give the DOM a moment to settle, then render the payload.
     await new Promise((r) => setTimeout(r, 50));
-    win.webContents.send("overlay:show", payload);
+    win.webContents.send("overlay:show", { ...payload, screenshot_mode: true });
 
-    // Allow any CSS animations to reach a stable frame.
-    await new Promise((r) => setTimeout(r, 250));
+    // Give the UI a moment to lay out (animations are disabled above).
+    await new Promise((r) => setTimeout(r, 50));
 
     const image = await win.capturePage();
     fs.writeFileSync(path.join(OUT_DIR, name), image.toPNG());
@@ -63,6 +70,13 @@ async function main() {
   });
 
   await capture("drift_persist.png", {
+    ...common,
+    event_type: "DRIFT_PERSIST",
+    headline: "Interrupt the loop."
+  });
+
+  // Explicitly capture a "screenshot mode" baseline (same payload, but ensures stable visuals).
+  await capture("drift_persist_screenshot_mode.png", {
     ...common,
     event_type: "DRIFT_PERSIST",
     headline: "Interrupt the loop."
