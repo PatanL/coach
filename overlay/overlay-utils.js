@@ -8,7 +8,14 @@
   function isTextInputTarget(target) {
     if (!target) return false;
     const tag = String(target.tagName || "").toLowerCase();
+
     if (target.isContentEditable) return true;
+
+    // ARIA roles sometimes appear on custom inputs (e.g., contenteditable divs or React components).
+    // Treat these as typing targets so global hotkeys (like Enter) don't accidentally fire overlay actions.
+    const role = String(target.getAttribute?.("role") || "").toLowerCase();
+    if (role === "textbox" || role === "searchbox" || role === "combobox") return true;
+
     return tag === "input" || tag === "textarea" || tag === "select";
   }
 
@@ -28,7 +35,7 @@
     // element that should "own" the keyboard interaction.
     if (typeof target.closest === "function") {
       const hit = target.closest(
-        'input,textarea,select,[contenteditable="true"],button,a,[role="button"],[role="link"]'
+        'input,textarea,select,[contenteditable="true"],[role="textbox"],[role="searchbox"],[role="combobox"],button,a,[role="button"],[role="link"]'
       );
       if (hit) return hit;
     }
