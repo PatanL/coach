@@ -20,6 +20,7 @@ test("isInteractiveTarget: recognizes common clickable targets", () => {
   assert.equal(isInteractiveTarget({ tagName: "BUTTON" }), true);
   assert.equal(isInteractiveTarget({ tagName: "a" }), true);
   assert.equal(isInteractiveTarget({ tagName: "DIV", getAttribute: (k) => (k === "role" ? "button" : null) }), true);
+  assert.equal(isInteractiveTarget({ tagName: "DIV", getAttribute: (k) => (k === "role" ? "link" : null) }), true);
 });
 
 test("isInteractiveTarget: ignores non-interactive targets", () => {
