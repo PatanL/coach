@@ -17,6 +17,9 @@ const stuckBtn = document.getElementById("stuckBtn");
 const recoverBtn = document.getElementById("recoverBtn");
 const snoozeBtn = document.getElementById("snoozeBtn");
 
+const enterHint = document.getElementById("enterHint");
+const escHint = document.getElementById("escHint");
+
 let shownAt = null;
 let currentPayload = null;
 
@@ -37,6 +40,15 @@ function updateEventLabel(payload) {
   const raw = payload?.source_event_type || payload?.event_type || payload?.type || "";
   const eventType = String(raw).toUpperCase();
   overlay.dataset.eventType = eventType;
+
+  // Update footer hints to support the DRIFT_PERSIST pattern-break.
+  // (Only changes copy; hotkeys remain unchanged.)
+  if (enterHint) {
+    enterHint.textContent = eventType === "DRIFT_PERSIST" ? "Enter: Back on track (or click Recover)" : "Enter: Back on track";
+  }
+  if (escHint) {
+    escHint.textContent = "Esc: Snooze";
+  }
 
   if (!eventType) {
     setText(eventLabel, "DRIFT");
