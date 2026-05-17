@@ -107,6 +107,23 @@ function showOverlay(payload) {
   overlay.dataset.level = payload.level || "B";
   currentPayload = payload;
   shownAt = Date.now();
+
+  // Focus defaults:
+  // - In standard mode, focus the primary action so accidental Enter goes to the intended place.
+  // - In align mode, focus the text field so the user can immediately type/submit.
+  // Use rAF so the element is focusable after visibility/classes settle.
+  requestAnimationFrame(() => {
+    try {
+      if (payload.choices && Array.isArray(payload.choices)) {
+        alignText.focus();
+        alignText.select?.();
+      } else {
+        backBtn.focus();
+      }
+    } catch {
+      // Ignore focus errors (e.g. during tests or if element is missing).
+    }
+  });
 }
 
 function sendAction(action) {
