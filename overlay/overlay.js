@@ -106,6 +106,12 @@ function showOverlay(payload) {
   updateEventLabel(payload);
   updatePrimaryLabel(payload);
 
+  const enterAction = window.overlayUtils?.getGlobalEnterAction?.(overlay.dataset.eventType) || "back_on_track";
+  // Make the default Enter action explicit and visually reflected in the primary button.
+  setText(enterHint, enterAction === "recover" ? "Enter: Recover schedule" : "Enter: Back on track");
+  backBtn.classList.toggle("primary", enterAction !== "recover");
+  recoverBtn.classList.toggle("primary", enterAction === "recover");
+
   if (payload.choices && Array.isArray(payload.choices)) {
     overlay.dataset.mode = "align";
   } else {

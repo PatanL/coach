@@ -251,3 +251,8 @@ button.primary:hover {
   color: #ff49a7;
   text-shadow: 0 0 10px rgba(255, 73, 167, 0.35);
 }
+
+/* Deterministic screenshots: the harness can disable animations for stable diffs. */
+#overlay[data-screenshot="true"] .card {
+  animation: none !important;
+}
