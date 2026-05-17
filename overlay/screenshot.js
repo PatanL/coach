@@ -34,6 +34,11 @@ async function main() {
 
   await win.loadFile(htmlPath);
 
+  // Mark screenshot mode so CSS can disable animations/transitions for deterministic renders.
+  await win.webContents.executeJavaScript(
+    "document.getElementById('overlay')?.setAttribute('data-screenshot','true');"
+  );
+
   // Deterministic screenshots are handled via payload.screenshot_mode (see overlay.css).
 
   async function capture(name, payload) {
