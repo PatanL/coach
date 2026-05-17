@@ -32,15 +32,22 @@ async function main() {
     throw new Error(`overlay.html not found at ${htmlPath}`);
   }
 
-  await win.loadFile(htmlPath);
+  await win.loadFile(htmlPath, { query: { screenshot: "1" } });
+
+  // Make screenshots deterministic by disabling CSS animations/transitions.
+  // DRIFT_PERSIST includes an animated pulse as a pattern-break; without this, captured
+  // frames can vary depending on timing.
+  await win.webContents.insertCSS(
+    "*,*::before,*::after{animation:none !important;transition:none !important;}"
+  );
 
   async function capture(name, payload) {
     // Give the DOM a moment to settle, then render the payload.
     await new Promise((r) => setTimeout(r, 50));
     win.webContents.send("overlay:show", payload);
 
-    // Allow any CSS animations to reach a stable frame.
-    await new Promise((r) => setTimeout(r, 250));
+    // Allow layout to settle after content injection.
+    await new Promise((r) => setTimeout(r, 50));
 
     const image = await win.capturePage();
     fs.writeFileSync(path.join(OUT_DIR, name), image.toPNG());
@@ -54,18 +61,30 @@ async function main() {
     diagnosis: "Detected off-task activity.",
     next_action: "Close the tab and reopen your task doc.",
     cmd_id: "screenshot",
-    block_id: "block_screenshot"
+    block_id: "block_screenshot",
+    disable_animations: true
   };
 
   await capture("drift_start.png", {
     ...common,
+    screenshot: true,
     event_type: "DRIFT_START"
   });
 
   await capture("drift_persist.png", {
     ...common,
+    screenshot: true,
     event_type: "DRIFT_PERSIST",
     headline: "Interrupt the loop."
+  });
+
+  // Extra deterministic snapshot explicitly used for PR diffs when tweaking the DRIFT_PERSIST pattern-break.
+  await capture("drift_persist_pattern_break.png", {
+    ...common,
+    screenshot: true,
+    event_type: "DRIFT_PERSIST",
+    headline: "Interrupt the loop.",
+    human_line: "This is the moment to break the loop."
   });
 
   win.destroy();

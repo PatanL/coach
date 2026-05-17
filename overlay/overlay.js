@@ -1,4 +1,18 @@
 const overlay = document.getElementById("overlay");
+
+// Deterministic screenshot mode: screenshot.js loads overlay.html with ?screenshot=1.
+// CSS uses html[data-screenshot="true"] / #overlay[data-screenshot="1"] to disable
+// animations/transitions (important for DRIFT_PERSIST pulse pattern-break).
+try {
+  const params = new URLSearchParams(window.location.search || "");
+  if (params.get("screenshot") === "1") {
+    document.documentElement.dataset.screenshot = "true";
+    overlay.dataset.screenshot = "1";
+  }
+} catch (_) {
+  // no-op
+}
+
 const eventLabel = document.getElementById("eventLabel");
 const blockName = document.getElementById("blockName");
 const headline = document.getElementById("headline");
@@ -66,8 +80,23 @@ function showOverlay(payload) {
   overlay.classList.remove("hidden");
   resetSnooze();
   resetAlignInput();
+
+  // Deterministic screenshots / test harnesses may request animations/transitions off.
+  // (Used by `npm --prefix overlay run screenshot`.)
+  if (payload?.disable_animations || payload?.cmd_id === "screenshot") {
+    overlay.dataset.animations = "off";
+  } else {
+    delete overlay.dataset.animations;
+  }
+
   updateEventLabel(payload);
   updatePrimaryLabel(payload);
+
+  if (payload?.disable_animations) {
+    overlay.dataset.disableAnimations = "true";
+  } else {
+    delete overlay.dataset.disableAnimations;
+  }
 
   if (payload.choices && Array.isArray(payload.choices)) {
     overlay.dataset.mode = "align";
