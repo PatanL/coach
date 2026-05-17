@@ -1,7 +1,7 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
 
-const { isTextInputTarget, isInteractiveTarget, shouldIgnoreGlobalEnter } = require("./overlay-utils");
+const { isTextInputTarget, isInteractiveTarget, shouldIgnoreGlobalEnter, getGlobalEnterAction } = require("./overlay-utils");
 
 test("isTextInputTarget: recognizes common typing targets", () => {
   assert.equal(isTextInputTarget({ tagName: "INPUT" }), true);
@@ -31,6 +31,7 @@ test("isInteractiveTarget: ignores non-interactive targets", () => {
 test("shouldIgnoreGlobalEnter: typing or clicking should block global Enter action", () => {
   assert.equal(shouldIgnoreGlobalEnter({ tagName: "INPUT" }), true);
   assert.equal(shouldIgnoreGlobalEnter({ tagName: "BUTTON" }), true);
+  assert.equal(shouldIgnoreGlobalEnter({ tagName: "DIV", isContentEditable: true }), true);
   assert.equal(shouldIgnoreGlobalEnter({ tagName: "DIV" }), false);
 });
 
@@ -45,4 +46,38 @@ test("shouldIgnoreGlobalEnter: child of button/link should still block global En
     }
   };
   assert.equal(shouldIgnoreGlobalEnter(spanInsideButton), true);
+
+  const link = { tagName: "A" };
+  const spanInsideLink = {
+    tagName: "SPAN",
+    closest: (selector) => (selector ? link : null)
+  };
+  assert.equal(shouldIgnoreGlobalEnter(spanInsideLink), true);
+});
+
+test("shouldIgnoreGlobalEnter: child of role=button/link should still block global Enter", () => {
+  const roleButton = { tagName: "DIV", getAttribute: (k) => (k === "role" ? "button" : null) };
+  const spanInsideRoleButton = {
+    tagName: "SPAN",
+    closest: (selector) => (selector ? roleButton : null)
+  };
+  assert.equal(shouldIgnoreGlobalEnter(spanInsideRoleButton), true);
+
+  const roleLink = { tagName: "DIV", getAttribute: (k) => (k === "role" ? "link" : null) };
+  const spanInsideRoleLink = {
+    tagName: "SPAN",
+    closest: (selector) => (selector ? roleLink : null)
+  };
+  assert.equal(shouldIgnoreGlobalEnter(spanInsideRoleLink), true);
+});
+
+test("getGlobalEnterAction: DRIFT_PERSIST prefers recovery action", () => {
+  assert.equal(getGlobalEnterAction("DRIFT_PERSIST"), "recover");
+  assert.equal(getGlobalEnterAction("drift_persist"), "recover");
+});
+
+test("getGlobalEnterAction: default is back_on_track", () => {
+  assert.equal(getGlobalEnterAction("DRIFT_START"), "back_on_track");
+  assert.equal(getGlobalEnterAction(""), "back_on_track");
+  assert.equal(getGlobalEnterAction(null), "back_on_track");
 });

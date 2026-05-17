@@ -12,6 +12,8 @@ const alignInput = document.getElementById("alignInput");
 const alignText = document.getElementById("alignText");
 const alignSubmit = document.getElementById("alignSubmit");
 
+const enterHint = document.getElementById("enterHint");
+
 const backBtn = document.getElementById("backBtn");
 const stuckBtn = document.getElementById("stuckBtn");
 const recoverBtn = document.getElementById("recoverBtn");
@@ -38,6 +40,21 @@ function updateEventLabel(payload) {
   const eventType = String(raw).toUpperCase();
   overlay.dataset.eventType = eventType;
 
+  // UX: DRIFT_PERSIST should push a more actionable recovery path and reduce accidental "I'm fine" exits.
+  // Keep the keyboard hint aligned with the primary action.
+  if (enterHint) {
+    enterHint.textContent = eventType === "DRIFT_PERSIST" ? "Enter: Recover schedule" : "Enter: Back on track";
+  }
+
+  // Swap primary emphasis on DRIFT_PERSIST (visual + motor pattern-break).
+  if (eventType === "DRIFT_PERSIST") {
+    backBtn.classList.remove("primary");
+    recoverBtn.classList.add("primary");
+  } else {
+    recoverBtn.classList.remove("primary");
+    backBtn.classList.add("primary");
+  }
+
   if (!eventType) {
     setText(eventLabel, "DRIFT");
     return;
@@ -53,6 +70,8 @@ function updateEventLabel(payload) {
   setText(eventLabel, eventType.replaceAll("_", " "));
 }
 
+// (unused helper functions removed)
+
 function resetSnooze() {
   snooze.classList.add("hidden");
 }
@@ -62,12 +81,36 @@ function resetAlignInput() {
   alignInput.classList.add("hidden");
 }
 
+function focusPreferredControl() {
+  const mode = overlay.dataset.mode || "";
+  if (mode === "align" && !alignInput.classList.contains("hidden")) {
+    // If we're asking for alignment input, put the cursor there immediately.
+    alignText.focus({ preventScroll: true });
+    return;
+  }
+
+  const action = window.overlayUtils?.getGlobalEnterAction?.(overlay.dataset.eventType) || "back_on_track";
+  const btn = action === "recover" ? recoverBtn : backBtn;
+  btn?.focus?.({ preventScroll: true });
+}
+
 function showOverlay(payload) {
   overlay.classList.remove("hidden");
   resetSnooze();
   resetAlignInput();
+
+  // Screenshot mode (used by `npm --prefix overlay run screenshot`) should be deterministic.
+  // We allow the screenshot harness to request animations be disabled.
+  overlay.dataset.screenshot = payload?.__screenshot ? "true" : "";
+
   updateEventLabel(payload);
   updatePrimaryLabel(payload);
+
+  const enterAction = window.overlayUtils?.getGlobalEnterAction?.(overlay.dataset.eventType) || "back_on_track";
+  // Make the default Enter action explicit and visually reflected in the primary button.
+  setText(enterHint, enterAction === "recover" ? "Enter: Recover schedule" : "Enter: Back on track");
+  backBtn.classList.toggle("primary", enterAction !== "recover");
+  recoverBtn.classList.toggle("primary", enterAction === "recover");
 
   if (payload.choices && Array.isArray(payload.choices)) {
     overlay.dataset.mode = "align";
@@ -105,6 +148,7 @@ function showOverlay(payload) {
   }
 
   overlay.dataset.level = payload.level || "B";
+  focusPreferredControl();
   currentPayload = payload;
   shownAt = Date.now();
 }
@@ -141,8 +185,15 @@ alignText.addEventListener("keydown", (event) => {
   }
 });
 
-snoozeBtn.addEventListener("click", () => {
+function openSnooze() {
   snooze.classList.remove("hidden");
+  // Move focus into the snooze panel so Enter doesn't accidentally trigger the global primary action.
+  const firstReason = snooze.querySelector("button[data-reason]");
+  firstReason?.focus?.({ preventScroll: true });
+}
+
+snoozeBtn.addEventListener("click", () => {
+  openSnooze();
 });
 
 snooze.addEventListener("click", (event) => {
@@ -161,14 +212,16 @@ window.overlayAPI.onPause(() => {
 });
 
 window.addEventListener("keydown", (event) => {
-  // Don't treat Enter as "Back on track" while the user is typing or interacting with a control.
+  // Don't treat Enter as a global overlay action while the user is typing or interacting with a control.
+  // In "align" mode, Enter is reserved for the input submit handler (or should do nothing).
   if (event.key === "Enter") {
     const ignoreEnter = window.overlayUtils?.shouldIgnoreGlobalEnter?.(event.target);
-    if (!ignoreEnter) {
-      sendAction({ action: "back_on_track" });
+    if (!ignoreEnter && overlay.dataset.mode !== "align") {
+      const action = window.overlayUtils?.getGlobalEnterAction?.(overlay.dataset.eventType) || "back_on_track";
+      sendAction({ action });
     }
   }
   if (event.key === "Escape") {
-    snooze.classList.remove("hidden");
+    openSnooze();
   }
 });
