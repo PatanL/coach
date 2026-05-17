@@ -69,11 +69,13 @@ function showOverlay(payload) {
   updateEventLabel(payload);
   updatePrimaryLabel(payload);
 
-  if (payload.choices && Array.isArray(payload.choices)) {
+  const hasChoices = payload.choices && Array.isArray(payload.choices);
+  if (hasChoices) {
     overlay.dataset.mode = "align";
   } else {
     overlay.dataset.mode = "";
   }
+
   setText(blockName, payload.block_name || "");
   setText(headline, payload.headline || "Reset.");
   setText(humanLine, payload.human_line || "");
@@ -87,7 +89,7 @@ function showOverlay(payload) {
     miniPlan.classList.add("hidden");
   }
 
-  if (payload.choices && Array.isArray(payload.choices)) {
+  if (hasChoices) {
     choiceButtons.innerHTML = "";
     payload.choices.forEach((choice) => {
       const button = document.createElement("button");
@@ -107,6 +109,17 @@ function showOverlay(payload) {
   overlay.dataset.level = payload.level || "B";
   currentPayload = payload;
   shownAt = Date.now();
+
+  // Deterministic focus defaults:
+  // - Align mode: focus the input so typing is frictionless.
+  // - DRIFT_PERSIST: focus Recover to create an actionable pattern-break.
+  if (hasChoices) {
+    alignText.focus();
+  } else if (overlay.dataset.eventType === "DRIFT_PERSIST") {
+    recoverBtn.focus();
+  } else {
+    backBtn.focus();
+  }
 }
 
 function sendAction(action) {
