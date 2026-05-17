@@ -46,13 +46,16 @@ html[data-screenshot="1"] *::after {
 }
 
 #overlay.pattern-break {
-  background: radial-gradient(circle at 50% 35%, rgba(241, 108, 91, 0.22), rgba(6, 8, 10, 0.6));
+  /* Stronger peripheral-vision "this is different" signal for DRIFT_PERSIST. */
+  background: radial-gradient(circle at 50% 35%, rgba(241, 108, 91, 0.32), rgba(6, 8, 10, 0.65));
 }
 
 #overlay.pattern-break .card {
-  border: 2px solid rgba(255, 122, 105, 0.9);
-  box-shadow: 0 26px 100px rgba(241, 108, 91, 0.28), 0 20px 60px rgba(0, 0, 0, 0.55);
+  border: 2px solid rgba(255, 122, 105, 0.92);
+  box-shadow: 0 30px 110px rgba(241, 108, 91, 0.34), 0 20px 60px rgba(0, 0, 0, 0.55);
   background: linear-gradient(140deg, rgba(36, 18, 18, 0.92), rgba(10, 12, 15, 0.96));
+  /* Motion is disabled in deterministic screenshot mode. */
+  animation: patternBreakPulse 900ms ease-in-out 0s 2;
 }
 
 #overlay.pattern-break .card::before {
