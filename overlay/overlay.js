@@ -115,6 +115,16 @@ function showOverlay(payload) {
   overlay.dataset.level = payload.level || "B";
   currentPayload = payload;
   shownAt = Date.now();
+
+  // DRIFT_PERSIST is the "pattern-break" moment: bias toward recovery.
+  // Focusing the recover button makes Enter activate recovery (and avoids the global Enter handler).
+  if (String(overlay.dataset.eventType || "").toUpperCase() === "DRIFT_PERSIST") {
+    try {
+      recoverBtn?.focus?.();
+    } catch {
+      // no-op (focus can throw in some contexts)
+    }
+  }
 }
 
 function sendAction(action) {
