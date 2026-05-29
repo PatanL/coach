@@ -5,6 +5,7 @@ const headline = document.getElementById("headline");
 const humanLine = document.getElementById("humanLine");
 const diagnosis = document.getElementById("diagnosis");
 const nextAction = document.getElementById("nextAction");
+const enterHint = document.getElementById("enterHint");
 const snooze = document.getElementById("snoozeReason");
 const miniPlan = document.getElementById("miniPlan");
 const choiceButtons = document.getElementById("choiceButtons");
@@ -37,6 +38,13 @@ function updateEventLabel(payload) {
   const raw = payload?.source_event_type || payload?.event_type || payload?.type || "";
   const eventType = String(raw).toUpperCase();
   overlay.dataset.eventType = eventType;
+
+  // Pattern-break: when drift persists, make the default Enter action "Recover schedule".
+  if (enterHint) {
+    enterHint.textContent = eventType === "DRIFT_PERSIST" ? "Enter: Recover schedule" : "Enter: Back on track";
+  }
+  backBtn.classList.toggle("primary", eventType !== "DRIFT_PERSIST");
+  recoverBtn.classList.toggle("primary", eventType === "DRIFT_PERSIST");
 
   if (!eventType) {
     setText(eventLabel, "DRIFT");
@@ -107,6 +115,16 @@ function showOverlay(payload) {
   overlay.dataset.level = payload.level || "B";
   currentPayload = payload;
   shownAt = Date.now();
+
+  // DRIFT_PERSIST is the "pattern-break" moment: bias toward recovery.
+  // Focusing the recover button makes Enter activate recovery (and avoids the global Enter handler).
+  if (String(overlay.dataset.eventType || "").toUpperCase() === "DRIFT_PERSIST") {
+    try {
+      recoverBtn?.focus?.();
+    } catch {
+      // no-op (focus can throw in some contexts)
+    }
+  }
 }
 
 function sendAction(action) {
@@ -165,7 +183,8 @@ window.addEventListener("keydown", (event) => {
   if (event.key === "Enter") {
     const ignoreEnter = window.overlayUtils?.shouldIgnoreGlobalEnter?.(event.target);
     if (!ignoreEnter) {
-      sendAction({ action: "back_on_track" });
+      const eventType = String(overlay?.dataset?.eventType || "").toUpperCase();
+      sendAction({ action: eventType === "DRIFT_PERSIST" ? "recover" : "back_on_track" });
     }
   }
   if (event.key === "Escape") {
