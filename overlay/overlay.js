@@ -17,6 +17,8 @@ const stuckBtn = document.getElementById("stuckBtn");
 const recoverBtn = document.getElementById("recoverBtn");
 const snoozeBtn = document.getElementById("snoozeBtn");
 
+const enterHint = document.getElementById("enterHint");
+
 let shownAt = null;
 let currentPayload = null;
 
@@ -53,6 +55,22 @@ function updateEventLabel(payload) {
   setText(eventLabel, eventType.replaceAll("_", " "));
 }
 
+function updatePrimaryAction(payload) {
+  const eventType = String(overlay.dataset.eventType || "").toUpperCase();
+
+  // Default: Enter confirms "Back on track".
+  backBtn.classList.add("primary");
+  recoverBtn.classList.remove("primary");
+  setText(enterHint, "Enter: Back on track");
+
+  // For persistent drift, bias toward an immediate recovery action (Option B overlay).
+  if (eventType === "DRIFT_PERSIST") {
+    backBtn.classList.remove("primary");
+    recoverBtn.classList.add("primary");
+    setText(enterHint, "Enter: Recover schedule");
+  }
+}
+
 function resetSnooze() {
   snooze.classList.add("hidden");
 }
@@ -68,6 +86,7 @@ function showOverlay(payload) {
   resetAlignInput();
   updateEventLabel(payload);
   updatePrimaryLabel(payload);
+  updatePrimaryAction(payload);
 
   if (payload.choices && Array.isArray(payload.choices)) {
     overlay.dataset.mode = "align";
@@ -165,7 +184,12 @@ window.addEventListener("keydown", (event) => {
   if (event.key === "Enter") {
     const ignoreEnter = window.overlayUtils?.shouldIgnoreGlobalEnter?.(event.target);
     if (!ignoreEnter) {
-      sendAction({ action: "back_on_track" });
+      const eventType = String(overlay.dataset.eventType || "").toUpperCase();
+      if (eventType === "DRIFT_PERSIST") {
+        sendAction({ action: "recover" });
+      } else {
+        sendAction({ action: "back_on_track" });
+      }
     }
   }
   if (event.key === "Escape") {
